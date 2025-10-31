@@ -186,13 +186,18 @@ body {
                 </a>
             </li>
             <li>
-                <a href="messages.php" class="<?php echo ($current_page == 'messages.php') ? 'active' : ''; ?>">
-                    <i class="fa fa-envelope"></i> Messages
+                <a href="interest-logs.php" class="<?php echo ($current_page == 'interest-logs.php') ? 'active' : ''; ?>">
+                    <i class="fa fa-heart"></i> Interest Logs
                 </a>
             </li>
             <li>
-                <a href="interest-logs.php" class="<?php echo ($current_page == 'interest-logs.php') ? 'active' : ''; ?>">
-                    <i class="fa fa-heart"></i> Interests/Logs
+                <a href="message-logs.php" class="<?php echo ($current_page == 'message-logs.php') ? 'active' : ''; ?>">
+                    <i class="fa fa-comments"></i> Message Logs
+                </a>
+            </li>
+            <li>
+                <a href="activity-logs.php" class="<?php echo ($current_page == 'activity-logs.php') ? 'active' : ''; ?>">
+                    <i class="fa fa-history"></i> Activity Logs
                 </a>
             </li>
             <li>
