@@ -496,11 +496,44 @@ function deleteSavedSearch(id) {
 }
 
 function sendInterest(userId) {
-    alert('Interest feature will be implemented in Todo #12');
+    if (!confirm('Send interest to this profile?')) return;
+    const btn = event ? event.currentTarget : null;
+    $.ajax({
+        url: '/api/interest.php',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ receiver_id: userId, message: '' }),
+        success: function(res) {
+            if (res.success) {
+                alert(res.message || 'Interest sent');
+                // Optionally update UI
+            } else {
+                alert('Failed: ' + (res.error || 'Unknown error'));
+            }
+        },
+        error: function() {
+            alert('Failed to contact server.');
+        }
+    });
 }
 
 function addToShortlist(userId) {
-    alert('Shortlist feature will be implemented in Todo #13');
+    $.ajax({
+        url: '/api/shortlist.php',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ profile_id: userId }),
+        success: function(res) {
+            if (res.success) {
+                alert(res.message || (res.action === 'added' ? 'Added to shortlist' : 'Removed from shortlist'));
+            } else {
+                alert('Failed: ' + (res.error || 'Unknown error'));
+            }
+        },
+        error: function() {
+            alert('Failed to contact server.');
+        }
+    });
 }
 </script>
 
