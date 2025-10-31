@@ -181,6 +181,11 @@ body {
                 </a>
             </li>
             <li>
+                <a href="search-analytics.php" class="<?php echo ($current_page == 'search-analytics.php') ? 'active' : ''; ?>">
+                    <i class="fa fa-search"></i> Search Analytics
+                </a>
+            </li>
+            <li>
                 <a href="messages.php" class="<?php echo ($current_page == 'messages.php') ? 'active' : ''; ?>">
                     <i class="fa fa-envelope"></i> Messages
                 </a>
