@@ -12,11 +12,50 @@ require_once("../includes/dbconn.php");
 $user_id = intval($_SESSION['id']);
 $method = $_SERVER['REQUEST_METHOD'];
 
+if ($method === 'GET') {
+    // List shortlisted profiles
+    $action = isset($_GET['action']) ? $_GET['action'] : '';
+    if ($action === 'list') {
+        $query = "SELECT s.*, 
+            u.name, u.age, u.location, u.occupation, c.verified
+            FROM shortlists s
+            LEFT JOIN users u ON s.profile_id = u.id
+            LEFT JOIN customer c ON s.profile_id = c.user_id
+            WHERE s.user_id = $user_id
+            ORDER BY s.created_at DESC";
+        
+        $result = mysqli_query($conn, $query);
+        $profiles = [];
+        while ($row = mysqli_fetch_assoc($result)) {
+            $profiles[] = $row;
+        }
+        
+        echo json_encode([
+            'success' => true,
+            'data' => $profiles,
+            'count' => count($profiles)
+        ]);
+        exit();
+    }
+}
+
 if ($method === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
     $profile_id = isset($input['profile_id']) ? intval($input['profile_id']) : 0;
     if ($profile_id <= 0 || $profile_id == $user_id) {
         echo json_encode(['success' => false, 'error' => 'Invalid profile id']);
+        exit();
+    }
+
+    // Update notes if requested
+    if (isset($input['update_notes']) && $input['update_notes'] === true) {
+        $notes = isset($input['notes']) ? mysqli_real_escape_string($conn, $input['notes']) : '';
+        $query = "UPDATE shortlists SET notes = '$notes' WHERE user_id = $user_id AND profile_id = $profile_id";
+        if (mysqli_query($conn, $query)) {
+            echo json_encode(['success' => true, 'message' => 'Notes updated']);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Failed to update notes']);
+        }
         exit();
     }
 
