@@ -1,45 +1,67 @@
-# Online Matrimonial Project in PHP
+# PHP Matrimony - Complete Matrimonial Platform
 
-A comprehensive matrimonial web portal built with PHP and MySQL that enables users to find life partners based on their preferences.
+A comprehensive, production-ready matrimonial web portal built with PHP and MySQL. Features include advanced search, messaging, interests, subscriptions, admin dashboard, and much more.
 
-## 🌟 Features
+## 🌟 Key Features
 
-- **User Registration & Authentication** - Secure user registration and login system
-- **Profile Creation** - Detailed profile creation with personal, educational, and professional information
-- **Photo Gallery** - Upload up to 4 photos per profile
-- **Advanced Search** - Search profiles by age, religion, caste, location, marital status, and more
-- **Partner Preferences** - Set and manage partner preference criteria
-- **Profile Viewing** - Browse and view detailed profiles of potential matches
-- **Match Recommendations** - Get matched profiles based on preferences
+### Member Features
+- **User Registration & Authentication** - Secure registration with email verification
+- **Profile Creation** - Comprehensive profile with 30+ data points
+- **Profile Completion Widget** - Smart progress tracker with suggestions
+- **Advanced Search** - 12+ filters (age, religion, location, education, etc.)
+- **Saved Searches** - Save and reuse search criteria
+- **Express Interests** - Send/receive interests with SMS notifications
+- **Shortlist & Favorites** - Save profiles with private notes
+- **Private Messaging** - Threaded conversations with read receipts
+- **Plan Quotas Dashboard** - Track subscription usage in real-time
+
+### Admin Features
+- **Interactive Dashboard** - Charts showing users, revenue, subscriptions
+- **Member Management** - CRUD operations, photo verification, bulk actions
+- **Subscription Plans** - Create plans with custom quotas
+- **Payment Management** - Transaction logs, refunds, revenue analytics
+- **SMS Template System** - Multi-gateway support (Twilio, MSG91)
+- **CMS Pages** - Create About Us, Privacy Policy, Terms pages
+- **Homepage Configuration** - Manage hero, features, testimonials
+- **Interest/Message Logs** - View and moderate all interactions
+- **Activity Logging** - Comprehensive audit trail with IP tracking
+- **Multi-language** - i18n system with translation editor
+
+### System Features
+- **Plan Quotas Middleware** - Centralized quota enforcement
+- **Security Enhancements** - CSRF protection, rate limiting, XSS prevention
+- **Profile Completion** - Weighted calculation with category breakdown
+- **SMS Notifications** - Interest accepted, new message alerts
+- **Search Analytics** - Admin dashboard with popular filters
+- **Responsive Design** - Mobile-friendly Bootstrap interface
 
 ## 🛠️ Technology Stack
 
-- **Frontend**: HTML5, CSS3, Bootstrap 3, JavaScript, jQuery
-- **Backend**: PHP 8.3
-- **Database**: MySQL 5.7
-- **Server**: PHP Built-in Development Server / Apache
+- **Frontend**: HTML5, CSS3, Bootstrap 3, JavaScript, jQuery, Chart.js, SortableJS, TinyMCE
+- **Backend**: PHP 8.3+ with OOP design patterns
+- **Database**: MySQL 5.7+ / MariaDB 10.3+
+- **Architecture**: MVC-style with API endpoints
+- **Security**: CSRF protection, XSS prevention, rate limiting
+- **Notifications**: SMS (Twilio/MSG91), Email
+- **Server**: Nginx/Apache with PHP-FPM
 
 ## 📋 Prerequisites
 
-- PHP 8.3 or higher with mysqli extension
-- MySQL 5.7 or higher / MariaDB
-- Docker (optional, for containerized MySQL)
+- PHP 8.0+ with extensions: mysqli, json, mbstring, curl, gd
+- MySQL 5.7+ or MariaDB 10.3+
+- Docker (recommended for development)
 - Git
+- SSL certificate (for production)
 
-## 🚀 Installation & Setup
+## 🚀 Quick Start
 
-### 1. Clone the Repository
+### Development Setup (Docker)
 
 ```bash
+# Clone repository
 git clone https://github.com/Utkrsh2405/php-metrimony.git
 cd php-metrimony
-```
 
-### 2. Database Setup
-
-#### Option A: Using Docker (Recommended)
-
-```bash
 # Start MySQL container
 docker run -d --name matrimony-mysql \
   -e MYSQL_ALLOW_EMPTY_PASSWORD=yes \
@@ -47,60 +69,30 @@ docker run -d --name matrimony-mysql \
   -p 3306:3306 \
   mysql:5.7
 
-# Wait for MySQL to initialize (15 seconds)
+# Wait for MySQL initialization
 sleep 15
 
-# Import the database
-docker exec -i matrimony-mysql mysql -uroot matrimony < db/matrimony.sql
+# Run migrations
+for file in db/migrations/*.sql; do
+    docker exec -i matrimony-mysql mysql -uroot matrimony < "$file"
+done
+
+# Start PHP server
+php -S 0.0.0.0:8080
+
+# Access at http://localhost:8080
 ```
 
-#### Option B: Using Local MySQL
+### Production Deployment
 
-```bash
-# Create database
-mysql -u root -p -e "CREATE DATABASE matrimony;"
-
-# Import the SQL file
-mysql -u root -p matrimony < db/matrimony.sql
-```
-
-### 3. Configure Database Connection
-
-The database configuration is already set in:
-- `functions.php` (line 3)
-- `includes/dbconn.php` (line 3)
-
-Default settings:
-```php
-$host = "127.0.0.1";
-$username = "root";
-$password = "";
-$db_name = "matrimony";
-```
-
-Update these values if your database configuration differs.
-
-### 4. Install PHP Extensions (if needed)
-
-```bash
-# For Debian/Ubuntu
-sudo apt install php-cli php-mysql
-
-# Verify mysqli extension
-php -m | grep mysqli
-```
-
-### 5. Run the Application
-
-```bash
-# Start PHP development server
-php -S localhost:8080
-
-# Or use system PHP
-/usr/bin/php -S 0.0.0.0:8080
-```
-
-Access the application at: **http://localhost:8080**
+See **[DEPLOYMENT.md](DEPLOYMENT.md)** for comprehensive production setup guide including:
+- Server requirements and setup
+- Nginx/Apache configuration
+- SSL certificate installation
+- Security hardening
+- Performance optimization
+- Backup procedures
+- Monitoring setup
 
 ## 👤 Default Credentials
 
@@ -117,22 +109,101 @@ The database includes several test profiles:
 
 ```
 php-metrimony/
-├── auth/                   # Authentication scripts
-├── css/                    # Stylesheets
-├── db/                     # Database SQL file
-├── fonts/                  # Font files
-├── images/                 # Image assets
-├── includes/               # PHP includes and utilities
-├── js/                     # JavaScript files
-├── profile/                # User profile photos
-├── index.php               # Homepage
-├── login.php               # Login page
-├── register.php            # Registration page
-├── create_profile.php      # Profile creation
-├── search.php              # Search functionality
-├── view_profile.php        # View profile details
-├── userhome.php           # User dashboard
+├── admin/                  # Admin panel
+│   ├── index.php          # Dashboard with charts
+│   ├── members.php        # Member management
+│   ├── plans.php          # Subscription plans
+│   ├── payments.php       # Payment management
+│   ├── sms-templates.php  # SMS template editor
+│   ├── translations.php   # i18n management
+│   ├── cms-pages.php      # CMS editor
+│   ├── homepage-config.php # Homepage sections
+│   ├── interest-logs.php  # Interest monitoring
+│   ├── message-logs.php   # Message moderation
+│   ├── activity-logs.php  # Audit trail
+│   └── api/               # Admin API endpoints
+├── api/                    # RESTful APIs
+│   ├── messages.php       # Messaging system
+│   ├── interest.php       # Express interest
+│   ├── interest-response.php # Accept/decline
+│   ├── shortlist.php      # Favorites management
+│   ├── search.php         # Advanced search
+│   ├── saved-searches.php # Saved searches
+│   └── profile-completion.php # Profile widget
+├── db/migrations/          # Database migrations (013 files)
+├── includes/               # Utilities & classes
+│   ├── dbconn.php         # Database connection
+│   ├── sms-sender.php     # SMS gateway integration
+│   ├── quota-manager.php  # Quota enforcement
+│   ├── profile-completion.php # Profile calculator
+│   ├── activity-logger.php # Audit logging
+│   └── security.php       # Security utilities
+├── advanced-search.php     # Member search interface
+├── interests.php          # Interest inbox
+├── shortlist.php          # Shortlist viewer
+├── messages.php           # Messaging inbox
+├── quota-dashboard.php    # Plan quotas
+├── DEPLOYMENT.md          # Production deployment guide
 └── README.md              # This file
+```
+
+## 🎯 Core Components
+
+### 1. Quota Management System
+```php
+require_once 'includes/quota-manager.php';
+$quota = getQuotaManager($conn, $user_id);
+
+// Check if user has quota
+if ($quota->hasQuota('interests_express', 'interests')) {
+    // Send interest
+} else {
+    // Show upgrade message
+}
+
+// Get all quotas
+$quotas = $quota->getAllQuotas();
+```
+
+### 2. Profile Completion
+```php
+require_once 'includes/profile-completion.php';
+$profile = getProfileCompletion($conn, $user_id);
+
+// Get completion percentage
+$percentage = $profile->getCompletionPercentage();
+
+// Get missing fields
+$suggestions = $profile->getTopSuggestions(5);
+```
+
+### 3. Activity Logging
+```php
+require_once 'includes/activity-logger.php';
+$logger = getActivityLogger($conn);
+
+// Log admin action
+$logger->logUserUpdate($user_id, $old_data, $new_data);
+$logger->logPayment('refund', $payment_id, 'Refunded $50');
+```
+
+### 4. Security Utilities
+```php
+require_once 'includes/security.php';
+
+// CSRF protection
+echo Security::csrfField();
+if (!Security::validateCSRFToken($_POST['csrf_token'])) {
+    die('Invalid token');
+}
+
+// Rate limiting
+if (!Security::checkRateLimit('login_' . $ip, 5, 300)) {
+    die('Too many attempts');
+}
+
+// XSS prevention
+$clean = Security::sanitizeInput($_POST['input']);
 ```
 
 ## 🔧 Configuration
