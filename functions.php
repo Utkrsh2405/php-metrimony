@@ -106,33 +106,69 @@ function writepartnerprefs($id){
 
 function register(){
 	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-	$uname=$_POST['name'];
-	$pass=$_POST['pass'];
-	$email=$_POST['email'];
-	$day=$_POST['day'];
-	$month=$_POST['month'];
-	$year=$_POST['year'];
-		$day=$_POST['day'];
-		$month=$_POST['month'];
-		$year=$_POST['year'];
-	$dob=$year ."-" . $month . "-" .$day ;
-	$gender=$_POST['gender'];
 	require_once("includes/dbconn.php");
+	
+	$uname = mysqli_real_escape_string($conn, trim($_POST['name']));
+	$pass = $_POST['pass'];
+	$email = mysqli_real_escape_string($conn, trim($_POST['email']));
+	$day = $_POST['day'] ?? '';
+	$month = $_POST['month'] ?? '';
+	$year = $_POST['year'] ?? '';
+	$dob = $year . "-" . $month . "-" . $day;
+	$gender = $_POST['gender'] ?? 'male';
+	
+	// Validate inputs
+	if (empty($uname) || empty($pass) || empty($email)) {
+		echo "<div class='alert alert-danger'>Please fill in all required fields.</div>";
+		return;
+	}
+	
+	// Validate date of birth
+	if (empty($day) || empty($month) || empty($year)) {
+		echo "<div class='alert alert-danger'>Please select your complete date of birth.</div>";
+		return;
+	}
+	
+	// Validate email format
+	if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+		echo "<div class='alert alert-danger'>Please enter a valid email address.</div>";
+		return;
+	}
+	
+	// Check if username already exists
+	$check_sql = "SELECT id FROM users WHERE username = '$uname'";
+	$check_result = mysqli_query($conn, $check_sql);
+	if (mysqli_num_rows($check_result) > 0) {
+		echo "<div class='alert alert-danger'>Username already exists. Please choose another.</div>";
+		return;
+	}
+	
+	// Check if email already exists
+	$check_email_sql = "SELECT id FROM users WHERE email = '$email'";
+	$check_email_result = mysqli_query($conn, $check_email_sql);
+	if (mysqli_num_rows($check_email_result) > 0) {
+		echo "<div class='alert alert-danger'>Email already registered. Please use another email or <a href='login.php'>login</a>.</div>";
+		return;
+	}
+	
+	// Hash the password
+	$hashed_password = password_hash($pass, PASSWORD_BCRYPT);
 
 	$sql = "INSERT 
 			INTO
 			   users
 			   ( profilestat, username, password, email, dateofbirth, gender, userlevel) 
 			VALUES
-			   (0, '$uname', '$pass', '$email', '$dob', '$gender', 0)";
+			   (0, '$uname', '$hashed_password', '$email', '$dob', '$gender', NULL)";
 
-	if (mysqli_query($conn,$sql)) {
-	  echo "Successfully Registered";
-	  echo "<a href=\"login.php\">";
-	  echo "Login to your account";
-	  echo "</a>";
+	if (mysqli_query($conn, $sql)) {
+		echo "<div class='alert alert-success' style='margin-bottom: 20px;'>";
+		echo "<i class='fa fa-check-circle'></i> <strong>Successfully Registered!</strong><br>";
+		echo "Your account has been created with username: <strong>" . htmlspecialchars($uname) . "</strong><br><br>";
+		echo "<a href='login.php' class='btn btn-primary'>Login to Your Account</a>";
+		echo "</div>";
 	} else {
-	  echo "Error: " . $sql . "<br>" . $conn->error;
+		echo "<div class='alert alert-danger'>Error creating account: " . $conn->error . "</div>";
 	}
 }
 }

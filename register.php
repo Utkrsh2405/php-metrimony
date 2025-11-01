@@ -52,25 +52,32 @@ $(document).ready(function(){
    </div>
    <div class="services">
    	  <div class="col-sm-6 login_left">
+	     <?php 
+	     // Display registration result if form was submitted
+	     if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+	         // The register() function output will appear here
+	     }
+	     ?>
 	     <form action="" method="POST">
 	  	    <div class="form-group">
 		      <label for="edit-name">Username <span class="form-required" title="This field is required.">*</span></label>
-		      <input type="text" id="edit-name" name="name" value="" size="60" maxlength="60" class="form-text required">
+		      <input type="text" id="edit-name" name="name" value="" size="60" maxlength="60" class="form-text required" required>
 		    </div>
 		    <div class="form-group">
 		      <label for="edit-pass">Password <span class="form-required" title="This field is required.">*</span></label>
-		      <input type="password" id="edit-pass" name="pass" size="60" maxlength="128" class="form-text required">
+		      <input type="password" id="edit-pass" name="pass" size="60" maxlength="128" class="form-text required" required minlength="6">
+		      <small class="form-text text-muted">Minimum 6 characters</small>
 		    </div>
 		    <div class="form-group">
-		      <label for="edit-name">Email <span class="form-required" title="This field is required.">*</span></label>
-		      <input type="text" id="edit-name" name="email" value="" size="60" maxlength="60" class="form-text required">
+		      <label for="edit-email">Email <span class="form-required" title="This field is required.">*</span></label>
+		      <input type="email" id="edit-email" name="email" value="" size="60" maxlength="60" class="form-text required" required>
 		    </div>
 		    <div class="age_select">
-		      <label for="edit-pass">Age <span class="form-required" title="This field is required.">*</span></label>
+		      <label for="edit-pass">Date of Birth <span class="form-required" title="This field is required.">*</span></label>
 		        <div class="age_grid">
 		         <div class="col-sm-4 form_box">
                   <div class="select-block1">
-                    <select name="day">
+                    <select name="day" required>
 	                    <option value="">Date</option>
 	                     <option value="1">1</option>
 		                    <option value="2">2</option>
@@ -102,13 +109,13 @@ $(document).ready(function(){
 		                    <option value="28">28</option>
 		                    <option value="29">29</option>
 		                    <option value="30">30</option>
-		                    <option value="31">31</option>
+                    <option value="31">31</option>
                     </select>
                   </div>
             </div>
-            <div class="col-sm-4 form_box2">
-                   <div class="select-block1">
-                    <select name="month">
+            <div class="col-sm-4 form_box">
+                <div class="select-block1">
+                    <select name="month" required>
 	                    <option value="">Month</option>
 	                    <option value="01">January</option>
 	                    <option value="02">February</option>
@@ -127,7 +134,7 @@ $(document).ready(function(){
                  </div>
                  <div class="col-sm-4 form_box1">
                    <div class="select-block1">
-                    <select name="year">
+                    <select name="year" required>
 	                    <option value="">Year</option>
 		                    <option value="1980">1980</option>
 		                    <option value="1981">1981</option>
