@@ -213,7 +213,10 @@ body {
 <div class="login-container">
     <div class="login-header">
         <h2><i class="fa fa-lock"></i> Admin Login</h2>
-        <p>Secure Administrative Access</p>
+        <p>Secure Administrative Access Only</p>
+        <p style="font-size: 12px; margin-top: 5px; opacity: 0.9;">
+            <i class="fa fa-info-circle"></i> For member login, please use the <a href="../login.php" style="color: #fff; text-decoration: underline;">member login page</a>
+        </p>
     </div>
     
     <div class="login-body">

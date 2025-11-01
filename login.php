@@ -49,17 +49,30 @@ $(document).ready(function(){
    </div>
    <div class="services">
    	  <div class="col-sm-6 login_left">
+	   <?php 
+	   session_start();
+	   if (isset($_SESSION['login_error'])): ?>
+	       <div class="alert alert-danger" style="margin-bottom: 20px;">
+	           <i class="fa fa-exclamation-circle"></i> <?php echo htmlspecialchars($_SESSION['login_error']); ?>
+	       </div>
+	   <?php 
+	       unset($_SESSION['login_error']);
+	   endif; 
+	   ?>
 	   <form action="auth/auth.php?user=1" method="post">
   	    <div class="form-item form-type-textfield form-item-name">
 	      <label for="edit-name">Username <span class="form-required" title="This field is required.">*</span></label>
-	      <input type="text" id="edit-name" name="username" value="" size="60" maxlength="60" class="form-text required">
+	      <input type="text" id="edit-name" name="username" value="" size="60" maxlength="60" class="form-text required" required>
 	    </div>
 	    <div class="form-item form-type-password form-item-pass">
 	      <label for="edit-pass">Password <span class="form-required" title="This field is required.">*</span></label>
-	      <input type="password" id="edit-pass" name="password" size="60" maxlength="128" class="form-text required">
+	      <input type="password" id="edit-pass" name="password" size="60" maxlength="128" class="form-text required" required>
 	    </div>
 	    <div class="form-actions">
 	    	<input type="submit" id="edit-submit" name="op" value="Log in" class="btn_1 submit">
+	    </div>
+	    <div style="margin-top: 15px; text-align: center;">
+	        <p>Don't have an account? <a href="register.php" style="color: #e91e63; font-weight: bold;">Register here</a></p>
 	    </div>
 	   </form>
 	  </div>
