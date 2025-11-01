@@ -4,21 +4,56 @@ if (!isset($_SESSION)) {
     session_start();
 }
 
-// Check if user is admin
+// Session timeout - 30 minutes of inactivity
+$timeout_duration = 1800; // 30 minutes in seconds
+
+// Check if user is logged in
 if (!isset($_SESSION['id']) || !isset($_SESSION['username'])) {
-    header("Location: ../login.php");
+    header("Location: login.php");
     exit();
 }
+
+// Check for session timeout
+if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity']) > $timeout_duration) {
+    session_unset();
+    session_destroy();
+    header("Location: login.php?timeout=1");
+    exit();
+}
+
+// Update last activity time
+$_SESSION['last_activity'] = time();
 
 require_once("../includes/dbconn.php");
 
-// Verify admin access
+// Verify admin access (userlevel = 1)
 $user_id = $_SESSION['id'];
 $check_admin = mysqli_query($conn, "SELECT userlevel FROM users WHERE id = $user_id AND userlevel = 1");
 if (mysqli_num_rows($check_admin) == 0) {
-    header("Location: ../index.php");
+    // Not an admin, redirect to main site
+    session_destroy();
+    header("Location: login.php");
     exit();
 }
+
+// Prevent session hijacking
+if (!isset($_SESSION['user_agent'])) {
+    $_SESSION['user_agent'] = $_SERVER['HTTP_USER_AGENT'];
+} elseif ($_SESSION['user_agent'] !== $_SERVER['HTTP_USER_AGENT']) {
+    // Session hijacking detected
+    session_destroy();
+    header("Location: login.php");
+    exit();
+}
+
+// Session timeout (30 minutes of inactivity)
+$timeout = 1800; // 30 minutes
+if (isset($_SESSION['last_activity']) && (time() - $_SESSION['last_activity']) > $timeout) {
+    session_destroy();
+    header("Location: login.php?timeout=1");
+    exit();
+}
+$_SESSION['last_activity'] = time();
 
 $current_page = basename($_SERVER['PHP_SELF']);
 ?>
@@ -206,7 +241,7 @@ body {
                 </a>
             </li>
             <li>
-                <a href="../logout.php">
+                <a href="logout.php">
                     <i class="fa fa-sign-out"></i> Logout
                 </a>
             </li>
