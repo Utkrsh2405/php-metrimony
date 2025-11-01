@@ -22,6 +22,36 @@ include("../includes/admin-header.php");
     <h1>Homepage Configuration</h1>
     <p class="text-muted">Configure sections displayed on the homepage</p>
     
+    <!-- Banner Upload Section -->
+    <div class="panel panel-default" style="margin-bottom: 20px;">
+        <div class="panel-heading">
+            <h3 class="panel-title"><i class="fa fa-image"></i> Homepage Banner Image</h3>
+        </div>
+        <div class="panel-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="form-group">
+                        <label>Upload New Banner Image</label>
+                        <input type="file" id="banner-upload" class="form-control" accept="image/*">
+                        <small class="text-muted">Recommended size: 1920x600px. Max 5MB. Formats: JPG, PNG, GIF, WebP</small>
+                    </div>
+                    <button id="upload-banner-btn" class="btn btn-success">
+                        <i class="fa fa-upload"></i> Upload Banner
+                    </button>
+                </div>
+                <div class="col-md-6">
+                    <label>Current Banner</label>
+                    <div id="current-banner-preview" style="border: 1px solid #ddd; border-radius: 4px; padding: 10px; min-height: 150px; background: #f9f9f9;">
+                        <img id="banner-image" src="" alt="Banner" style="max-width: 100%; height: auto; display: block;">
+                        <p id="banner-loading" class="text-center text-muted" style="padding: 50px 0;">
+                            <i class="fa fa-spinner fa-spin"></i> Loading...
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
     <div class="row" style="margin-bottom: 15px;">
         <div class="col-md-12">
             <button id="save-all" class="btn btn-primary">
@@ -109,7 +139,7 @@ function renderSections() {
     
     sections.forEach((section, index) => {
         const active = section.is_active == 1;
-        const content = section.content;
+        const content = section.section_content || {};
         
         let contentFields = '';
         
@@ -225,13 +255,36 @@ function renderSections() {
                     </div>
                 `;
                 break;
+                
+            case 'custom_html':
+                contentFields = `
+                    <div class="alert alert-info">
+                        <i class="fa fa-info-circle"></i> Add custom HTML and CSS to create unique sections on your homepage.
+                    </div>
+                    <div class="form-group">
+                        <label>HTML Content</label>
+                        <textarea class="form-control" rows="10" data-key="html" placeholder="<div class='my-section'>\n  <h2>My Custom Section</h2>\n  <p>Content here...</p>\n</div>">${content.html || ''}</textarea>
+                        <small class="text-muted">Enter your custom HTML code. Use Bootstrap classes for styling.</small>
+                    </div>
+                    <div class="form-group">
+                        <label>Custom CSS (Optional)</label>
+                        <textarea class="form-control" rows="8" data-key="css" placeholder=".my-section {\n  padding: 40px 0;\n  background: #f5f5f5;\n  text-align: center;\n}">${content.css || ''}</textarea>
+                        <small class="text-muted">Enter custom CSS to style your HTML content.</small>
+                    </div>
+                    <div class="form-group">
+                        <button type="button" class="btn btn-sm btn-info" onclick="previewCustomHTML(${index})">
+                            <i class="fa fa-eye"></i> Preview in New Tab
+                        </button>
+                    </div>
+                `;
+                break;
         }
         
         container.append(`
             <div class="section-card" data-index="${index}">
                 <div class="section-header" onclick="toggleSection(${index})">
                     <i class="fa fa-bars drag-handle"></i>
-                    <h3>${section.title}</h3>
+                    <h3>${section.section_title}</h3>
                     <div class="pull-right">
                         <label class="switch" style="margin: 0;">
                             <input type="checkbox" class="section-active" data-index="${index}" ${active ? 'checked' : ''} onclick="event.stopPropagation()">
@@ -363,6 +416,126 @@ function saveOrder() {
         }
     });
 }
+
+// Load current banner
+function loadBanner() {
+    $.ajax({
+        url: '/admin/api/site-settings.php?key=homepage_banner',
+        method: 'GET',
+        success: function(response) {
+            if (response.success && response.data) {
+                $('#banner-image').attr('src', response.data.setting_value).show();
+                $('#banner-loading').hide();
+            } else {
+                $('#banner-loading').html('<i class="fa fa-exclamation-circle"></i> No banner set');
+            }
+        },
+        error: function() {
+            $('#banner-loading').html('<i class="fa fa-exclamation-circle"></i> Failed to load banner');
+        }
+    });
+}
+
+// Upload banner
+$('#upload-banner-btn').on('click', function() {
+    const fileInput = $('#banner-upload')[0];
+    
+    if (!fileInput.files || !fileInput.files[0]) {
+        alert('Please select an image file first');
+        return;
+    }
+    
+    const formData = new FormData();
+    formData.append('banner', fileInput.files[0]);
+    
+    const btn = $(this);
+    btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Uploading...');
+    
+    $.ajax({
+        url: '/admin/api/upload-banner.php',
+        method: 'POST',
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function(response) {
+            if (response.success) {
+                alert('Banner uploaded successfully!');
+                $('#banner-image').attr('src', response.path).show();
+                $('#banner-loading').hide();
+                fileInput.value = '';
+            } else {
+                alert('Error: ' + (response.error || 'Upload failed'));
+            }
+        },
+        error: function(xhr) {
+            const response = xhr.responseJSON;
+            alert('Upload failed: ' + (response && response.error ? response.error : 'Unknown error'));
+        },
+        complete: function() {
+            btn.prop('disabled', false).html('<i class="fa fa-upload"></i> Upload Banner');
+        }
+    });
+});
+
+// Preview custom HTML in new tab
+function previewCustomHTML(index) {
+    const section = sections[index];
+    const card = $(`.section-card[data-index="${index}"]`);
+    
+    let html = '';
+    let css = '';
+    
+    card.find('[data-key]').each(function() {
+        const key = $(this).data('key');
+        const value = $(this).val();
+        
+        if (key === 'html') {
+            html = value;
+        } else if (key === 'css') {
+            css = value;
+        }
+    });
+    
+    const previewHTML = `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Custom HTML Preview</title>
+    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <style>
+        body { padding: 20px; background: #f5f5f5; }
+        .preview-container { background: white; padding: 20px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
+        ${css}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="alert alert-info">
+            <strong>Preview Mode</strong> - This is how your custom HTML section will appear on the homepage.
+        </div>
+        <div class="preview-container">
+            ${html}
+        </div>
+    </div>
+    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+</body>
+</html>
+    `;
+    
+    const previewWindow = window.open('', '_blank');
+    previewWindow.document.write(previewHTML);
+    previewWindow.document.close();
+}
+
+// Initialize
+$(document).ready(function() {
+    loadSections();
+    loadBanner();
+});
 </script>
 
 <!-- Toggle Switch CSS -->

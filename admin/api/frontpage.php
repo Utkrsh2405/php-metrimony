@@ -40,23 +40,22 @@ elseif ($method == 'POST') {
     $data = json_decode(file_get_contents('php://input'), true);
     
     $id = intval($data['id']);
-    $section_title = mysqli_real_escape_string($conn, $data['section_title']);
-    $section_content = mysqli_real_escape_string($conn, json_encode($data['section_content']));
-    $is_active = isset($data['is_active']) ? 1 : 0;
-    $display_order = intval($data['display_order']);
+    $is_active = isset($data['is_active']) ? intval($data['is_active']) : 0;
+    
+    // Prepare content - ensure it's properly encoded
+    $content = isset($data['content']) ? $data['content'] : [];
+    $section_content = mysqli_real_escape_string($conn, json_encode($content));
     
     $query = "UPDATE homepage_config SET
-              section_title = '$section_title',
               section_content = '$section_content',
               is_active = $is_active,
-              display_order = $display_order,
               updated_at = NOW()
               WHERE id = $id";
     
     if (mysqli_query($conn, $query)) {
         echo json_encode(['success' => true, 'message' => 'Section updated successfully']);
     } else {
-        echo json_encode(['error' => 'Failed to update section']);
+        echo json_encode(['error' => 'Failed to update section: ' . mysqli_error($conn)]);
     }
 }
 
@@ -64,11 +63,11 @@ elseif ($method == 'POST') {
 elseif ($method == 'PUT') {
     $data = json_decode(file_get_contents('php://input'), true);
     
-    if (isset($data['reorder']) && is_array($data['order'])) {
+    if (isset($data['order']) && is_array($data['order'])) {
         $success = true;
-        foreach ($data['order'] as $order_item) {
-            $id = intval($order_item['id']);
-            $display_order = intval($order_item['order']);
+        foreach ($data['order'] as $order_index => $section_id) {
+            $id = intval($section_id);
+            $display_order = $order_index + 1;
             
             $query = "UPDATE homepage_config SET display_order = $display_order WHERE id = $id";
             if (!mysqli_query($conn, $query)) {
