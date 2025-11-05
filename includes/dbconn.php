@@ -3,7 +3,7 @@
 
 $host="127.0.0.1"; // Host name 
 $username="root"; // Mysql username 
-$password=""; // Mysql password 
+$password="Uttu@2025"; // Mysql password 
 $db_name="matrimony"; // Database name 
 
 // Connect to server and select databse.
