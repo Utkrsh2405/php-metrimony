@@ -1,20 +1,21 @@
 <?php
 function mysqlexec($sql){
-	$host="127.0.0.1"; // Host name 
-	$username="root"; // Mysql username 
-	$password="Uttu@2025"; // Mysql password 
-	$db_name="matrimony"; // Database name// Connect to server and select databse.
-	$conn=mysqli_connect("$host", "$username", "$password")or die("cannot connect");
+	// Hostinger-ready DB connection
+	$host = "localhost"; // Hostinger uses 'localhost'
+	$username = "u166093127_dbuser"; // cPanel-prefixed DB user
+	$password = "Uttu@2025"; // DB password
+	$db_name = "u166093127_matrimony"; // cPanel-prefixed DB name
 
-	mysqli_select_db($conn,"$db_name")or die("cannot select DB");
+	// Connect to server and select database.
+	$conn = mysqli_connect($host, $username, $password) or die("Cannot connect: " . mysqli_connect_error());
+	mysqli_set_charset($conn, "utf8mb4");
+	mysqli_select_db($conn, $db_name) or die("Cannot select DB '" . $db_name . "': " . mysqli_error($conn));
 
-	if($result = mysqli_query($conn, $sql)){
+	if ($result = mysqli_query($conn, $sql)){
 		return $result;
-	}
-	else{
+	} else {
 		echo mysqli_error($conn);
 	}
-
 
 }
 function searchid(){
