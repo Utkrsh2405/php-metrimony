@@ -1,4 +1,7 @@
-<?php include_once("functions.php");?>
+<?php 
+session_start();
+include_once("functions.php");
+?>
 <!DOCTYPE HTML>
 <html>
 <head>
@@ -36,7 +39,7 @@ $(document).ready(function(){
 </head>
 <body>
 <!-- ============================  Navigation Start =========================== -->
-<?php include_once("includes/navigation.php");?>
+<?php include_once("includes/navigation.php"); ?>
 <!-- ============================  Navigation End ============================ -->
 <div class="grid_3">
   <div class="container">
@@ -50,7 +53,6 @@ $(document).ready(function(){
    <div class="services">
    	  <div class="col-sm-6 login_left">
 	   <?php 
-	   session_start();
 	   if (isset($_SESSION['login_error'])): ?>
 	       <div class="alert alert-danger" style="margin-bottom: 20px;">
 	           <i class="fa fa-exclamation-circle"></i> <?php echo htmlspecialchars($_SESSION['login_error']); ?>

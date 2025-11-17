@@ -31,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
         $ip = $_SERVER['REMOTE_ADDR'];
         if (!Security::checkRateLimit('admin_login_' . $ip, 5, 900)) {
             $error = 'Too many login attempts. Please try again in 15 minutes.';
-            Security::logSecurityEvent('admin_login_rate_limit', 'Admin login rate limit exceeded', null, $ip);
+            Security::logSecurityEvent($conn, 'admin_login_rate_limit', 'Admin login rate limit exceeded from IP: ' . $ip, null);
         } else {
             if (empty($username) || empty($password)) {
                 $error = 'Please enter both username and password.';
@@ -68,11 +68,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
                         exit();
                     } else {
                         $error = 'Invalid username or password.';
-                        Security::logSecurityEvent('admin_login_failed', 'Failed admin login attempt for: ' . $username, null, $ip);
+                        Security::logSecurityEvent($conn, 'admin_login_failed', 'Failed admin login attempt for: ' . $username . ' from IP: ' . $ip, null);
                     }
                 } else {
                     $error = 'Invalid username or password.';
-                    Security::logSecurityEvent('admin_login_failed', 'Admin login attempt with non-admin account: ' . $username, null, $ip);
+                    Security::logSecurityEvent($conn, 'admin_login_failed', 'Admin login attempt with non-admin account: ' . $username . ' from IP: ' . $ip, null);
                 }
             }
         }

@@ -56,6 +56,7 @@
 		                
 		              </ul>
 		            </li>
+		            <li><a href="plans.php">Pricing</a></li>
 		            <li class="last"><a href="contact.php">Contacts</a></li>
 		        </ul>
 		     </div><!-- /.navbar-collapse -->

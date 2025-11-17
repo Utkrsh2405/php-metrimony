@@ -1,10 +1,11 @@
 <?php
 function mysqlexec($sql){
-	// Hostinger-ready DB connection
-	$host = "localhost"; // Hostinger uses 'localhost'
-	$username = "u166093127_dbuser"; // cPanel-prefixed DB user
+	// Local development DB connection
+	// For Hostinger: change to localhost, u166093127_dbuser, u166093127_matrimony
+	$host = "127.0.0.1"; // Use 127.0.0.1 for local Docker, 'localhost' for Hostinger
+	$username = "root"; // Use 'root' for local, cPanel username for Hostinger
 	$password = "Uttu@2025"; // DB password
-	$db_name = "u166093127_matrimony"; // cPanel-prefixed DB name
+	$db_name = "matrimony"; // Use 'matrimony' for local, cPanel prefixed for Hostinger
 
 	// Connect to server and select database.
 	$conn = mysqli_connect($host, $username, $password) or die("Cannot connect: " . mysqli_connect_error());

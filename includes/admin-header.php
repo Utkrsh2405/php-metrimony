@@ -216,6 +216,16 @@ body {
                 </a>
             </li>
             <li>
+                <a href="homepage-sections.php" class="<?php echo ($current_page == 'homepage-sections.php') ? 'active' : ''; ?>">
+                    <i class="fa fa-th-large"></i> Homepage Sections
+                </a>
+            </li>
+            <li>
+                <a href="search-categories.php" class="<?php echo ($current_page == 'search-categories.php') ? 'active' : ''; ?>">
+                    <i class="fa fa-sitemap"></i> Search Categories
+                </a>
+            </li>
+            <li>
                 <a href="search-analytics.php" class="<?php echo ($current_page == 'search-analytics.php') ? 'active' : ''; ?>">
                     <i class="fa fa-search"></i> Search Analytics
                 </a>

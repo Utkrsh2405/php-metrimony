@@ -1,12 +1,15 @@
 
 <?php 
 
-// Hostinger-ready database configuration
-// Replace the values below if you used different names when creating the DB in cPanel
-$host = "localhost"; // Host name (Hostinger expects 'localhost')
-$username = "u166093127_dbuser"; // Mysql username (your cPanel prefixed username)
+// Local development database configuration
+// For Hostinger deployment, change these values:
+// - host: localhost
+// - username: u166093127_dbuser (your cPanel prefixed username)
+// - db_name: u166093127_matrimony (cPanel prefix + matrimony)
+$host = "127.0.0.1"; // Host name (use 127.0.0.1 for local Docker, 'localhost' for Hostinger)
+$username = "root"; // Mysql username (use 'root' for local, cPanel username for Hostinger)
 $password = "Uttu@2025"; // Mysql password
-$db_name = "u166093127_matrimony"; // Database name (cPanel prefix + matrimony)
+$db_name = "matrimony"; // Database name (use 'matrimony' for local, cPanel prefixed for Hostinger)
 
 // Connect to server and select database.
 $conn = mysqli_connect($host, $username, $password) or die("Cannot connect to database: " . mysqli_connect_error());
