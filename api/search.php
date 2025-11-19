@@ -82,12 +82,89 @@ if ($method === 'POST') {
         $query .= " AND (c.location LIKE '%$location%' OR c.city LIKE '%$location%' OR c.state LIKE '%$location%')";
     }
     
+    if (!empty($input['state'])) {
+        $state = mysqli_real_escape_string($conn, $input['state']);
+        $query .= " AND c.state_code = '$state'";
+    }
+    
+    if (!empty($input['city'])) {
+        $city = mysqli_real_escape_string($conn, $input['city']);
+        $query .= " AND c.city = '$city'";
+    }
+    
+    if (!empty($input['caste'])) {
+        $caste = mysqli_real_escape_string($conn, $input['caste']);
+        $query .= " AND c.caste = '$caste'";
+    }
+    
+    if (!empty($input['mother_tongue'])) {
+        $mother_tongue = mysqli_real_escape_string($conn, $input['mother_tongue']);
+        $query .= " AND c.mothertounge = '$mother_tongue'";
+    }
+    
+    if (!empty($input['country'])) {
+        $country = mysqli_real_escape_string($conn, $input['country']);
+        $query .= " AND c.country = '$country'";
+    }
+    
+    // Keyword search - search across multiple fields
+    if (!empty($input['keyword'])) {
+        $keyword = mysqli_real_escape_string($conn, $input['keyword']);
+        $query .= " AND (
+            c.firstname LIKE '%$keyword%' OR 
+            c.lastname LIKE '%$keyword%' OR 
+            c.religion LIKE '%$keyword%' OR 
+            c.caste LIKE '%$keyword%' OR 
+            c.occupation LIKE '%$keyword%' OR 
+            c.education LIKE '%$keyword%' OR 
+            c.city LIKE '%$keyword%' OR 
+            c.state LIKE '%$keyword%' OR 
+            c.mothertounge LIKE '%$keyword%' OR 
+            c.location LIKE '%$keyword%' OR
+            c.about LIKE '%$keyword%'
+        )";
+    }
+    
     if (!empty($input['verified_only']) && $input['verified_only'] == 1) {
         $query .= " AND c.verified = 1";
     }
     
     if (!empty($input['with_photo']) && $input['with_photo'] == 1) {
         $query .= " AND c.profile_pic IS NOT NULL AND c.profile_pic != ''";
+    }
+    
+    if (!empty($input['with_horoscope']) && $input['with_horoscope'] == 1) {
+        $query .= " AND c.horoscope IS NOT NULL AND c.horoscope != ''";
+    }
+    
+    // Handle complexion filter
+    if (!empty($input['complexion'])) {
+        $complexion = mysqli_real_escape_string($conn, $input['complexion']);
+        $query .= " AND c.complexion = '$complexion'";
+    }
+    
+    // Handle manglik filter
+    if (!empty($input['manglik'])) {
+        $manglik = mysqli_real_escape_string($conn, $input['manglik']);
+        $query .= " AND c.manglik = '$manglik'";
+    }
+    
+    // Handle physical status filter
+    if (!empty($input['physical_status'])) {
+        $physical_status = mysqli_real_escape_string($conn, $input['physical_status']);
+        $query .= " AND c.physical_status = '$physical_status'";
+    }
+    
+    // Handle eating habits filter
+    if (!empty($input['eating_habits'])) {
+        $eating_habits = mysqli_real_escape_string($conn, $input['eating_habits']);
+        $query .= " AND c.eating_habits = '$eating_habits'";
+    }
+    
+    // Handle has_children filter
+    if (!empty($input['has_children'])) {
+        $has_children = mysqli_real_escape_string($conn, $input['has_children']);
+        $query .= " AND c.has_children = '$has_children'";
     }
     
     $query .= " ORDER BY c.verified DESC, u.plan_id DESC, c.created_at DESC LIMIT 50";

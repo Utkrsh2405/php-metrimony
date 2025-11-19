@@ -50,10 +50,10 @@
 					<li class="dropdown">
 		              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Search<span class="caret"></span></a>
 		              <ul class="dropdown-menu" role="menu">
-		                <li><a href="search.php">Regular Search</a></li>
-		                <li><a href="search-id.php">Search By Profile ID</a></li>
-		                <li><a href="faq.php">Faq</a></li>
-		                
+		                <li><a href="quick-search.php"><i class="fa fa-search"></i> Quick Search</a></li>
+		                <li><a href="advance-search.php"><i class="fa fa-search-plus"></i> Advance Search</a></li>
+		                <li><a href="keyword-search.php"><i class="fa fa-key"></i> Keyword Search</a></li>
+		                <li><a href="search-id.php"><i class="fa fa-id-card"></i> Search By Profile ID</a></li>
 		              </ul>
 		            </li>
 		            <li><a href="plans.php">Pricing</a></li>

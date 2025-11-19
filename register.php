@@ -1,6 +1,37 @@
 <?php include_once("includes/basic_includes.php");?>
 <?php include_once("functions.php"); ?>
+<?php include_once("includes/dbconn.php"); ?>
 <?php register(); ?>
+<?php
+// Fetch data from database for dropdowns
+$states_query = mysqli_query($conn, "SELECT id, name FROM states WHERE status = 1 ORDER BY name");
+$states = [];
+$states_map = [];
+while($state = mysqli_fetch_assoc($states_query)) {
+    $states[] = $state['name'];
+    $states_map[$state['name']] = $state['id'];
+}
+
+$cities_query = mysqli_query($conn, "SELECT name, state_id FROM cities WHERE status = 1 ORDER BY name");
+$cities_list = [];
+while($city = mysqli_fetch_assoc($cities_query)) {
+    $cities_list[] = $city;
+}
+
+$religions_query = mysqli_query($conn, "SELECT DISTINCT religion FROM castes WHERE status = 1 AND religion IS NOT NULL ORDER BY religion");
+$religions = [];
+while($rel = mysqli_fetch_assoc($religions_query)) {
+    if(!in_array($rel['religion'], $religions)) {
+        $religions[] = $rel['religion'];
+    }
+}
+
+$castes_query = mysqli_query($conn, "SELECT DISTINCT name, religion FROM castes WHERE status = 1 ORDER BY name");
+$castes_list = [];
+while($caste = mysqli_fetch_assoc($castes_query)) {
+    $castes_list[] = $caste;
+}
+?>
 <!DOCTYPE HTML>
 <html>
 <head>
@@ -229,25 +260,9 @@ $(document).ready(function(){
 		      <label for="edit-religion">Religion <span class="form-required">*</span></label>
 		      <select id="edit-religion" name="religion" class="form-control" required>
 		        <option value="">--- Select Religion ---</option>
-		        <option value="Hindu">Hindu</option>
-		        <option value="Muslim">Muslim</option>
-		        <option value="Muslim - Shia">Muslim - Shia</option>
-		        <option value="Muslim - Sunni">Muslim - Sunni</option>
-		        <option value="Muslim - Others">Muslim - Others</option>
-		        <option value="Christian">Christian</option>
-		        <option value="Christian - Protestant">Christian - Protestant</option>
-		        <option value="Christian - Catholic">Christian - Catholic</option>
-		        <option value="Christian - Orthodox">Christian - Orthodox</option>
-		        <option value="Sikh">Sikh</option>
-		        <option value="Jain">Jain</option>
-		        <option value="Jain - Digamber">Jain - Digamber</option>
-		        <option value="Jain - Shwetamber">Jain - Shwetamber</option>
-		        <option value="Buddhist">Buddhist</option>
-		        <option value="Parsi">Parsi</option>
-		        <option value="Jewish">Jewish</option>
-		        <option value="Bahai">Bahai</option>
-		        <option value="Spiritual">Spiritual</option>
-		        <option value="No Religion">No Religion</option>
+		        <?php foreach($religions as $religion): ?>
+		        <option value="<?= htmlspecialchars($religion) ?>"><?= htmlspecialchars($religion) ?></option>
+		        <?php endforeach; ?>
 		        <option value="Other">Other</option>
 		      </select>
 		    </div>
@@ -257,43 +272,9 @@ $(document).ready(function(){
 		      <label for="edit-caste">Caste <span class="form-required">*</span></label>
 		      <select id="edit-caste" name="caste" class="form-control" required>
 		        <option value="">--- Select Caste ---</option>
-		        <option value="Brahmin">Brahmin</option>
-		        <option value="Kshatriya">Kshatriya</option>
-		        <option value="Vaishya">Vaishya</option>
-		        <option value="Shudra">Shudra</option>
-		        <option value="Maratha">Maratha</option>
-		        <option value="Kayastha">Kayastha</option>
-		        <option value="Rajput">Rajput</option>
-		        <option value="Jat">Jat</option>
-		        <option value="Yadav">Yadav</option>
-		        <option value="Kurmi">Kurmi</option>
-		        <option value="Reddy">Reddy</option>
-		        <option value="Nair">Nair</option>
-		        <option value="Nadar">Nadar</option>
-		        <option value="Bhumihar">Bhumihar</option>
-		        <option value="Khatri">Khatri</option>
-		        <option value="Arora">Arora</option>
-		        <option value="Agarwal">Agarwal</option>
-		        <option value="Baniya">Baniya</option>
-		        <option value="Gowda">Gowda</option>
-		        <option value="Lingayat">Lingayat</option>
-		        <option value="Ezhava">Ezhava</option>
-		        <option value="Kamma">Kamma</option>
-		        <option value="Kapu">Kapu</option>
-		        <option value="Vellalar">Vellalar</option>
-		        <option value="Gounder">Gounder</option>
-		        <option value="Pillai">Pillai</option>
-		        <option value="Mudaliar">Mudaliar</option>
-		        <option value="Naidu">Naidu</option>
-		        <option value="Patel">Patel</option>
-		        <option value="Gupta">Gupta</option>
-		        <option value="Sindhi">Sindhi</option>
-		        <option value="Punjabi">Punjabi</option>
-		        <option value="Bengali">Bengali</option>
-		        <option value="Malayalee">Malayalee</option>
-		        <option value="Scheduled Caste">Scheduled Caste</option>
-		        <option value="Scheduled Tribe">Scheduled Tribe</option>
-		        <option value="OBC - Other Backward Class">OBC - Other Backward Class</option>
+		        <?php foreach($castes_list as $caste): ?>
+		        <option value="<?= htmlspecialchars($caste['name']) ?>" data-religion="<?= htmlspecialchars($caste['religion']) ?>"><?= htmlspecialchars($caste['name']) ?></option>
+		        <?php endforeach; ?>
 		        <option value="Other">Other</option>
 		        <option value="Caste No Bar">Caste No Bar</option>
 		      </select>
@@ -389,43 +370,9 @@ $(document).ready(function(){
 		      <label for="edit-state">Select State <span class="form-required">*</span></label>
 		      <select id="edit-state" name="state" class="form-control" required>
 		        <option value="">--- Select State ---</option>
-		        <option value="Andaman and Nicobar Islands">Andaman and Nicobar Islands</option>
-		        <option value="Andhra Pradesh">Andhra Pradesh</option>
-		        <option value="Arunachal Pradesh">Arunachal Pradesh</option>
-		        <option value="Assam">Assam</option>
-		        <option value="Bihar">Bihar</option>
-		        <option value="Chandigarh">Chandigarh</option>
-		        <option value="Chhattisgarh">Chhattisgarh</option>
-		        <option value="Dadra and Nagar Haveli">Dadra and Nagar Haveli</option>
-		        <option value="Daman and Diu">Daman and Diu</option>
-		        <option value="Delhi">Delhi</option>
-		        <option value="Goa">Goa</option>
-		        <option value="Gujarat">Gujarat</option>
-		        <option value="Haryana">Haryana</option>
-		        <option value="Himachal Pradesh">Himachal Pradesh</option>
-		        <option value="Jammu and Kashmir">Jammu and Kashmir</option>
-		        <option value="Jharkhand">Jharkhand</option>
-		        <option value="Karnataka">Karnataka</option>
-		        <option value="Kerala">Kerala</option>
-		        <option value="Ladakh">Ladakh</option>
-		        <option value="Lakshadweep">Lakshadweep</option>
-		        <option value="Madhya Pradesh">Madhya Pradesh</option>
-		        <option value="Maharashtra">Maharashtra</option>
-		        <option value="Manipur">Manipur</option>
-		        <option value="Meghalaya">Meghalaya</option>
-		        <option value="Mizoram">Mizoram</option>
-		        <option value="Nagaland">Nagaland</option>
-		        <option value="Odisha">Odisha</option>
-		        <option value="Puducherry">Puducherry</option>
-		        <option value="Punjab">Punjab</option>
-		        <option value="Rajasthan">Rajasthan</option>
-		        <option value="Sikkim">Sikkim</option>
-		        <option value="Tamil Nadu">Tamil Nadu</option>
-		        <option value="Telangana">Telangana</option>
-		        <option value="Tripura">Tripura</option>
-		        <option value="Uttar Pradesh">Uttar Pradesh</option>
-		        <option value="Uttarakhand">Uttarakhand</option>
-		        <option value="West Bengal">West Bengal</option>
+		        <?php foreach($states as $state): ?>
+		        <option value="<?= htmlspecialchars($state) ?>" data-state-id="<?= $states_map[$state] ?>"><?= htmlspecialchars($state) ?></option>
+		        <?php endforeach; ?>
 		      </select>
 		    </div>
 		    
@@ -434,68 +381,9 @@ $(document).ready(function(){
 		      <label for="edit-city">City <span class="form-required">*</span></label>
 		      <select id="edit-city" name="city" class="form-control" required>
 		        <option value="">--- Select City ---</option>
-		        <option value="Agra">Agra</option>
-		        <option value="Ahmedabad">Ahmedabad</option>
-		        <option value="Ajmer">Ajmer</option>
-		        <option value="Allahabad">Allahabad</option>
-		        <option value="Amritsar">Amritsar</option>
-		        <option value="Aurangabad">Aurangabad</option>
-		        <option value="Bangalore">Bangalore</option>
-		        <option value="Bhopal">Bhopal</option>
-		        <option value="Bhubaneswar">Bhubaneswar</option>
-		        <option value="Chandigarh">Chandigarh</option>
-		        <option value="Chennai">Chennai</option>
-		        <option value="Coimbatore">Coimbatore</option>
-		        <option value="Cuttack">Cuttack</option>
-		        <option value="Dehradun">Dehradun</option>
-		        <option value="Delhi">Delhi</option>
-		        <option value="Dhanbad">Dhanbad</option>
-		        <option value="Faridabad">Faridabad</option>
-		        <option value="Ghaziabad">Ghaziabad</option>
-		        <option value="Goa">Goa</option>
-		        <option value="Gurgaon">Gurgaon</option>
-		        <option value="Guwahati">Guwahati</option>
-		        <option value="Gwalior">Gwalior</option>
-		        <option value="Hyderabad">Hyderabad</option>
-		        <option value="Indore">Indore</option>
-		        <option value="Jabalpur">Jabalpur</option>
-		        <option value="Jaipur">Jaipur</option>
-		        <option value="Jalandhar">Jalandhar</option>
-		        <option value="Jammu">Jammu</option>
-		        <option value="Jamshedpur">Jamshedpur</option>
-		        <option value="Jodhpur">Jodhpur</option>
-		        <option value="Kanpur">Kanpur</option>
-		        <option value="Kochi">Kochi</option>
-		        <option value="Kolkata">Kolkata</option>
-		        <option value="Kota">Kota</option>
-		        <option value="Lucknow">Lucknow</option>
-		        <option value="Ludhiana">Ludhiana</option>
-		        <option value="Madurai">Madurai</option>
-		        <option value="Mangalore">Mangalore</option>
-		        <option value="Meerut">Meerut</option>
-		        <option value="Mumbai">Mumbai</option>
-		        <option value="Mysore">Mysore</option>
-		        <option value="Nagpur">Nagpur</option>
-		        <option value="Nashik">Nashik</option>
-		        <option value="Navi Mumbai">Navi Mumbai</option>
-		        <option value="Noida">Noida</option>
-		        <option value="Patna">Patna</option>
-		        <option value="Pune">Pune</option>
-		        <option value="Raipur">Raipur</option>
-		        <option value="Rajkot">Rajkot</option>
-		        <option value="Ranchi">Ranchi</option>
-		        <option value="Salem">Salem</option>
-		        <option value="Shimla">Shimla</option>
-		        <option value="Srinagar">Srinagar</option>
-		        <option value="Surat">Surat</option>
-		        <option value="Thane">Thane</option>
-		        <option value="Thiruvananthapuram">Thiruvananthapuram</option>
-		        <option value="Tiruchirappalli">Tiruchirappalli</option>
-		        <option value="Udaipur">Udaipur</option>
-		        <option value="Vadodara">Vadodara</option>
-		        <option value="Varanasi">Varanasi</option>
-		        <option value="Vijayawada">Vijayawada</option>
-		        <option value="Visakhapatnam">Visakhapatnam</option>
+		        <?php foreach($cities_list as $city): ?>
+		        <option value="<?= htmlspecialchars($city['name']) ?>" data-state-id="<?= $city['state_id'] ?>"><?= htmlspecialchars($city['name']) ?></option>
+		        <?php endforeach; ?>
 		        <option value="Other">Other</option>
 		      </select>
 		    </div>
@@ -574,6 +462,57 @@ $(document).ready(function(){
   </div>
 </div>
 
+
+<script>
+// Cascading dropdown for State -> City
+jQuery(document).ready(function($) {
+    var allCities = $('#edit-city option').clone();
+    
+    $('#edit-state').on('change', function() {
+        var selectedStateId = $(this).find(':selected').data('state-id');
+        
+        // Reset city dropdown
+        $('#edit-city').empty().append('<option value="">--- Select City ---</option>');
+        
+        if (selectedStateId) {
+            // Filter cities by selected state
+            allCities.each(function() {
+                var $option = $(this);
+                if ($option.val() === '' || $option.val() === 'Other' || $option.data('state-id') == selectedStateId) {
+                    $('#edit-city').append($option.clone());
+                }
+            });
+        } else {
+            // No state selected, show all cities
+            $('#edit-city').append(allCities.clone());
+        }
+    });
+    
+    // Cascading dropdown for Religion -> Caste
+    var allCastes = $('#edit-caste option').clone();
+    
+    $('#edit-religion').on('change', function() {
+        var selectedReligion = $(this).val();
+        
+        // Reset caste dropdown
+        $('#edit-caste').empty().append('<option value="">--- Select Caste ---</option>');
+        
+        if (selectedReligion) {
+            // Filter castes by selected religion
+            allCastes.each(function() {
+                var $option = $(this);
+                if ($option.val() === '' || $option.val() === 'Other' || $option.val() === 'Caste No Bar' || 
+                    $option.data('religion') === selectedReligion) {
+                    $('#edit-caste').append($option.clone());
+                }
+            });
+        } else {
+            // No religion selected, show all castes
+            $('#edit-caste').append(allCastes.clone());
+        }
+    });
+});
+</script>
 
 <?php include_once("footer.php");?>
 

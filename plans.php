@@ -1,6 +1,7 @@
 <?php
 session_start();
 require_once("includes/dbconn.php");
+require_once("functions.php");
 
 // Fetch all active plans
 $query = "SELECT * FROM plans WHERE is_active = 1 ORDER BY price ASC";

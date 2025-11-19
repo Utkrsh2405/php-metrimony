@@ -27,7 +27,7 @@ include("../includes/admin-header.php");
 ?>
 
 <!-- TinyMCE Editor -->
-<script src="https://cdn.tiny.cloud/1/no-api-key/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
+<script src="https://cdn.tiny.cloud/1/fl8w5hwrd50wqy5j8e8ye9tcumt8r6nvu7zaqcy3276rjfiz/tinymce/6/tinymce.min.js" referrerpolicy="origin"></script>
 
 <div class="admin-content">
     <div class="row" style="margin-bottom: 15px;">

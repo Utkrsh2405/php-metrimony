@@ -1,310 +1,418 @@
-<?php include_once("includes/basic_includes.php");?>
-<?php include_once("functions.php"); ?>
-<?php 
-if(isloggedin()){
- //do nothing stay here
-} else{
-   header("location:login.php");
+<?php
+session_start();
+
+if (!isset($_SESSION['id'])) {
+    header("Location: /login.php");
+    exit();
 }
 
-?>
-<?php
-$result=search();
-?>
-<!DOCTYPE HTML>
-<html>
-<head>
-<title>Find Your Perfect Partner - Makemylove
- | Search :: Make My Love
-</title>
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+require_once("includes/dbconn.php");
 
-<script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
-<link href="css/bootstrap-3.1.1.min.css" rel='stylesheet' type='text/css' />
-<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
-<script src="js/jquery.min.js"></script>
-<script src="js/bootstrap.min.js"></script>
-<!-- Custom Theme files -->
-<link href="css/style.css" rel='stylesheet' type='text/css' />
-<link href='//fonts.googleapis.com/css?family=Oswald:300,400,700' rel='stylesheet' type='text/css'>
-<link href='//fonts.googleapis.com/css?family=Ubuntu:300,400,500,700' rel='stylesheet' type='text/css'>
-<!--font-Awesome-->
-<link href="css/font-awesome.css" rel="stylesheet"> 
-<!--font-Awesome-->
+$user_id = $_SESSION['id'];
+
+// Get user's gender to search opposite gender by default
+$user_query = mysqli_query($conn, "SELECT c.gender FROM customer c WHERE c.id = $user_id");
+$user_data = mysqli_fetch_assoc($user_query);
+$default_gender = ($user_data['gender'] == 'Male') ? 'Female' : 'Male';
+
+// Get all states for dropdown
+$states_query = mysqli_query($conn, "SELECT id, state_name, state_code FROM states WHERE status = 1 ORDER BY state_name");
+$states = [];
+while ($state = mysqli_fetch_assoc($states_query)) {
+    $states[] = $state;
+}
+
+// Get religions from castes table
+$religions_query = mysqli_query($conn, "SELECT DISTINCT religion FROM castes WHERE status = 1 AND religion IS NOT NULL AND religion != 'All Religions' ORDER BY religion");
+$religions = [];
+while ($rel = mysqli_fetch_assoc($religions_query)) {
+    $religions[] = $rel['religion'];
+}
+
+include("includes/header.php");
+?>
+
+<style>
+.quick-search {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 50px 0;
+    margin-bottom: 30px;
+}
+.search-card {
+    background: white;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+    padding: 30px;
+    margin-bottom: 30px;
+}
+.filter-group {
+    margin-bottom: 20px;
+}
+.filter-group label {
+    font-weight: 600;
+    color: #333;
+    margin-bottom: 8px;
+    display: block;
+}
+.btn-search {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    border: none;
+    padding: 12px 40px;
+    font-size: 16px;
+    font-weight: 600;
+    border-radius: 25px;
+    transition: all 0.3s;
+}
+.btn-search:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    color: white;
+}
+.profile-card {
+    background: white;
+    border: 1px solid #e0e0e0;
+    border-radius: 10px;
+    padding: 20px;
+    margin-bottom: 20px;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 20px;
+}
+.profile-card:hover {
+    box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+    transform: translateY(-3px);
+}
+.profile-avatar {
+    width: 100px;
+    height: 100px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 32px;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+.profile-info {
+    flex: 1;
+}
+.profile-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+.badge-verified {
+    background: #28a745;
+    color: white;
+    padding: 3px 10px;
+    border-radius: 12px;
+    font-size: 11px;
+    margin-left: 8px;
+}
+.no-results {
+    text-align: center;
+    padding: 60px 20px;
+    color: #999;
+}
+.no-results i {
+    font-size: 64px;
+    margin-bottom: 20px;
+    color: #ddd;
+}
+</style>
+
+<div class="quick-search">
+    <div class="container">
+        <h1 style="margin: 0 0 10px 0;"><i class="fa fa-search"></i> Quick Search</h1>
+        <p style="margin: 0; font-size: 18px; opacity: 0.9;">Find your perfect match with simple filters</p>
+    </div>
+</div>
+
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="search-card">
+                <form id="quick-search-form">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="filter-group">
+                                <label>Gender</label>
+                                <select name="gender" class="form-control">
+                                    <option value="">Any</option>
+                                    <option value="Male" <?= $default_gender == 'Male' ? 'selected' : '' ?>>Male</option>
+                                    <option value="Female" <?= $default_gender == 'Female' ? 'selected' : '' ?>>Female</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="filter-group">
+                                <label>Age From - To</label>
+                                <div class="row">
+                                    <div class="col-xs-6">
+                                        <input type="number" name="age_min" class="form-control" placeholder="21" min="18" max="100">
+                                    </div>
+                                    <div class="col-xs-6">
+                                        <input type="number" name="age_max" class="form-control" placeholder="35" min="18" max="100">
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="filter-group">
+                                <label>Religion</label>
+                                <select name="religion" class="form-control">
+                                    <option value="">Any</option>
+                                    <?php foreach ($religions as $religion): ?>
+                                    <option value="<?= htmlspecialchars($religion) ?>"><?= htmlspecialchars($religion) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="filter-group">
+                                <label>State</label>
+                                <select name="state" class="form-control">
+                                    <option value="">Any State</option>
+                                    <?php foreach ($states as $state): ?>
+                                    <option value="<?= $state['state_code'] ?>"><?= htmlspecialchars($state['state_name']) ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="filter-group">
+                                <label>Marital Status</label>
+                                <select name="marital_status" class="form-control">
+                                    <option value="">Any</option>
+                                    <option value="Never Married">Never Married</option>
+                                    <option value="Divorced">Divorced</option>
+                                    <option value="Widowed">Widowed</option>
+                                    <option value="Awaiting Divorce">Awaiting Divorce</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="filter-group">
+                                <label>Education</label>
+                                <select name="education" class="form-control">
+                                    <option value="">Any</option>
+                                    <option value="High School">High School</option>
+                                    <option value="Diploma">Diploma</option>
+                                    <option value="Graduate">Graduate</option>
+                                    <option value="Post Graduate">Post Graduate</option>
+                                    <option value="Doctorate">Doctorate</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="filter-group">
+                                <label>Mother Tongue</label>
+                                <select name="mother_tongue" class="form-control">
+                                    <option value="">Any</option>
+                                    <option value="Hindi">Hindi</option>
+                                    <option value="English">English</option>
+                                    <option value="Tamil">Tamil</option>
+                                    <option value="Telugu">Telugu</option>
+                                    <option value="Malayalam">Malayalam</option>
+                                    <option value="Kannada">Kannada</option>
+                                    <option value="Marathi">Marathi</option>
+                                    <option value="Bengali">Bengali</option>
+                                    <option value="Gujarati">Gujarati</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="filter-group">
+                                <label>&nbsp;</label>
+                                <div class="checkbox" style="margin-top: 0;">
+                                    <label>
+                                        <input type="checkbox" name="with_photo" value="1"> With Photo Only
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center" style="margin-top: 20px;">
+                        <button type="submit" class="btn btn-search">
+                            <i class="fa fa-search"></i> Search Profiles
+                        </button>
+                        <button type="button" class="btn btn-default" onclick="resetSearch()" style="margin-left: 10px;">
+                            <i class="fa fa-refresh"></i> Reset
+                        </button>
+                        <a href="advanced-search.php" class="btn btn-info" style="margin-left: 10px;">
+                            <i class="fa fa-search-plus"></i> Advanced Search
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-md-12">
+            <div id="search-results">
+                <!-- Results will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
 <script>
-$(document).ready(function(){
-    $(".dropdown").hover(            
-        function() {
-            $('.dropdown-menu', this).stop( true, true ).slideDown("fast");
-            $(this).toggleClass('open');        
-        },
-        function() {
-            $('.dropdown-menu', this).stop( true, true ).slideUp("fast");
-            $(this).toggleClass('open');       
-        }
-    );
+$(document).ready(function() {
+    // Perform initial search with default filters
+    performSearch();
 });
-</script>
-</head>
-<body>
-<!-- ============================  Navigation Start =========================== -->
- <?php include_once("includes/navigation.php");?>
-<!-- ============================  Navigation End ============================ -->
-<div class="grid_3">
-  <div class="container">
-   <div class="breadcrumb1">
-     <ul>
-        <a href="index.php"><i class="fa fa-home home_1"></i></a>
-        <span class="divider">&nbsp;|&nbsp;</span>
-        <li class="current-page">Regular Search</li>
-     </ul>
-   </div>
-   <!--<script type="text/javascript">
-    $(function () {
-     $('#btnRadio').click(function () {
-          var checkedradio = $('[name="gr"]:radio:checked').val();
-          $("#sel").php("Selected Value: " + checkedradio);
-      });
+
+$('#quick-search-form').on('submit', function(e) {
+    e.preventDefault();
+    performSearch();
+});
+
+function performSearch() {
+    const formData = {};
+    $('#quick-search-form').serializeArray().forEach(item => {
+        if (item.value) {
+            formData[item.name] = item.value;
+        }
     });
-   </script>-->
-<div class="col-md-9 search_left">
-  <form action="" method="post">	
-   <div class="form_but1">
-	<label class="col-sm-5 control-lable1" for="sex">Gender : </label>
-	<div class="col-sm-7 form_radios">
-		<input type="radio" class="radio_1" name="sex" value="male" <?php echo "checked";?>/> Groom &nbsp;&nbsp;
-		<input type="radio" class="radio_1" name="sex" value="female"/> Bride
-		
-		<!--<hr />
-		<p id="sel"></p><br />
-		<input id="btnRadio" type="button" value="Get Selected Value" />-->
-	</div>
-	<div class="clearfix"> </div>
-  </div>
-  <div class="form_but1">
-	<label class="col-sm-5 control-lable1" for="Marital Status">Marital Status : </label>
-	<div class="col-sm-7 form_radios">
-		<input type="checkbox" class="radio_1" name="maritalstatus" value="Single" <?php echo "checked" ?>/> Single &nbsp;&nbsp;
-		<input type="checkbox" class="radio_1" name="maritalstatus" value="divorced" /> Divorced &nbsp;&nbsp;
-		<input type="checkbox" class="radio_1" name="maritalstatus" value="widowed" /> Widowed &nbsp;&nbsp;
-		<input type="checkbox" class="radio_1" name="maritalstatus" value="seperated"/> Separated &nbsp;&nbsp;
-		<input type="checkbox" class="radio_1" name="maritalstatus" value="any" /> Any
-	</div>
-	<div class="clearfix"> </div>
-  </div>
-  <div class="form_but1">
-    <label class="col-sm-5 control-lable1" for="country">Country : </label>
-    <div class="col-sm-7 form_radios">
-      <div class="select-block1">
-        <select name="country">
-            <option value="">Country</option>
-            <option value="Japan">Japan</option>
-            <option value="Kenya">Kenya</option>
-            <option value="Dubai">Dubai</option>
-            <option value="Italy">Italy</option>
-            <option value="Greece">Greece</option> 
-            <option value="Iceland">Iceland</option> 
-            <option value="China">China</option> 
-            <option value="India">India</option> 
-            <option value="Irland">Irland</option> 
-            <option value="Srilanka">Srilanka</option> 
-            <option value="Russia">Russia</option> 
-            <option value="Hong Kong">Hong Kong</option> 
-            <option value="Germany">Germany</option>
-          </select>
-      </div>
-    </div>
-    <div class="clearfix"> </div>
-  </div>
-  <div class="form_but1">
-    <label class="col-sm-5 control-lable1" for="District / City">District / City : </label>
-    <div class="col-sm-7 form_radios">
-      <div class="select-block1">
-        <select name="district">
-            <option value="">District / City</option>
-            <option value="Wayanad">Wayanad</option>
-            <option value="Calicut">Calicut</option>
-            <option value="Malappuram">Malappuram</option> 
-            <option value="Trivandrum">Trivandrum</option> 
-            <option value="Kannur">Kannur</option> 
-            <option value="Kasargode">Kasargode</option>
-        </select>
-      </div>
-    </div>
-    <div class="clearfix"> </div>
-  </div>
-  <div class="form_but1">
-    <label class="col-sm-5 control-lable1" for="State">State : </label>
-    <div class="col-sm-7 form_radios">
-      <div class="select-block1">
-        <select name="state">
-            <option value="">State</option>
-            <option value="Kerala">Kerala</option>
-            <option value="Tamilnadu">Tamilnadu</option>
-            <option value="Karnataka">Karnataka</option>
-            <option value="Madhyapradesh">Madhyapradesh</option>
-        </select>
-      </div>
-    </div>
-    <div class="clearfix"> </div>
-  </div>
-  <div class="form_but1">
-    <label class="col-sm-5 control-lable1" for="Religion">Religion : </label>
-    <div class="col-sm-7 form_radios">
-      <div class="select-block1">
-        <select name="religion">
-            <option value="">Religion</option>
-            <option value="Hindu">Hindu</option>
-            <option value="Sikh">Sikh</option>
-            <option value="Jain-All">Jain-All</option>
-            <option value="Jain-Digambar">Jain-Digambar</option>
-            <option value="Jain-Others">Jain-Others</option>
-            <option value="Muslim-All">Muslim-All</option> 
-            <option value="Muslim-Shia">Muslim-Shia</option> 
-            <option value="Muslim-Sunni">Muslim-Sunni</option> 
-            <option value="Muslim-Others">Muslim-Others</option> 
-            <option value="Christian-All">Christian-All</option> 
-            <option value="Christian-Catholic">Christian-Catholic</option> 
-            <option value="Jewish">Jewish</option> 
-            <option value="Inter-Religion">Inter-Religion</option> 
-        </select>
-      </div>
-    </div>
-    <div class="clearfix"> </div>
-  </div>
-  <div class="form_but1">
-    <label class="col-sm-5 control-lable1" for="Mother Tongue">Mother Tongue : </label>
-    <div class="col-sm-7 form_radios">
-      <div class="select-block1">
-        <select name="mothertounge">
-            <option value="Malayalam">Malayalam</option>
-            <option value="English">English</option>
-            <option value="French">French</option>
-            <option value="Telugu">Telugu</option>
-            <option value="Bengali">Bengali</option>
-            <option value="Bihari">Bihari</option>
-            <option value="Hindi">Hindi</option>
-            <option value="Tamil">Tamil</option> 
-            <option value="Urdu">Urdu</option> 
-            <option value="Manipuri">Manipuri</option> 
-        </select>
-      </div>
-    </div>
-    <div class="clearfix"> </div>
-  </div>
-  <div class="form_but1">
-	<label class="col-sm-5 control-lable1" for="Age">Age : </label>
-	<div class="col-sm-7 form_radios">
-	  <div class="col-sm-5 input-group1">
-        <input class="form-control has-dark-background" name="agemin" id="slider-name" placeholder="18" type="text" required=""/>
-      </div>
-      
-      <div class="col-sm-5 input-group1">
-        <input class="form-control has-dark-background" name="agemax" id="slider-name" placeholder="40" type="text" required=""/>
-      </div>
-      <div class="clearfix"> </div>
-	</div>
-	<div class="clearfix"> </div>
-  <input type="submit" name="search" value="Search"/>
-  </div>
- </form>
- <div class="paid_people">
-   <h1>Profiles</h1>
-<?php
-//only start display profiles if and only if search is triggered
-if(isset($_POST['search'])){
-
-//code to print matching profiles
-
-// couloumn count
-
-$c_count = '1';
-
-while ($row = mysqli_fetch_assoc($result))
-  {
     
-    $profid=$row['cust_id'];
-    //getting photo for display
-    $sql="SELECT * FROM photos WHERE cust_id=$profid";
-    $result2=mysqlexec($sql);
-    $photo=mysqli_fetch_assoc($result2);
-    $pic=$photo['pic1'];
-  // printing left side profile
-  echo "<div class=\"row_1\">"; //starting row  
-  if ($c_count == '1')
-    {
+    $('#search-results').html('<div class="text-center" style="padding: 40px;"><i class="fa fa-spinner fa-spin fa-3x"></i><p style="margin-top: 15px;">Searching...</p></div>');
     
-    echo "<div class=\"col-sm-6 paid_people-left\">"; //left statrted
-    echo "<ul class=\"profile_item\">";
-    echo "<a href=\"view_profile.php?id=$profid\">";
-    echo "<li class=\"profile_item-img\"><img src=\"profile/". $profid."/".$pic ."\"" . "class=\"img-responsive\" alt=\"\"/></li>";
-    echo "<li class=\"profile_item-desc\">";
-    echo "<h4>" . $row['firstname'] . " " . $row['lastname'] . "</h4>";
-    echo "<p>" . $row['age']. "Yrs," . $row['religion'] . "</p>";
-    echo "<h5>" . "View Full Profile" . "</h5>";
-    echo "</li>";
-    echo "</a>";
-    echo "</ul>";
-    echo "</div>"; //left end
-    $c_count++;
+    $.ajax({
+        url: '/api/search.php',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify(formData),
+        success: function(response) {
+            if (response.success) {
+                displayResults(response.data, response.count);
+            } else {
+                alert('Search failed: ' + response.error);
+            }
+        },
+        error: function() {
+            $('#search-results').html('<div class="alert alert-danger">Failed to perform search. Please try again.</div>');
+        }
+    });
+}
+
+function displayResults(results, count) {
+    const container = $('#search-results');
+    container.empty();
+    
+    if (count === 0) {
+        container.html(`
+            <div class="no-results">
+                <i class="fa fa-search"></i>
+                <h3>No profiles found</h3>
+                <p>Try adjusting your search filters or use <a href="advanced-search.php">Advanced Search</a></p>
+            </div>
+        `);
+        return;
     }
-    else
-    {
-    echo "<div class=\"col-sm-6\">"; //right statrted
-    echo "<ul class=\"profile_item\">";
-    echo "<a href=\"view_profile.php?id=$profid\">";
-    echo "<li class=\"profile_item-img\"><img src=\"profile/". $profid."/".$pic ."\"" . "class=\"img-responsive\"" ;
-    echo "alt=\"\"/></li>";
-    echo "<li class=\"profile_item-desc\">";
-    echo "<h4>" . $row['firstname'] . " " . $row['lastname'] . "</h4>";
-    echo "<p>" . $row['age']. "Yrs," . $row['religion'] . "</p>";
-    echo "<h5>" . "View Full Profile" . "</h5>";
-    echo "</li>";
-    echo "</a>";
-    echo "</ul>";
-    echo "</div class=\"test\">"; //right end
-
-    // end of right side
-
     
-    $c_count = '1';
-    }
-    echo "</div>"; //row end
-  } //loop end
-  
-}//end of if
-?>
-   
-  </div>
-</div>
-<!-- Match Right Starts -->
-<div class="col-md-3 match_right">
-  <?php include_once("matchright.php");?>
-</div>
-<!-- Match Right ends -->
-     <div class="clearfix"> </div>
-  </div>
-</div>
+    container.append(`
+        <div class="search-card">
+            <h3 style="margin: 0 0 20px 0;"><i class="fa fa-users"></i> Found ${count} Profile${count > 1 ? 's' : ''}</h3>
+        </div>
+    `);
+    
+    results.forEach(profile => {
+        const age = profile.age || 'N/A';
+        const verified = profile.verified == 1 ? '<span class="badge-verified"><i class="fa fa-check-circle"></i> Verified</span>' : '';
+        const initials = profile.name ? profile.name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2) : '?';
+        
+        container.append(`
+            <div class="profile-card">
+                <div class="profile-avatar">${initials}</div>
+                <div class="profile-info">
+                    <h4 style="margin: 0 0 10px 0;">
+                        ${profile.name || 'Profile #' + profile.id}
+                        ${verified}
+                    </h4>
+                    <p style="margin: 5px 0; color: #666;">
+                        <i class="fa fa-birthday-cake"></i> ${age} years | 
+                        <i class="fa fa-venus-mars"></i> ${profile.gender || 'N/A'} | 
+                        <i class="fa fa-heart"></i> ${profile.marital_status || 'N/A'}
+                    </p>
+                    <p style="margin: 5px 0; color: #666;">
+                        <i class="fa fa-book"></i> ${profile.religion || 'N/A'} | 
+                        <i class="fa fa-map-marker"></i> ${profile.location || 'N/A'}
+                    </p>
+                    <p style="margin: 5px 0; color: #666;">
+                        <i class="fa fa-graduation-cap"></i> ${profile.education || 'N/A'} | 
+                        <i class="fa fa-briefcase"></i> ${profile.occupation || 'N/A'}
+                    </p>
+                </div>
+                <div class="profile-actions">
+                    <a href="/view_profile.php?id=${profile.id}" class="btn btn-primary btn-sm">
+                        <i class="fa fa-eye"></i> View Profile
+                    </a>
+                    <button class="btn btn-success btn-sm" onclick="sendInterest(${profile.id})">
+                        <i class="fa fa-heart"></i> Send Interest
+                    </button>
+                    <button class="btn btn-info btn-sm" onclick="addToShortlist(${profile.id})">
+                        <i class="fa fa-star"></i> Shortlist
+                    </button>
+                </div>
+            </div>
+        `);
+    });
+}
 
+function resetSearch() {
+    $('#quick-search-form')[0].reset();
+    performSearch();
+}
 
-<?php include_once("footer.php");?>
-<!-- FlexSlider -->
-<link href="css/flexslider.css" rel='stylesheet' type='text/css' />
-  <script defer src="js/jquery.flexslider.js"></script>
-  <script type="text/javascript">
-	$(function(){
-	  SyntaxHighlighter.all();
-	});
-	$(window).load(function(){
-	  $('.flexslider').flexslider({
-		animation: "slide",
-		start: function(slider){
-		  $('body').removeClass('loading');
-		}
-	  });
-	});
-  </script>
-<!-- FlexSlider -->
-</body>
-</html>	
+function sendInterest(userId) {
+    if (!confirm('Send interest to this profile?')) return;
+    
+    $.ajax({
+        url: '/api/interest.php',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ receiver_id: userId, message: '' }),
+        success: function(res) {
+            if (res.success) {
+                alert(res.message || 'Interest sent successfully!');
+            } else {
+                alert('Failed: ' + (res.error || 'Unknown error'));
+            }
+        },
+        error: function() {
+            alert('Failed to send interest. Please try again.');
+        }
+    });
+}
+
+function addToShortlist(userId) {
+    $.ajax({
+        url: '/api/shortlist.php',
+        method: 'POST',
+        contentType: 'application/json',
+        data: JSON.stringify({ profile_id: userId }),
+        success: function(res) {
+            if (res.success) {
+                alert(res.message || (res.action === 'added' ? 'Added to shortlist!' : 'Removed from shortlist'));
+            } else {
+                alert('Failed: ' + (res.error || 'Unknown error'));
+            }
+        },
+        error: function() {
+            alert('Failed to update shortlist. Please try again.');
+        }
+    });
+}
+</script>
+
+<?php include("includes/footer.php"); ?>

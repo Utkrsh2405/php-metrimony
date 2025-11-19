@@ -272,7 +272,7 @@ function renderSections() {
                         <small class="text-muted">Enter custom CSS to style your HTML content.</small>
                     </div>
                     <div class="form-group">
-                        <button type="button" class="btn btn-sm btn-info" onclick="previewCustomHTML(${index})">
+                        <button type="button" class="btn btn-sm btn-info preview-html-btn" data-section-index="${index}">
                             <i class="fa fa-eye"></i> Preview in New Tab
                         </button>
                     </div>
@@ -478,7 +478,8 @@ $('#upload-banner-btn').on('click', function() {
 });
 
 // Preview custom HTML in new tab
-function previewCustomHTML(index) {
+$(document).on('click', '.preview-html-btn', function() {
+    const index = $(this).data('section-index');
     const section = sections[index];
     const card = $(`.section-card[data-index="${index}"]`);
     
@@ -496,35 +497,33 @@ function previewCustomHTML(index) {
         }
     });
     
-    const previewHTML = `
-<!DOCTYPE html>
-<html>
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Custom HTML Preview</title>
-    <link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">
-    <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-    <style>
-        body { padding: 20px; background: #f5f5f5; }
-        .preview-container { background: white; padding: 20px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }
-        ${css}
-    </style>
-</head>
-<body>
-    <div class="container">
-        <div class="alert alert-info">
-            <strong>Preview Mode</strong> - This is how your custom HTML section will appear on the homepage.
-        </div>
-        <div class="preview-container">
-            ${html}
-        </div>
-    </div>
-    <script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>
-    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
-</body>
-</html>
-    `;
+    const previewHTML = '<!DOCTYPE html>' +
+'<html>' +
+'<head>' +
+    '<meta charset="UTF-8">' +
+    '<meta name="viewport" content="width=device-width, initial-scale=1.0">' +
+    '<title>Custom HTML Preview</title>' +
+    '<link href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" rel="stylesheet">' +
+    '<link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">' +
+    '<style>' +
+        'body { padding: 20px; background: #f5f5f5; }' +
+        '.preview-container { background: white; padding: 20px; border-radius: 4px; box-shadow: 0 2px 4px rgba(0,0,0,0.1); }' +
+        css +
+    '</style>' +
+'</head>' +
+'<body>' +
+    '<div class="container">' +
+        '<div class="alert alert-info">' +
+            '<strong>Preview Mode</strong> - This is how your custom HTML section will appear on the homepage.' +
+        '</div>' +
+        '<div class="preview-container">' +
+            html +
+        '</div>' +
+    '</div>' +
+    '<script src="https://code.jquery.com/jquery-2.2.4.min.js"></script>' +
+    '<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>' +
+'</body>' +
+'</html>';
     
     const previewWindow = window.open('', '_blank');
     previewWindow.document.write(previewHTML);

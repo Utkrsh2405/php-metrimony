@@ -11,12 +11,26 @@ require_once("includes/dbconn.php");
 $user_id = $_SESSION['id'];
 
 // Get user's gender to search opposite gender by default
-$user_query = mysqli_query($conn, "SELECT gender FROM customer WHERE id = $user_id");
+$user_query = mysqli_query($conn, "SELECT c.gender FROM customer c WHERE c.id = $user_id");
 $user_data = mysqli_fetch_assoc($user_query);
 $default_gender = ($user_data['gender'] == 'Male') ? 'Female' : 'Male';
 
 // Get saved searches
 $saved_searches = mysqli_query($conn, "SELECT * FROM saved_searches WHERE user_id = $user_id ORDER BY is_default DESC, search_name");
+
+// Get all states for dropdown
+$states_query = mysqli_query($conn, "SELECT id, state_name, state_code FROM states WHERE status = 1 ORDER BY state_name");
+$states = [];
+while ($state = mysqli_fetch_assoc($states_query)) {
+    $states[] = $state;
+}
+
+// Get religions from castes table
+$religions_query = mysqli_query($conn, "SELECT DISTINCT religion FROM castes WHERE status = 1 AND religion IS NOT NULL AND religion != 'All Religions' ORDER BY religion");
+$religions = [];
+while ($rel = mysqli_fetch_assoc($religions_query)) {
+    $religions[] = $rel['religion'];
+}
 
 include("includes/header.php");
 ?>
@@ -203,15 +217,44 @@ include("includes/header.php");
                             <div class="col-md-6">
                                 <div class="form-group">
                                     <label>Religion</label>
-                                    <select name="religion" class="form-control">
+                                    <select name="religion" id="religion" class="form-control" onchange="loadCastes()">
                                         <option value="">Any</option>
-                                        <option value="Hindu">Hindu</option>
-                                        <option value="Muslim">Muslim</option>
-                                        <option value="Christian">Christian</option>
-                                        <option value="Sikh">Sikh</option>
-                                        <option value="Jain">Jain</option>
-                                        <option value="Buddhist">Buddhist</option>
-                                        <option value="Other">Other</option>
+                                        <?php foreach ($religions as $religion): ?>
+                                        <option value="<?= htmlspecialchars($religion) ?>"><?= htmlspecialchars($religion) ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Caste/Community</label>
+                                    <select name="caste" id="caste" class="form-control">
+                                        <option value="">Any</option>
+                                    </select>
+                                    <small class="text-muted">Select religion first to load castes</small>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>Mother Tongue</label>
+                                    <select name="mother_tongue" class="form-control">
+                                        <option value="">Any</option>
+                                        <option value="Hindi">Hindi</option>
+                                        <option value="English">English</option>
+                                        <option value="Telugu">Telugu</option>
+                                        <option value="Tamil">Tamil</option>
+                                        <option value="Malayalam">Malayalam</option>
+                                        <option value="Kannada">Kannada</option>
+                                        <option value="Marathi">Marathi</option>
+                                        <option value="Bengali">Bengali</option>
+                                        <option value="Gujarati">Gujarati</option>
+                                        <option value="Punjabi">Punjabi</option>
+                                        <option value="Odia">Odia</option>
+                                        <option value="Urdu">Urdu</option>
+                                        <option value="Assamese">Assamese</option>
+                                        <option value="Sanskrit">Sanskrit</option>
                                     </select>
                                 </div>
                             </div>
@@ -270,15 +313,46 @@ include("includes/header.php");
                                         <option value="0">0 - 2 Lakhs</option>
                                         <option value="200000">2 - 5 Lakhs</option>
                                         <option value="500000">5 - 10 Lakhs</option>
-                                        <option value="1000000">10+ Lakhs</option>
-                                        <option value="2000000">20+ Lakhs</option>
+                                        <option value="1000000">10 - 20 Lakhs</option>
+                                        <option value="2000000">20 - 50 Lakhs</option>
+                                        <option value="5000000">50+ Lakhs</option>
                                     </select>
                                 </div>
                             </div>
                             <div class="col-md-6">
                                 <div class="form-group">
-                                    <label>Location/City</label>
-                                    <input type="text" name="location" class="form-control" placeholder="City or State">
+                                    <label>Country</label>
+                                    <select name="country" class="form-control">
+                                        <option value="">Any</option>
+                                        <option value="India" selected>India</option>
+                                        <option value="USA">USA</option>
+                                        <option value="UK">UK</option>
+                                        <option value="Canada">Canada</option>
+                                        <option value="Australia">Australia</option>
+                                        <option value="UAE">UAE</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>State</label>
+                                    <select name="state" id="state" class="form-control" onchange="loadCities()">
+                                        <option value="">Any State</option>
+                                        <?php foreach ($states as $state): ?>
+                                        <option value="<?= $state['state_code'] ?>"><?= htmlspecialchars($state['state_name']) ?></option>
+                                        <?php endforeach; ?>
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label>City</label>
+                                    <select name="city" id="city" class="form-control">
+                                        <option value="">Any City</option>
+                                    </select>
+                                    <small class="text-muted">Select state first to load cities</small>
                                 </div>
                             </div>
                         </div>
@@ -335,6 +409,70 @@ $('#search-form').on('submit', function(e) {
     e.preventDefault();
     performSearch();
 });
+
+function loadCities() {
+    const stateCode = $('#state').val();
+    const citySelect = $('#city');
+    
+    if (!stateCode) {
+        citySelect.html('<option value="">Any City</option>');
+        return;
+    }
+    
+    citySelect.html('<option value="">Loading...</option>');
+    
+    $.ajax({
+        url: '/api/get-cities.php',
+        method: 'GET',
+        data: { state: stateCode },
+        success: function(response) {
+            if (response.success) {
+                let options = '<option value="">Any City</option>';
+                response.data.forEach(city => {
+                    options += `<option value="${city.city_name}">${city.city_name}</option>`;
+                });
+                citySelect.html(options);
+            } else {
+                citySelect.html('<option value="">Error loading cities</option>');
+            }
+        },
+        error: function() {
+            citySelect.html('<option value="">Error loading cities</option>');
+        }
+    });
+}
+
+function loadCastes() {
+    const religion = $('#religion').val();
+    const casteSelect = $('#caste');
+    
+    if (!religion) {
+        casteSelect.html('<option value="">Any</option>');
+        return;
+    }
+    
+    casteSelect.html('<option value="">Loading...</option>');
+    
+    $.ajax({
+        url: '/api/get-castes.php',
+        method: 'GET',
+        data: { religion: religion },
+        success: function(response) {
+            if (response.success) {
+                let options = '<option value="">Any</option>';
+                response.data.forEach(caste => {
+                    options += `<option value="${caste.caste_name}">${caste.caste_name}</option>`;
+                });
+                casteSelect.html(options);
+            } else {
+                casteSelect.html('<option value="">Error loading castes</option>');
+            }
+        },
+        error: function() {
+            casteSelect.html('<option value="">Error loading castes</option>');
+        }
+    });
+}
 
 function performSearch() {
     const formData = {};
