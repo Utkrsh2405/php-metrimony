@@ -27,9 +27,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
         $username = Security::sanitizeInput($_POST['username'] ?? '');
         $password = $_POST['password'] ?? '';
         
-        // Rate limiting - 5 attempts per 15 minutes
+        // Rate limiting - 100 attempts per 15 minutes
         $ip = $_SERVER['REMOTE_ADDR'];
-        if (!Security::checkRateLimit('admin_login_' . $ip, 5, 900)) {
+        if (!Security::checkRateLimit('admin_login_' . $ip, 100, 900)) {
             $error = 'Too many login attempts. Please try again in 15 minutes.';
             Security::logSecurityEvent($conn, 'admin_login_rate_limit', 'Admin login rate limit exceeded from IP: ' . $ip, null);
         } else {
@@ -89,7 +89,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST' && isset($_POST['login'])) {
 <link href="../css/font-awesome.css" rel="stylesheet"> 
 <style>
 body {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #c32143 0%, #2c3e50 100%);
     min-height: 100vh;
     display: flex;
     align-items: center;
@@ -105,7 +105,7 @@ body {
     width: 100%;
 }
 .login-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #c32143 0%, #901832 100%);
     color: #fff;
     padding: 30px;
     text-align: center;
@@ -140,8 +140,8 @@ body {
 }
 .form-control:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    border-color: #c32143;
+    box-shadow: 0 0 0 3px rgba(195, 33, 67, 0.1);
 }
 .input-icon {
     position: relative;
@@ -159,7 +159,7 @@ body {
 .btn-login {
     width: 100%;
     padding: 12px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #c32143 0%, #901832 100%);
     color: #fff;
     border: none;
     border-radius: 5px;
@@ -170,7 +170,7 @@ body {
 }
 .btn-login:hover {
     transform: translateY(-2px);
-    box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 5px 20px rgba(195, 33, 67, 0.4);
 }
 .alert {
     padding: 12px 15px;
@@ -192,7 +192,7 @@ body {
     margin-top: 20px;
 }
 .back-link a {
-    color: #667eea;
+    color: #c32143;
     text-decoration: none;
 }
 .back-link a:hover {

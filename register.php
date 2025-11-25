@@ -1,36 +1,10 @@
 <?php include_once("includes/basic_includes.php");?>
 <?php include_once("functions.php"); ?>
 <?php include_once("includes/dbconn.php"); ?>
+<?php include_once("includes/dropdown_options.php"); ?>
 <?php register(); ?>
 <?php
-// Fetch data from database for dropdowns
-$states_query = mysqli_query($conn, "SELECT id, name FROM states WHERE status = 1 ORDER BY name");
-$states = [];
-$states_map = [];
-while($state = mysqli_fetch_assoc($states_query)) {
-    $states[] = $state['name'];
-    $states_map[$state['name']] = $state['id'];
-}
-
-$cities_query = mysqli_query($conn, "SELECT name, state_id FROM cities WHERE status = 1 ORDER BY name");
-$cities_list = [];
-while($city = mysqli_fetch_assoc($cities_query)) {
-    $cities_list[] = $city;
-}
-
-$religions_query = mysqli_query($conn, "SELECT DISTINCT religion FROM castes WHERE status = 1 AND religion IS NOT NULL ORDER BY religion");
-$religions = [];
-while($rel = mysqli_fetch_assoc($religions_query)) {
-    if(!in_array($rel['religion'], $religions)) {
-        $religions[] = $rel['religion'];
-    }
-}
-
-$castes_query = mysqli_query($conn, "SELECT DISTINCT name, religion FROM castes WHERE status = 1 ORDER BY name");
-$castes_list = [];
-while($caste = mysqli_fetch_assoc($castes_query)) {
-    $castes_list[] = $caste;
-}
+// Data fetching moved to includes/dropdown_options.php
 ?>
 <!DOCTYPE HTML>
 <html>
@@ -273,7 +247,7 @@ $(document).ready(function(){
 		      <select id="edit-caste" name="caste" class="form-control" required>
 		        <option value="">--- Select Caste ---</option>
 		        <?php foreach($castes_list as $caste): ?>
-		        <option value="<?= htmlspecialchars($caste['name']) ?>" data-religion="<?= htmlspecialchars($caste['religion']) ?>"><?= htmlspecialchars($caste['name']) ?></option>
+		        <option value="<?= htmlspecialchars($caste['caste_name']) ?>" data-religion="<?= htmlspecialchars($caste['religion']) ?>"><?= htmlspecialchars($caste['caste_name']) ?></option>
 		        <?php endforeach; ?>
 		        <option value="Other">Other</option>
 		        <option value="Caste No Bar">Caste No Bar</option>
@@ -382,7 +356,7 @@ $(document).ready(function(){
 		      <select id="edit-city" name="city" class="form-control" required>
 		        <option value="">--- Select City ---</option>
 		        <?php foreach($cities_list as $city): ?>
-		        <option value="<?= htmlspecialchars($city['name']) ?>" data-state-id="<?= $city['state_id'] ?>"><?= htmlspecialchars($city['name']) ?></option>
+		        <option value="<?= htmlspecialchars($city['city_name']) ?>" data-state-id="<?= $city['state_id'] ?>"><?= htmlspecialchars($city['city_name']) ?></option>
 		        <?php endforeach; ?>
 		        <option value="Other">Other</option>
 		      </select>

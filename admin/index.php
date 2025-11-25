@@ -11,7 +11,7 @@
 
 <!-- Stat Cards -->
 <div class="row">
-    <div class="col-md-3">
+    <div class="col-md-3 col-sm-6">
         <div class="stat-card blue">
             <h3>Total Members</h3>
             <div class="number" id="total-members">
@@ -20,7 +20,7 @@
             <div class="change" id="member-growth"></div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-3 col-sm-6">
         <div class="stat-card green">
             <h3>Active Subscriptions</h3>
             <div class="number" id="active-subs">
@@ -29,7 +29,7 @@
             <div class="change">Current active plans</div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-3 col-sm-6">
         <div class="stat-card orange">
             <h3>Monthly Revenue</h3>
             <div class="number" id="monthly-revenue">
@@ -38,7 +38,7 @@
             <div class="change" id="revenue-growth"></div>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-3 col-sm-6">
         <div class="stat-card purple">
             <h3>Unread Messages</h3>
             <div class="number" id="unread-messages">
@@ -50,44 +50,46 @@
 </div>
 
 <!-- Secondary Stats -->
-<div class="row" style="margin-top: 20px;">
-    <div class="col-md-3">
+<div class="row" style="margin-top: 24px;">
+    <div class="col-md-3 col-sm-6">
         <div class="card">
-            <h4 style="margin-top: 0;">Pending Approvals</h4>
-            <h2 id="pending-approvals" style="color: #e74c3c;">-</h2>
-            <a href="members.php?filter=pending">View All</a>
+            <h4 style="margin-top: 0; color: #64748b; font-size: 0.9rem; text-transform: uppercase;">Pending Approvals</h4>
+            <h2 id="pending-approvals" style="color: var(--danger-color); margin: 10px 0;">-</h2>
+            <a href="members.php?filter=pending" class="btn btn-default btn-xs">View All</a>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-3 col-sm-6">
         <div class="card">
-            <h4 style="margin-top: 0;">Pending Interests</h4>
-            <h2 id="pending-interests" style="color: #f39c12;">-</h2>
-            <a href="interest-logs.php?status=pending">View All</a>
+            <h4 style="margin-top: 0; color: #64748b; font-size: 0.9rem; text-transform: uppercase;">Pending Interests</h4>
+            <h2 id="pending-interests" style="color: var(--warning-color); margin: 10px 0;">-</h2>
+            <a href="interest-logs.php?status=pending" class="btn btn-default btn-xs">View All</a>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-3 col-sm-6">
         <div class="card">
-            <h4 style="margin-top: 0;">Active Members</h4>
-            <h2 id="active-members" style="color: #27ae60;">-</h2>
-            <small>Last 30 days</small>
+            <h4 style="margin-top: 0; color: #64748b; font-size: 0.9rem; text-transform: uppercase;">Active Members</h4>
+            <h2 id="active-members" style="color: var(--success-color); margin: 10px 0;">-</h2>
+            <small class="text-muted">Last 30 days</small>
         </div>
     </div>
-    <div class="col-md-3">
+    <div class="col-md-3 col-sm-6">
         <div class="card">
-            <h4 style="margin-top: 0;">New This Week</h4>
-            <h2 id="new-week" style="color: #3498db;">-</h2>
-            <small>New registrations</small>
+            <h4 style="margin-top: 0; color: #64748b; font-size: 0.9rem; text-transform: uppercase;">New This Week</h4>
+            <h2 id="new-week" style="color: var(--primary-color); margin: 10px 0;">-</h2>
+            <small class="text-muted">New registrations</small>
         </div>
     </div>
 </div>
 
 <!-- Charts and Tables Row -->
-<div class="row" style="margin-top: 20px;">
+<div class="row" style="margin-top: 24px;">
     <!-- Plan Distribution -->
     <div class="col-md-6">
         <div class="card">
-            <h4 style="margin-top: 0;"><i class="fa fa-pie-chart"></i> Plan Distribution</h4>
-            <div id="plan-distribution">
+            <h4 style="margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px;">
+                <i class="fa fa-pie-chart"></i> Plan Distribution
+            </h4>
+            <div id="plan-distribution" class="admin-table">
                 <p style="text-align: center; padding: 40px; color: #95a5a6;">
                     <i class="fa fa-spinner fa-spin fa-2x"></i><br>
                     Loading...
@@ -99,7 +101,9 @@
     <!-- Recent Registrations -->
     <div class="col-md-6">
         <div class="card">
-            <h4 style="margin-top: 0;"><i class="fa fa-users"></i> Recent Registrations</h4>
+            <h4 style="margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px;">
+                <i class="fa fa-users"></i> Recent Registrations
+            </h4>
             <div class="admin-table" id="recent-registrations">
                 <p style="text-align: center; padding: 40px; color: #95a5a6;">
                     <i class="fa fa-spinner fa-spin fa-2x"></i><br>
@@ -111,10 +115,12 @@
 </div>
 
 <!-- Recent Payments -->
-<div class="row" style="margin-top: 20px;">
+<div class="row" style="margin-top: 24px;">
     <div class="col-md-12">
         <div class="card">
-            <h4 style="margin-top: 0;"><i class="fa fa-money"></i> Recent Payments</h4>
+            <h4 style="margin-top: 0; margin-bottom: 20px; border-bottom: 1px solid #f1f5f9; padding-bottom: 15px;">
+                <i class="fa fa-money"></i> Recent Payments
+            </h4>
             <div class="admin-table" id="recent-payments">
                 <p style="text-align: center; padding: 40px; color: #95a5a6;">
                     <i class="fa fa-spinner fa-spin fa-2x"></i><br>
@@ -176,8 +182,8 @@ function loadMetrics() {
                 let html = '<table><tbody>';
                 data.recent_registrations.forEach(reg => {
                     html += '<tr>';
-                    html += '<td><strong>' + reg.name + '</strong><br><small>' + reg.email + '</small></td>';
-                    html += '<td style="text-align: right;"><small>' + reg.date + '</small></td>';
+                    html += '<td><strong>' + reg.name + '</strong><br><small class="text-muted">' + reg.email + '</small></td>';
+                    html += '<td style="text-align: right;"><small class="text-muted">' + reg.date + '</small></td>';
                     html += '</tr>';
                 });
                 html += '</tbody></table>';
@@ -196,10 +202,10 @@ function loadMetrics() {
                                        payment.status === 'pending' ? 'warning' : 'danger';
                     html += '<tr>';
                     html += '<td>#' + payment.id + '</td>';
-                    html += '<td>' + payment.username + '<br><small>' + payment.email + '</small></td>';
+                    html += '<td>' + payment.username + '<br><small class="text-muted">' + payment.email + '</small></td>';
                     html += '<td><strong>' + payment.currency + ' ' + payment.amount + '</strong></td>';
                     html += '<td><span class="badge badge-' + statusClass + '">' + payment.status + '</span></td>';
-                    html += '<td><small>' + payment.created_at + '</small></td>';
+                    html += '<td><small class="text-muted">' + payment.created_at + '</small></td>';
                     html += '</tr>';
                 });
                 html += '</tbody></table>';

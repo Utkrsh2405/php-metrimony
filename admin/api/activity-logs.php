@@ -12,13 +12,13 @@ require_once("../../includes/activity-logger.php");
 
 // Check admin role
 $user_id = intval($_SESSION['id']);
-$role_check = mysqli_query($conn, "SELECT role FROM users WHERE id = $user_id LIMIT 1");
+$role_check = mysqli_query($conn, "SELECT userlevel FROM users WHERE id = $user_id LIMIT 1");
 if (!$role_check || mysqli_num_rows($role_check) === 0) {
     echo json_encode(['success' => false, 'error' => 'Unauthorized']);
     exit();
 }
 $user = mysqli_fetch_assoc($role_check);
-if ($user['role'] !== 'admin') {
+if ($user['userlevel'] != 1) {
     echo json_encode(['success' => false, 'error' => 'Access denied']);
     exit();
 }
@@ -38,7 +38,7 @@ if ($method === 'GET') {
             exit();
         }
         
-        $query = "SELECT l.*, u.name as admin_name, u.email as admin_email
+        $query = "SELECT l.*, u.username as admin_name, u.email as admin_email
             FROM admin_activity_logs l
             LEFT JOIN users u ON l.admin_id = u.id
             WHERE l.id = $id LIMIT 1";
@@ -75,7 +75,7 @@ if ($method === 'GET') {
     
     $where_sql = count($where) > 0 ? 'WHERE ' . implode(' AND ', $where) : '';
     
-    $query = "SELECT l.*, u.name as admin_name, u.email as admin_email
+    $query = "SELECT l.*, u.username as admin_name, u.email as admin_email
         FROM admin_activity_logs l
         LEFT JOIN users u ON l.admin_id = u.id
         $where_sql

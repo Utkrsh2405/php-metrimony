@@ -57,7 +57,13 @@
 		              </ul>
 		            </li>
 		            <li><a href="plans.php">Pricing</a></li>
-		            <li class="last"><a href="contact.php">Contacts</a></li>
+		            <li><a href="contact.php">Contacts</a></li>
+                    <?php if(!isloggedin()): ?>
+                        <li><a href="login.php">Login</a></li>
+                        <li class="last"><a href="register.php">Signup</a></li>
+                    <?php else: ?>
+                        <li><a href="logout.php">Logout</a></li>
+                    <?php endif; ?>
 		        </ul>
 		     </div><!-- /.navbar-collapse -->
 		    </nav>

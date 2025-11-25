@@ -10,18 +10,18 @@ require_once("../includes/dbconn.php");
 
 // Check admin role
 $user_id = intval($_SESSION['id']);
-$role_check = mysqli_query($conn, "SELECT role FROM users WHERE id = $user_id LIMIT 1");
+$role_check = mysqli_query($conn, "SELECT userlevel FROM users WHERE id = $user_id LIMIT 1");
 if (!$role_check || mysqli_num_rows($role_check) === 0) {
     header("Location: /login.php");
     exit();
 }
 $user = mysqli_fetch_assoc($role_check);
-if ($user['role'] !== 'admin') {
+if ($user['userlevel'] != 1) {
     header("Location: /index.php");
     exit();
 }
 
-include("includes/header.php");
+include("../includes/admin-header.php");
 ?>
 
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
@@ -311,4 +311,4 @@ function deleteInterest(interestId) {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
 
-<?php include("includes/footer.php"); ?>
+<?php include("../includes/admin-footer.php"); ?>

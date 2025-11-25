@@ -19,9 +19,9 @@ if (empty($myusername) || empty($mypassword)) {
     exit();
 }
 
-// Rate limiting - 10 attempts per 15 minutes for users
+// Rate limiting - 100 attempts per 15 minutes for users
 $ip = $_SERVER['REMOTE_ADDR'];
-if (!Security::checkRateLimit('user_login_' . $ip, 10, 900)) {
+if (!Security::checkRateLimit('user_login_' . $ip, 100, 900)) {
     $_SESSION['login_error'] = 'Too many login attempts. Please try again in 15 minutes.';
     Security::logSecurityEvent('user_login_rate_limit', 'User login rate limit exceeded', null, $ip);
     header('Location: ../login.php');

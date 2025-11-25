@@ -420,7 +420,21 @@ $search_by = $sections['search_by'] ?? null;
         <h2 class="section-title">Featured Profile</h2>
         <div class="profile-slider">
             <?php
-            $sql = "SELECT * FROM customer ORDER BY cust_id DESC LIMIT 12";
+            // Get user's gender to show opposite gender profiles
+            $featured_gender_filter = "";
+            if(isset($_SESSION['id'])) {
+                $logged_user_id = $_SESSION['id'];
+                $gender_sql = "SELECT sex FROM customer WHERE cust_id = $logged_user_id";
+                $gender_result = mysqlexec($gender_sql);
+                if($gender_result && mysqli_num_rows($gender_result) > 0) {
+                    $gender_row = mysqli_fetch_assoc($gender_result);
+                    $user_gender = $gender_row['sex'];
+                    // Show opposite gender
+                    $opposite_gender = ($user_gender == 'Male') ? 'Female' : 'Male';
+                    $featured_gender_filter = "WHERE sex = '$opposite_gender'";
+                }
+            }
+            $sql = "SELECT * FROM customer $featured_gender_filter ORDER BY cust_id DESC LIMIT 12";
             $result = mysqlexec($sql);
             if($result && mysqli_num_rows($result) > 0) {
                 while($row = mysqli_fetch_assoc($result)) {
@@ -466,7 +480,21 @@ $search_by = $sections['search_by'] ?? null;
             <h2 class="section-title"><?php echo htmlspecialchars($bride_groom['section_title']); ?></h2>
             <div class="profile-slider">
                 <?php
-                $featured_sql = "SELECT * FROM customer ORDER BY cust_id DESC LIMIT 12";
+                // Get user's gender to show opposite gender profiles
+                $bg_gender_filter = "";
+                if(isset($_SESSION['id'])) {
+                    $logged_user_id = $_SESSION['id'];
+                    $bg_gender_sql = "SELECT sex FROM customer WHERE cust_id = $logged_user_id";
+                    $bg_gender_result = mysqlexec($bg_gender_sql);
+                    if($bg_gender_result && mysqli_num_rows($bg_gender_result) > 0) {
+                        $bg_gender_row = mysqli_fetch_assoc($bg_gender_result);
+                        $bg_user_gender = $bg_gender_row['sex'];
+                        // Show opposite gender
+                        $bg_opposite_gender = ($bg_user_gender == 'Male') ? 'Female' : 'Male';
+                        $bg_gender_filter = "WHERE sex = '$bg_opposite_gender'";
+                    }
+                }
+                $featured_sql = "SELECT * FROM customer $bg_gender_filter ORDER BY cust_id DESC LIMIT 12";
                 $featured_result = mysqlexec($featured_sql);
                 if($featured_result && mysqli_num_rows($featured_result) > 0) {
                     while($profile = mysqli_fetch_assoc($featured_result)) {

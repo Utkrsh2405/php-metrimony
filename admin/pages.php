@@ -18,50 +18,50 @@ if (mysqli_num_rows($check_admin) == 0) {
 include("../includes/admin-header.php");
 ?>
 
-<div class="admin-content">
-    <h1>CMS Pages Management</h1>
-    <p class="text-muted">Create and manage content pages</p>
-    
-    <div class="row" style="margin-bottom: 15px;">
-        <div class="col-md-6">
-            <a href="page-edit.php" class="btn btn-primary">
-                <i class="fa fa-plus"></i> Add New Page
-            </a>
+<div class="admin-content-inner">
+    <div class="page-header">
+        <div>
+            <h2><i class="fa fa-file-text"></i> CMS Pages</h2>
+            <p class="text-muted" style="margin-top: 5px;">Create and manage content pages</p>
         </div>
-        <div class="col-md-6">
-            <div class="row">
-                <div class="col-md-6">
+        <a href="page-edit.php" class="btn btn-primary">
+            <i class="fa fa-plus"></i> Add New Page
+        </a>
+    </div>
+    
+    <div class="card">
+        <div class="card-body">
+            <div class="row" style="margin-bottom: 20px;">
+                <div class="col-md-3">
                     <select id="status-filter" class="form-control">
                         <option value="">All Status</option>
                         <option value="published">Published</option>
                         <option value="draft">Draft</option>
                     </select>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-4">
                     <input type="text" id="search" class="form-control" placeholder="Search pages...">
                 </div>
             </div>
-        </div>
-    </div>
-    
-    <div class="card">
-        <div class="card-body">
-            <table class="table table-striped table-hover">
-                <thead>
-                    <tr>
-                        <th>Title</th>
-                        <th>Slug</th>
-                        <th>Status</th>
-                        <th>Views</th>
-                        <th>Author</th>
-                        <th>Updated</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="pages-tbody">
-                    <tr><td colspan="7" class="text-center">Loading...</td></tr>
-                </tbody>
-            </table>
+            
+            <div class="table-responsive admin-table">
+                <table class="table table-hover">
+                    <thead>
+                        <tr>
+                            <th>Title</th>
+                            <th>Slug</th>
+                            <th>Status</th>
+                            <th>Views</th>
+                            <th>Author</th>
+                            <th>Updated</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pages-tbody">
+                        <tr><td colspan="7" class="text-center">Loading...</td></tr>
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
 </div>
@@ -105,22 +105,24 @@ function renderPages(pages) {
         
         tbody.append(`
             <tr>
-                <td>${featured}${page.title}</td>
+                <td>${featured}<strong>${page.title}</strong></td>
                 <td><code>${page.slug}</code></td>
                 <td>${status}</td>
                 <td><span class="badge">${page.view_count || 0}</span></td>
                 <td>${page.author || 'System'}</td>
                 <td>${updated}</td>
                 <td>
-                    <a href="page-edit.php?id=${page.id}" class="btn btn-xs btn-primary">
-                        <i class="fa fa-edit"></i> Edit
-                    </a>
-                    <a href="/page.php?slug=${page.slug}" target="_blank" class="btn btn-xs btn-info">
-                        <i class="fa fa-eye"></i> View
-                    </a>
-                    <button class="btn btn-xs btn-danger" onclick="deletePage(${page.id})">
-                        <i class="fa fa-trash"></i>
-                    </button>
+                    <div class="btn-group btn-group-xs">
+                        <a href="page-edit.php?id=${page.id}" class="btn btn-primary" title="Edit">
+                            <i class="fa fa-edit"></i>
+                        </a>
+                        <a href="/page.php?slug=${page.slug}" target="_blank" class="btn btn-info" title="View">
+                            <i class="fa fa-eye"></i>
+                        </a>
+                        <button class="btn btn-danger" onclick="deletePage(${page.id})" title="Delete">
+                            <i class="fa fa-trash"></i>
+                        </button>
+                    </div>
                 </td>
             </tr>
         `);

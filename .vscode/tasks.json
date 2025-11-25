@@ -1,0 +1,18 @@
+{
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "Run PHP Server",
+            "type": "shell",
+            "command": "sudo service mariadb start && php -S 0.0.0.0:8080 -t .",
+            "isBackground": true,
+            "problemMatcher": [
+                "$php"
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        }
+    ]
+}

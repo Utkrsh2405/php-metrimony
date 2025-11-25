@@ -11,13 +11,13 @@ require_once("../../includes/dbconn.php");
 
 // Check admin role
 $user_id = intval($_SESSION['id']);
-$role_check = mysqli_query($conn, "SELECT role FROM users WHERE id = $user_id LIMIT 1");
+$role_check = mysqli_query($conn, "SELECT userlevel FROM users WHERE id = $user_id LIMIT 1");
 if (!$role_check || mysqli_num_rows($role_check) === 0) {
     echo json_encode(['success' => false, 'error' => 'Unauthorized']);
     exit();
 }
 $user = mysqli_fetch_assoc($role_check);
-if ($user['role'] !== 'admin') {
+if ($user['userlevel'] != 1) {
     echo json_encode(['success' => false, 'error' => 'Access denied']);
     exit();
 }
@@ -74,8 +74,8 @@ if ($method === 'GET') {
         }
         
         $query = "SELECT m.*,
-            u1.name as from_name,
-            u2.name as to_name
+            u1.username as from_name,
+            u2.username as to_name
             FROM messages m
             LEFT JOIN users u1 ON m.from_user_id = u1.id
             LEFT JOIN users u2 ON m.to_user_id = u2.id
@@ -114,8 +114,8 @@ if ($method === 'GET') {
     $where_sql = count($where) > 0 ? 'WHERE ' . implode(' AND ', $where) : '';
     
     $query = "SELECT m.*,
-        u1.name as from_name,
-        u2.name as to_name
+        u1.username as from_name,
+        u2.username as to_name
         FROM messages m
         LEFT JOIN users u1 ON m.from_user_id = u1.id
         LEFT JOIN users u2 ON m.to_user_id = u2.id

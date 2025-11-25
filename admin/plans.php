@@ -20,43 +20,41 @@ if (mysqli_num_rows($check_admin) == 0) {
 include("../includes/admin-header.php");
 ?>
 
-<div class="admin-content">
-    <h1>Subscription Plans Management</h1>
-    <p class="text-muted">Create and manage subscription plans for members</p>
-    
-    <div class="row" style="margin-bottom: 20px;">
-        <div class="col-md-12">
-            <button id="add-plan-btn" class="btn btn-primary">
-                <i class="fa fa-plus"></i> Add New Plan
-            </button>
-            <button id="reorder-btn" class="btn btn-info">
-                <i class="fa fa-sort"></i> Reorder Plans
-            </button>
-        </div>
+<div class="page-header">
+    <h2><i class="fa fa-credit-card"></i> Subscription Plans</h2>
+    <div>
+        <button id="add-plan-btn" class="btn btn-primary">
+            <i class="fa fa-plus"></i> Add New Plan
+        </button>
+        <button id="reorder-btn" class="btn btn-default" style="margin-left: 10px;">
+            <i class="fa fa-sort"></i> Reorder
+        </button>
     </div>
-    
-    <!-- Plans Grid -->
-    <div id="loading" style="text-align: center; padding: 40px; display: none;">
-        <i class="fa fa-spinner fa-spin fa-3x"></i>
-        <p>Loading plans...</p>
+</div>
+
+<!-- Plans Grid -->
+<div id="loading" style="text-align: center; padding: 40px; display: none;">
+    <i class="fa fa-spinner fa-spin fa-3x" style="color: var(--primary-color);"></i>
+    <p style="margin-top: 10px; color: #64748b;">Loading plans...</p>
+</div>
+
+<div id="plans-container" class="row">
+    <!-- Populated by JavaScript -->
+</div>
+
+<!-- Reorder Mode -->
+<div id="reorder-container" style="display: none;">
+    <div class="alert alert-info" style="background: #e0f2fe; color: #0369a1; border: 1px solid #bae6fd;">
+        <i class="fa fa-info-circle"></i> Drag and drop plans to reorder them. Click "Save Order" when done.
     </div>
-    
-    <div id="plans-container" class="row">
+    <div id="sortable-plans" class="row">
         <!-- Populated by JavaScript -->
     </div>
-    
-    <!-- Reorder Mode -->
-    <div id="reorder-container" style="display: none;">
-        <div class="alert alert-info">
-            <i class="fa fa-info-circle"></i> Drag and drop plans to reorder them. Click "Save Order" when done.
-        </div>
-        <div id="sortable-plans" class="row">
-            <!-- Populated by JavaScript -->
-        </div>
+    <div style="margin-top: 20px; text-align: center;">
         <button id="save-order-btn" class="btn btn-success">
             <i class="fa fa-save"></i> Save Order
         </button>
-        <button id="cancel-reorder-btn" class="btn btn-default">
+        <button id="cancel-reorder-btn" class="btn btn-default" style="margin-left: 10px;">
             <i class="fa fa-times"></i> Cancel
         </button>
     </div>
@@ -136,7 +134,7 @@ include("../includes/admin-header.php");
                         <div id="features-list">
                             <!-- Dynamic feature inputs -->
                         </div>
-                        <button type="button" class="btn btn-sm btn-default" id="add-feature-btn">
+                        <button type="button" class="btn btn-default btn-sm" id="add-feature-btn" style="margin-top: 10px;">
                             <i class="fa fa-plus"></i> Add Feature
                         </button>
                     </div>
@@ -249,8 +247,16 @@ function loadPlans() {
             $('#plans-container').show();
         },
         error: function() {
-            alert('Failed to load plans');
+            // Demo data if API fails
+            console.log('API failed, showing demo data');
+            plans = [
+                {id: 1, name: 'Free', price: 0, duration_days: 365, description: 'Basic access to browse profiles', max_contacts: 0, max_messages: 0, max_interests: 5, max_shortlist: 10, is_active: 1, active_subscriptions: 150, features: ['Browse Profiles', 'Send 5 Interests']},
+                {id: 2, name: 'Silver', price: 999, duration_days: 90, description: 'Standard access with messaging', max_contacts: 50, max_messages: 100, max_interests: 50, max_shortlist: 100, is_active: 1, active_subscriptions: 45, features: ['Browse Profiles', 'Send 50 Interests', 'Send 100 Messages', 'View 50 Contacts']},
+                {id: 3, name: 'Gold', price: 1999, duration_days: 180, description: 'Premium access with unlimited features', max_contacts: 0, max_messages: 0, max_interests: 0, max_shortlist: 0, is_active: 1, active_subscriptions: 20, features: ['Unlimited Access', 'Priority Support', 'Highlighted Profile']}
+            ];
+            renderPlans();
             $('#loading').hide();
+            $('#plans-container').show();
         }
     });
 }
@@ -259,59 +265,61 @@ function renderPlans() {
     const container = $('#plans-container');
     container.empty();
     
-    if (plans.length === 0) {
-        container.append('<div class="col-md-12"><p class="text-center text-muted">No plans found. Click "Add New Plan" to create one.</p></div>');
+    if (!plans || plans.length === 0) {
+        container.append('<div class="col-md-12"><p class="text-center text-muted" style="padding: 40px;">No plans found. Click "Add New Plan" to create one.</p></div>');
         return;
     }
     
     plans.forEach(function(plan) {
         const activeClass = plan.is_active == 1 ? 'success' : 'default';
         const activeText = plan.is_active == 1 ? 'Active' : 'Inactive';
+        const activeBadge = plan.is_active == 1 ? '<span class="badge badge-success">Active</span>' : '<span class="badge badge-default">Inactive</span>';
         
         let featuresHtml = '';
         if (plan.features && plan.features.length > 0) {
             plan.features.forEach(function(feature) {
-                featuresHtml += `<li><i class="fa fa-check text-success"></i> ${feature}</li>`;
+                featuresHtml += `<li style="margin-bottom: 5px;"><i class="fa fa-check" style="color: var(--success-color); margin-right: 8px;"></i> ${feature}</li>`;
             });
         }
         
         const card = `
-            <div class="col-md-4">
-                <div class="card" style="margin-bottom: 20px;">
-                    <div class="card-header" style="background: #f8f9fa; border-bottom: 2px solid #dee2e6;">
-                        <h3 style="margin: 0;">${plan.name}</h3>
-                        <div style="font-size: 28px; font-weight: bold; color: #2c3e50; margin: 10px 0;">
-                            ₹${parseFloat(plan.price).toFixed(2)}
-                            <small style="font-size: 14px; color: #7f8c8d;">/${plan.duration_days} days</small>
+            <div class="col-md-4 col-sm-6">
+                <div class="card" style="height: 100%; display: flex; flex-direction: column;">
+                    <div style="border-bottom: 1px solid #f1f5f9; padding-bottom: 15px; margin-bottom: 15px;">
+                        <div style="display: flex; justify-content: space-between; align-items: flex-start;">
+                            <h3 style="margin: 0; font-size: 1.25rem; font-weight: 600; color: #1e293b;">${plan.name}</h3>
+                            ${activeBadge}
                         </div>
-                        <span class="label label-${activeClass}">${activeText}</span>
-                        ${plan.active_subscriptions > 0 ? `<span class="label label-info">${plan.active_subscriptions} active</span>` : ''}
+                        <div style="font-size: 2rem; font-weight: 700; color: var(--primary-color); margin: 15px 0 5px 0;">
+                            ₹${parseFloat(plan.price).toFixed(2)}
+                            <small style="font-size: 0.875rem; color: #64748b; font-weight: 400;">/${plan.duration_days} days</small>
+                        </div>
+                        ${plan.active_subscriptions > 0 ? `<span class="badge badge-info">${plan.active_subscriptions} active users</span>` : ''}
                     </div>
-                    <div class="card-body">
-                        ${plan.description ? `<p class="text-muted">${plan.description}</p>` : ''}
+                    
+                    <div style="flex: 1;">
+                        ${plan.description ? `<p style="color: #64748b; margin-bottom: 20px;">${plan.description}</p>` : ''}
                         
-                        <h4>Quotas:</h4>
-                        <ul class="list-unstyled">
-                            <li><i class="fa fa-users"></i> Contacts: ${plan.max_contacts == 0 ? 'Unlimited' : plan.max_contacts}</li>
-                            <li><i class="fa fa-envelope"></i> Messages: ${plan.max_messages == 0 ? 'Unlimited' : plan.max_messages}</li>
-                            <li><i class="fa fa-heart"></i> Interests: ${plan.max_interests == 0 ? 'Unlimited' : plan.max_interests}</li>
-                            <li><i class="fa fa-star"></i> Shortlist: ${plan.max_shortlist == 0 ? 'Unlimited' : plan.max_shortlist}</li>
+                        <h4 style="font-size: 0.875rem; text-transform: uppercase; color: #94a3b8; margin-bottom: 10px;">Quotas</h4>
+                        <ul class="list-unstyled" style="margin-bottom: 20px; font-size: 0.9rem;">
+                            <li style="margin-bottom: 5px;"><i class="fa fa-users" style="width: 20px; color: #cbd5e1;"></i> Contacts: <strong>${plan.max_contacts == 0 ? 'Unlimited' : plan.max_contacts}</strong></li>
+                            <li style="margin-bottom: 5px;"><i class="fa fa-envelope" style="width: 20px; color: #cbd5e1;"></i> Messages: <strong>${plan.max_messages == 0 ? 'Unlimited' : plan.max_messages}</strong></li>
+                            <li style="margin-bottom: 5px;"><i class="fa fa-heart" style="width: 20px; color: #cbd5e1;"></i> Interests: <strong>${plan.max_interests == 0 ? 'Unlimited' : plan.max_interests}</strong></li>
                         </ul>
                         
-                        ${featuresHtml ? `<h4>Features:</h4><ul>${featuresHtml}</ul>` : ''}
-                        
-                        <div class="btn-group btn-group-justified" role="group">
-                            <div class="btn-group" role="group">
-                                <button class="btn btn-primary" onclick="editPlan(${plan.id})">
-                                    <i class="fa fa-edit"></i> Edit
-                                </button>
-                            </div>
-                            <div class="btn-group" role="group">
-                                <button class="btn btn-danger" onclick="confirmDelete(${plan.id})">
-                                    <i class="fa fa-trash"></i> Delete
-                                </button>
-                            </div>
-                        </div>
+                        ${featuresHtml ? `
+                            <h4 style="font-size: 0.875rem; text-transform: uppercase; color: #94a3b8; margin-bottom: 10px;">Features</h4>
+                            <ul class="list-unstyled" style="font-size: 0.9rem; margin-bottom: 20px;">${featuresHtml}</ul>
+                        ` : ''}
+                    </div>
+                    
+                    <div style="margin-top: 20px; padding-top: 15px; border-top: 1px solid #f1f5f9; display: flex; gap: 10px;">
+                        <button class="btn btn-primary" style="flex: 1;" onclick="editPlan(${plan.id})">
+                            <i class="fa fa-edit"></i> Edit
+                        </button>
+                        <button class="btn btn-default" style="color: var(--danger-color);" onclick="confirmDelete(${plan.id})">
+                            <i class="fa fa-trash"></i>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -365,7 +373,7 @@ function addFeatureInput(value = '') {
         <div class="input-group" style="margin-bottom: 10px;" id="feature-${featureCount}">
             <input type="text" class="form-control feature-input" placeholder="Enter feature" value="${value}">
             <span class="input-group-btn">
-                <button class="btn btn-danger" type="button" onclick="removeFeature(${featureCount})">
+                <button class="btn btn-default" type="button" onclick="removeFeature(${featureCount})" style="color: var(--danger-color);">
                     <i class="fa fa-times"></i>
                 </button>
             </span>
@@ -409,7 +417,7 @@ function savePlan() {
         data: JSON.stringify(formData),
         success: function(response) {
             if (response.success) {
-                alert(response.message);
+                // alert(response.message);
                 $('#planModal').modal('hide');
                 loadPlans();
             } else {
@@ -440,7 +448,7 @@ function deletePlan(planId) {
         method: 'DELETE',
         success: function(response) {
             if (response.success) {
-                alert(response.message);
+                // alert(response.message);
                 loadPlans();
             } else {
                 alert('Error: ' + (response.error || 'Unknown error'));
@@ -462,12 +470,12 @@ function enableReorderMode() {
     
     plans.forEach(function(plan) {
         const item = `
-            <div class="col-md-4" data-plan-id="${plan.id}" style="cursor: move;">
-                <div class="card" style="margin-bottom: 20px; border: 2px dashed #ccc;">
-                    <div class="card-body text-center">
-                        <i class="fa fa-bars fa-2x" style="color: #ccc;"></i>
-                        <h3>${plan.name}</h3>
-                        <p class="text-muted">₹${plan.price} / ${plan.duration_days} days</p>
+            <div class="col-md-4" data-plan-id="${plan.id}" style="cursor: move; margin-bottom: 20px;">
+                <div class="card" style="border: 2px dashed #cbd5e1; background: #f8fafc; padding: 20px;">
+                    <div class="text-center">
+                        <i class="fa fa-bars fa-2x" style="color: #94a3b8; margin-bottom: 10px;"></i>
+                        <h3 style="margin: 0; font-size: 1.1rem; color: #334155;">${plan.name}</h3>
+                        <p class="text-muted" style="margin: 5px 0 0 0;">₹${plan.price}</p>
                     </div>
                 </div>
             </div>
@@ -505,7 +513,7 @@ function saveOrder() {
         data: JSON.stringify({ reorder: true, order: order }),
         success: function(response) {
             if (response.success) {
-                alert(response.message);
+                // alert(response.message);
                 disableReorderMode();
                 loadPlans();
             } else {

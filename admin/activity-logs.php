@@ -1,190 +1,133 @@
 <?php
 session_start();
 
-if (!isset($_SESSION['id'])) {
-    header("Location: /login.php");
-    exit();
-}
+// Auth check is handled in admin-header.php
 
 require_once("../includes/dbconn.php");
 require_once("../includes/activity-logger.php");
 
-// Check admin role
-$user_id = intval($_SESSION['id']);
-$role_check = mysqli_query($conn, "SELECT role FROM users WHERE id = $user_id LIMIT 1");
-if (!$role_check || mysqli_num_rows($role_check) === 0) {
-    header("Location: /login.php");
-    exit();
-}
-$user = mysqli_fetch_assoc($role_check);
-if ($user['role'] !== 'admin') {
-    header("Location: /index.php");
-    exit();
-}
-
 $logger = getActivityLogger($conn);
 $stats = $logger->getStats();
 
-include("includes/header.php");
+include("../includes/admin-header.php");
 ?>
 
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-<style>
-.page-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    color: white;
-    padding: 30px;
-    border-radius: 8px;
-    margin-bottom: 30px;
-}
-.stats-row {
-    margin-bottom: 30px;
-}
-.stat-card {
-    background: white;
-    border-radius: 8px;
-    padding: 20px;
-    text-align: center;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-}
-.stat-value {
-    font-size: 36px;
-    font-weight: bold;
-    color: #667eea;
-    margin: 10px 0;
-}
-.filter-section {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
-}
-.logs-table {
-    background: white;
-    border-radius: 8px;
-    overflow: hidden;
-}
-.action-badge {
-    padding: 4px 10px;
-    border-radius: 12px;
-    font-size: 11px;
-    font-weight: bold;
-    text-transform: uppercase;
-}
-.action-create { background: #d4edda; color: #155724; }
-.action-update { background: #cce5ff; color: #004085; }
-.action-delete { background: #f8d7da; color: #721c24; }
-.action-verify_photo { background: #fff3cd; color: #856404; }
-.action-approve { background: #d1ecf1; color: #0c5460; }
-.action-reject { background: #f5c6cb; color: #721c24; }
-</style>
-
-<div class="container-fluid">
-    <div class="page-header">
+<div class="admin-content-inner">
+    <div class="page-header-custom">
         <h1><i class="fa fa-history"></i> Admin Activity Logs</h1>
-        <p style="margin: 10px 0 0 0;">Comprehensive audit trail of all admin actions</p>
+        <p class="text-muted">Comprehensive audit trail of all admin actions</p>
     </div>
     
     <!-- Statistics -->
-    <div class="row stats-row">
+    <div class="row stats-row" style="margin-bottom: 30px;">
         <div class="col-md-3">
-            <div class="stat-card">
-                <i class="fa fa-list" style="font-size: 48px; color: #667eea;"></i>
-                <div class="stat-value"><?php echo number_format($stats['total']); ?></div>
-                <div>Total Actions</div>
+            <div class="stat-card blue">
+                <i class="fa fa-list" style="font-size: 32px; float: right; opacity: 0.3;"></i>
+                <h3>Total Actions</h3>
+                <div class="number"><?php echo number_format($stats['total']); ?></div>
+                <p class="text-muted">All time</p>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="stat-card">
-                <i class="fa fa-calendar-o" style="font-size: 48px; color: #4caf50;"></i>
-                <div class="stat-value" style="color: #4caf50;"><?php echo number_format($stats['today']); ?></div>
-                <div>Today</div>
+            <div class="stat-card green">
+                <i class="fa fa-calendar-o" style="font-size: 32px; float: right; opacity: 0.3;"></i>
+                <h3>Today</h3>
+                <div class="number"><?php echo number_format($stats['today']); ?></div>
+                <p class="text-muted">Actions today</p>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="stat-card">
-                <i class="fa fa-calendar-check-o" style="font-size: 48px; color: #ffc107;"></i>
-                <div class="stat-value" style="color: #ffc107;"><?php echo number_format($stats['this_week']); ?></div>
-                <div>This Week</div>
+            <div class="stat-card orange">
+                <i class="fa fa-calendar-check-o" style="font-size: 32px; float: right; opacity: 0.3;"></i>
+                <h3>This Week</h3>
+                <div class="number"><?php echo number_format($stats['this_week']); ?></div>
+                <p class="text-muted">Actions this week</p>
             </div>
         </div>
         <div class="col-md-3">
-            <div class="stat-card">
-                <i class="fa fa-calendar" style="font-size: 48px; color: #2196f3;"></i>
-                <div class="stat-value" style="color: #2196f3;"><?php echo number_format($stats['this_month']); ?></div>
-                <div>This Month</div>
+            <div class="stat-card purple">
+                <i class="fa fa-calendar" style="font-size: 32px; float: right; opacity: 0.3;"></i>
+                <h3>This Month</h3>
+                <div class="number"><?php echo number_format($stats['this_month']); ?></div>
+                <p class="text-muted">Actions this month</p>
             </div>
         </div>
     </div>
     
     <!-- Filters -->
-    <div class="filter-section">
-        <div class="row">
-            <div class="col-md-3">
-                <label>Action Type</label>
-                <select id="filter-action" class="form-control">
-                    <option value="">All Actions</option>
-                    <option value="create">Create</option>
-                    <option value="update">Update</option>
-                    <option value="delete">Delete</option>
-                    <option value="verify_photo">Verify Photo</option>
-                    <option value="approve">Approve</option>
-                    <option value="reject">Reject</option>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label>Entity Type</label>
-                <select id="filter-entity" class="form-control">
-                    <option value="">All Entities</option>
-                    <option value="user">User</option>
-                    <option value="plan">Plan</option>
-                    <option value="payment">Payment</option>
-                    <option value="message">Message</option>
-                    <option value="interest">Interest</option>
-                    <option value="cms_page">CMS Page</option>
-                    <option value="sms_template">SMS Template</option>
-                </select>
-            </div>
-            <div class="col-md-3">
-                <label>Admin ID</label>
-                <input type="number" id="filter-admin" class="form-control" placeholder="Admin ID">
-            </div>
-            <div class="col-md-3">
-                <label>&nbsp;</label>
-                <button class="btn btn-primary btn-block" onclick="loadLogs()">
-                    <i class="fa fa-filter"></i> Apply Filters
-                </button>
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-3">
+                    <label>Action Type</label>
+                    <select id="filter-action" class="form-control">
+                        <option value="">All Actions</option>
+                        <option value="create">Create</option>
+                        <option value="update">Update</option>
+                        <option value="delete">Delete</option>
+                        <option value="verify_photo">Verify Photo</option>
+                        <option value="approve">Approve</option>
+                        <option value="reject">Reject</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label>Entity Type</label>
+                    <select id="filter-entity" class="form-control">
+                        <option value="">All Entities</option>
+                        <option value="user">User</option>
+                        <option value="plan">Plan</option>
+                        <option value="payment">Payment</option>
+                        <option value="message">Message</option>
+                        <option value="interest">Interest</option>
+                        <option value="cms_page">CMS Page</option>
+                        <option value="sms_template">SMS Template</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <label>Admin ID</label>
+                    <input type="number" id="filter-admin" class="form-control" placeholder="Admin ID">
+                </div>
+                <div class="col-md-3">
+                    <label>&nbsp;</label>
+                    <button class="btn btn-primary btn-block" onclick="loadLogs()">
+                        <i class="fa fa-filter"></i> Apply Filters
+                    </button>
+                </div>
             </div>
         </div>
     </div>
     
     <!-- Table -->
-    <div class="logs-table">
-        <table class="table table-striped table-hover">
-            <thead style="background: #f5f5f5;">
-                <tr>
-                    <th>ID</th>
-                    <th>Admin</th>
-                    <th>Action</th>
-                    <th>Entity</th>
-                    <th>Description</th>
-                    <th>IP Address</th>
-                    <th>Date/Time</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody id="logs-tbody">
-                <tr>
-                    <td colspan="8" class="text-center">Loading...</td>
-                </tr>
-            </tbody>
-        </table>
-    </div>
-    
-    <div style="margin-top: 20px; text-align: center;">
-        <button class="btn btn-default" id="load-more-btn" onclick="loadMore()" style="display: none;">
-            <i class="fa fa-chevron-down"></i> Load More
-        </button>
+    <div class="card">
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped table-hover admin-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Admin</th>
+                            <th>Action</th>
+                            <th>Entity</th>
+                            <th>Description</th>
+                            <th>IP Address</th>
+                            <th>Date/Time</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="logs-tbody">
+                        <tr>
+                            <td colspan="8" class="text-center">Loading...</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            
+            <div style="margin-top: 20px; text-align: center;">
+                <button class="btn btn-default" id="load-more-btn" onclick="loadMore()" style="display: none;">
+                    <i class="fa fa-chevron-down"></i> Load More
+                </button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -255,19 +198,27 @@ function renderLogs(logs, append) {
         const actionClass = 'action-' + log.action.replace('_', '-');
         const created = moment(log.created_at).format('MMM D, YYYY h:mm A');
         
+        // Map action to badge color
+        let badgeClass = 'label-default';
+        if (log.action === 'create') badgeClass = 'label-success';
+        if (log.action === 'update') badgeClass = 'label-info';
+        if (log.action === 'delete') badgeClass = 'label-danger';
+        if (log.action === 'approve') badgeClass = 'label-primary';
+        if (log.action === 'reject') badgeClass = 'label-warning';
+        
         tbody.append(`
             <tr>
                 <td>${log.id}</td>
                 <td>
-                    ${log.admin_name || 'Unknown'}<br>
-                    <small style="color: #999;">#${log.admin_id}</small>
+                    <strong>${log.admin_name || 'Unknown'}</strong><br>
+                    <small class="text-muted">#${log.admin_id}</small>
                 </td>
                 <td>
-                    <span class="action-badge ${actionClass}">${log.action}</span>
+                    <span class="label ${badgeClass}">${log.action}</span>
                 </td>
                 <td>
                     ${log.entity_type}
-                    ${log.entity_id ? '<br><small style="color: #999;">#' + log.entity_id + '</small>' : ''}
+                    ${log.entity_id ? '<br><small class="text-muted">#' + log.entity_id + '</small>' : ''}
                 </td>
                 <td>${log.description || '-'}</td>
                 <td><small>${log.ip_address || '-'}</small></td>
@@ -321,7 +272,7 @@ function viewDetails(logId) {
                     </tr>
                     <tr>
                         <th>Action:</th>
-                        <td><span class="action-badge action-${log.action}">${log.action}</span></td>
+                        <td><span class="label label-info">${log.action}</span></td>
                     </tr>
                     <tr>
                         <th>Entity:</th>
@@ -355,4 +306,4 @@ function viewDetails(logId) {
 
 <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
 
-<?php include("includes/footer.php"); ?>
+<?php include("../includes/admin-footer.php"); ?>

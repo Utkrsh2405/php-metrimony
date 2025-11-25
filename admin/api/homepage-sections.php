@@ -118,7 +118,7 @@ else if ($method == 'POST') {
                            updated_at = NOW()
                            WHERE section_key = ?";
             $stmt = mysqli_prepare($conn, $update_sql);
-            mysqli_stmt_bind_param($stmt, "ssssss", $section_title, $section_subtitle, $section_content, $section_image, $is_active, $section_key);
+            mysqli_stmt_bind_param($stmt, "ssssis", $section_title, $section_subtitle, $section_content, $section_image, $is_active, $section_key);
         } else {
             $update_sql = "UPDATE homepage_sections SET 
                            section_title = ?, 
@@ -128,7 +128,7 @@ else if ($method == 'POST') {
                            updated_at = NOW()
                            WHERE section_key = ?";
             $stmt = mysqli_prepare($conn, $update_sql);
-            mysqli_stmt_bind_param($stmt, "sssss", $section_title, $section_subtitle, $section_content, $is_active, $section_key);
+            mysqli_stmt_bind_param($stmt, "sssis", $section_title, $section_subtitle, $section_content, $is_active, $section_key);
         }
         
         if (mysqli_stmt_execute($stmt)) {
@@ -141,7 +141,7 @@ else if ($method == 'POST') {
         $insert_sql = "INSERT INTO homepage_sections (section_key, section_title, section_subtitle, section_content, section_image, is_active) 
                        VALUES (?, ?, ?, ?, ?, ?)";
         $stmt = mysqli_prepare($conn, $insert_sql);
-        mysqli_stmt_bind_param($stmt, "ssssss", $section_key, $section_title, $section_subtitle, $section_content, $section_image, $is_active);
+        mysqli_stmt_bind_param($stmt, "sssssi", $section_key, $section_title, $section_subtitle, $section_content, $section_image, $is_active);
         
         if (mysqli_stmt_execute($stmt)) {
             echo json_encode(['success' => true, 'message' => 'Section created successfully']);

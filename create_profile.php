@@ -1,5 +1,6 @@
 <?php include_once("includes/basic_includes.php");?>
 <?php include_once("functions.php"); ?>
+<?php include_once("includes/dropdown_options.php"); ?>
 <?php 
 if(! isloggedin()){
    header("location:login.php");
@@ -194,26 +195,22 @@ $(document).ready(function(){
 			        <div class="age_grid">
 			         <div class="col-sm-4 form_box">
 	                  <div class="select-block1">
-	                    <select name="religion">
-		                    <option value="Not Applicable">Not Applicable</option>
-		                    <option value="Hindu">Hindu</option>
-		                    <option value="Christian">Christian</option>
-		                    <option value="Muslim">Muslim</option>
-		                    <option value="Jain">Jain</option>
-		                    <option value="Sikh">Sikh</option>
-		                    
+	                    <select name="religion" id="edit-religion">
+		                    <option value="">Select Religion</option>
+		                    <?php foreach($religions as $religion): ?>
+		                    <option value="<?= htmlspecialchars($religion) ?>"><?= htmlspecialchars($religion) ?></option>
+		                    <?php endforeach; ?>
 	                    </select>
 	                  </div>
 	            </div>
 	         
 	            <div class="col-sm-4 form_box2">
 	                   <div class="select-block1">
-	                    <select name="caste">
-		                    <option value="Roman Cathaolic">Roman Cathaolic</option>
-		                    <option value="Latin Catholic">Latin Catholic</option>
-		                    <option value="Penthecost">Penthecost</option>
-		                    <option value="Mappila">Mappila</option>
-		                    <option value="Thiyya">Thiyya</option>  
+	                    <select name="caste" id="edit-caste">
+		                    <option value="">Select Caste</option>
+		                    <?php foreach($castes_list as $caste): ?>
+		                    <option value="<?= htmlspecialchars($caste['name']) ?>" data-religion="<?= htmlspecialchars($caste['religion']) ?>"><?= htmlspecialchars($caste['name']) ?></option>
+		                    <?php endforeach; ?>
 	                    </select>
 	                  </div>
 	                 </div>
@@ -251,23 +248,21 @@ $(document).ready(function(){
 	         
 	            <div class="col-sm-4 form_box2">
 	                   <div class="select-block1">
-	                    <select name="state">
-		                    <option value="">State</option>
-		                    <option value="Kerala">Kerala</option>
-		                    <option value="Taminadu">Tamilnadu</option>
-		                    <option value="Karnataka">Karnataka</option>
-		                    <option value="Andhrapradesh">Andrapradesh</option>  
+	                    <select name="state" id="edit-state">
+		                    <option value="">Select State</option>
+		                    <?php foreach($states as $state): ?>
+		                    <option value="<?= htmlspecialchars($state) ?>" data-state-id="<?= $states_map[$state] ?>"><?= htmlspecialchars($state) ?></option>
+		                    <?php endforeach; ?>
 	                    </select>
 	                  </div>
 	                 </div>
 	                 <div class="col-sm-4 form_box1">
 	                   <div class="select-block1">
-	                    <select name="district">
-		                    <option value="">District</option>
-		                    <option value="Trivandrum">Trivandrum</option>
-		                    <option value="Kollam">Kollam</option>
-		                    <option value="Pathanamthitta">Pathanamthitta</option>
-		                    <option value="Wayanad">Wayanad</option>
+	                    <select name="district" id="edit-city"> <!-- Using district field for City -->
+		                    <option value="">Select City</option>
+		                    <?php foreach($cities_list as $city): ?>
+		                    <option value="<?= htmlspecialchars($city['name']) ?>" data-state-id="<?= $city['state_id'] ?>"><?= htmlspecialchars($city['name']) ?></option>
+		                    <?php endforeach; ?>
 	                    </select>
 	                   </div>
 	                  </div>
@@ -526,6 +521,54 @@ $(document).ready(function(){
 
 
 <?php include_once("footer.php");?>
+
+<script>
+// Cascading dropdown for State -> City
+jQuery(document).ready(function($) {
+    var allCities = $('#edit-city option').clone();
+    var allCastes = $('#edit-caste option').clone();
+    
+    $('#edit-state').on('change', function() {
+        var selectedStateId = $(this).find(':selected').data('state-id');
+        
+        // Reset city dropdown
+        $('#edit-city').empty().append('<option value="">Select City</option>');
+        
+        if (selectedStateId) {
+            // Filter cities by selected state
+            allCities.each(function() {
+                var $option = $(this);
+                if ($option.val() === '' || $option.data('state-id') == selectedStateId) {
+                    $('#edit-city').append($option.clone());
+                }
+            });
+        } else {
+            // No state selected, show all cities
+            $('#edit-city').append(allCities.clone());
+        }
+    });
+    
+    $('#edit-religion').on('change', function() {
+        var selectedReligion = $(this).val();
+        
+        // Reset caste dropdown
+        $('#edit-caste').empty().append('<option value="">Select Caste</option>');
+        
+        if (selectedReligion) {
+            // Filter castes by selected religion
+            allCastes.each(function() {
+                var $option = $(this);
+                if ($option.val() === '' || $option.data('religion') === selectedReligion) {
+                    $('#edit-caste').append($option.clone());
+                }
+            });
+        } else {
+            // No religion selected, show all castes
+            $('#edit-caste').append(allCastes.clone());
+        }
+    });
+});
+</script>
 
 </body>
 </html>	

@@ -1,0 +1,4 @@
+phpmyadmin/
+*.log
+api_output.json
+*.zip

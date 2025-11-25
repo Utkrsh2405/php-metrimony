@@ -15,7 +15,7 @@ $user_id = $_SESSION['id'];
 // Get user data
 $user_query = mysqli_query($conn, "SELECT sex FROM customer WHERE id = $user_id");
 $user_data = mysqli_fetch_assoc($user_query);
-$default_gender = ($user_data['sex'] == 'male') ? 'Female' : 'Male';
+$default_gender = (strcasecmp($user_data['sex'], 'Male') == 0) ? 'Female' : 'Male';
 
 // Get states
 $states_query = mysqli_query($conn, "SELECT DISTINCT state_code, state_name FROM states WHERE status = 1 ORDER BY state_name");
