@@ -420,21 +420,8 @@ $search_by = $sections['search_by'] ?? null;
         <h2 class="section-title">Featured Profile</h2>
         <div class="profile-slider">
             <?php
-            // Get user's gender to show opposite gender profiles
-            $featured_gender_filter = "";
-            if(isset($_SESSION['id'])) {
-                $logged_user_id = $_SESSION['id'];
-                $gender_sql = "SELECT sex FROM customer WHERE cust_id = $logged_user_id";
-                $gender_result = mysqlexec($gender_sql);
-                if($gender_result && mysqli_num_rows($gender_result) > 0) {
-                    $gender_row = mysqli_fetch_assoc($gender_result);
-                    $user_gender = $gender_row['sex'];
-                    // Show opposite gender
-                    $opposite_gender = ($user_gender == 'Male') ? 'Female' : 'Male';
-                    $featured_gender_filter = "WHERE sex = '$opposite_gender'";
-                }
-            }
-            $sql = "SELECT * FROM customer $featured_gender_filter ORDER BY cust_id DESC LIMIT 12";
+            // Get featured profiles
+            $sql = "SELECT * FROM customer ORDER BY cust_id DESC LIMIT 12";
             $result = mysqlexec($sql);
             if($result && mysqli_num_rows($result) > 0) {
                 while($row = mysqli_fetch_assoc($result)) {
@@ -465,6 +452,8 @@ $search_by = $sections['search_by'] ?? null;
             </div>
             <?php
                 }
+            } else {
+                echo '<p style="text-align:center; padding: 40px; color: #666;">No profiles available yet. <a href="register.php">Be the first to register!</a></p>';
             }
             ?>
         </div>
