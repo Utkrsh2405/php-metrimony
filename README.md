@@ -83,6 +83,35 @@ php -S 0.0.0.0:8080
 # Access at http://localhost:8080
 ```
 
+### 🌐 Deploy to Hostinger (Easy Way)
+
+**Option 1: Using Install Wizard (Recommended)**
+
+1. Upload all files to `public_html/` folder
+2. Rename `htaccess-hostinger.txt` to `.htaccess`
+3. Create database in cPanel → MySQL Databases
+4. Import `db/matrimony.sql` via phpMyAdmin
+5. Visit `http://yourdomain.com/install.php`
+6. Follow the wizard steps
+7. **Delete `install.php` after installation!**
+
+**Option 2: Manual Configuration**
+
+1. Copy `config.sample.php` to `config.php`
+2. Update database credentials:
+   ```php
+   define('DB_HOST', 'localhost');
+   define('DB_NAME', 'cpanelusername_matrimony');
+   define('DB_USER', 'cpanelusername_dbuser');
+   define('DB_PASS', 'your_password');
+   ```
+3. Upload files and import database
+
+📖 **Detailed Guides:**
+- Quick Deploy: [QUICK_DEPLOY.md](QUICK_DEPLOY.md)
+- Full Guide: [HOSTINGER_SETUP.md](HOSTINGER_SETUP.md)
+- Production: [DEPLOYMENT.md](DEPLOYMENT.md)
+
 ### Production Deployment
 
 See **[DEPLOYMENT.md](DEPLOYMENT.md)** for comprehensive production setup guide including:
