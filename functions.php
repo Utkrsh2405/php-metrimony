@@ -1,11 +1,21 @@
 <?php
 function mysqlexec($sql){
-	// Local development DB connection
-	// For Hostinger: change to localhost, u166093127_dbuser, u166093127_matrimony
-	$host = "127.0.0.1"; // Use 127.0.0.1 for local Docker, 'localhost' for Hostinger
-	$username = "root"; // Use 'root' for local, cPanel username for Hostinger
-	$password = "Uttu@2025"; // DB password
-	$db_name = "matrimony"; // Use 'matrimony' for local, cPanel prefixed for Hostinger
+	// Load config file if exists, otherwise use fallback
+	$config_file = __DIR__ . '/config.php';
+	
+	if (file_exists($config_file)) {
+		require_once($config_file);
+		$host = DB_HOST;
+		$username = DB_USER;
+		$password = DB_PASS;
+		$db_name = DB_NAME;
+	} else {
+		// Fallback for local development
+		$host = "127.0.0.1";
+		$username = "root";
+		$password = "Uttu@2025";
+		$db_name = "matrimony";
+	}
 
 	// Connect to server and select database.
 	$conn = mysqli_connect($host, $username, $password) or die("Cannot connect: " . mysqli_connect_error());
