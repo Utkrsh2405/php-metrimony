@@ -14,7 +14,7 @@ define('SITE_NAME', 'MakeMyLove');
 define('DB_HOST', 'localhost');
 define('DB_NAME', 'u166093127_matrimony');
 define('DB_USER', 'u166093127_dbuser');
-define('DB_PASS', 'Uttu@2405');
+define('DB_PASS', 'Uttu@2005');
 
 // File Upload Settings
 define('MAX_UPLOAD_SIZE', 5242880);

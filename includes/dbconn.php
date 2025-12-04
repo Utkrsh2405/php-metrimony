@@ -8,7 +8,7 @@
 // HOSTINGER CREDENTIALS - ACTIVE
 $host = "localhost"; 
 $username = "u166093127_dbuser"; 
-$password = "Uttu@2405"; 
+$password = "Uttu@2005"; 
 $db_name = "u166093127_matrimony";
 
 // ==========================================
