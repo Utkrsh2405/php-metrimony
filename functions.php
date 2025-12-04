@@ -1,16 +1,20 @@
 <?php
 function mysqlexec($sql){
-	// Load config file if exists, otherwise use fallback
+	// Load config file if exists
 	$config_file = __DIR__ . '/config.php';
 	
-	if (file_exists($config_file)) {
+	if (file_exists($config_file) && !defined('DB_HOST')) {
 		require_once($config_file);
+	}
+	
+	// Use config constants if defined, otherwise fallback
+	if (defined('DB_HOST')) {
 		$host = DB_HOST;
 		$username = DB_USER;
 		$password = DB_PASS;
 		$db_name = DB_NAME;
 	} else {
-		// Fallback for local development
+		// Fallback for local development only
 		$host = "127.0.0.1";
 		$username = "root";
 		$password = "Uttu@2025";
