@@ -1,25 +1,10 @@
 <?php
 function mysqlexec($sql){
-	// Load config file if exists
-	$config_file = __DIR__ . '/config.php';
-	
-	if (file_exists($config_file) && !defined('DB_HOST')) {
-		require_once($config_file);
-	}
-	
-	// Use config constants if defined, otherwise fallback
-	if (defined('DB_HOST')) {
-		$host = DB_HOST;
-		$username = DB_USER;
-		$password = DB_PASS;
-		$db_name = DB_NAME;
-	} else {
-		// Fallback for local development only
-		$host = "127.0.0.1";
-		$username = "root";
-		$password = "Uttu@2025";
-		$db_name = "matrimony";
-	}
+	// HOSTINGER CREDENTIALS - ACTIVE
+	$host = "localhost";
+	$username = "u166093127_dbuser";
+	$password = "Uttu@2405";
+	$db_name = "u166093127_matrimony";
 
 	// Connect to server and select database.
 	$conn = mysqli_connect($host, $username, $password) or die("Cannot connect: " . mysqli_connect_error());

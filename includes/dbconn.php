@@ -1,40 +1,15 @@
 <?php 
 /*
  * DATABASE CONNECTION FILE
- * ------------------------
- * This file automatically loads config from config.php if it exists,
- * otherwise uses the fallback values below.
- * 
- * For Hostinger deployment:
- * - Use the install.php wizard, OR
- * - Copy config.sample.php to config.php and update values
+ * ========================
+ * Hostinger Production Credentials
  */
 
-// ==========================================
-// LOAD CONFIG FILE IF EXISTS
-// ==========================================
-$config_file = __DIR__ . '/../config.php';
-
-if (file_exists($config_file)) {
-    require_once($config_file);
-    
-    // Use config constants
-    $host = defined('DB_HOST') ? DB_HOST : 'localhost';
-    $username = defined('DB_USER') ? DB_USER : 'root';
-    $password = defined('DB_PASS') ? DB_PASS : '';
-    $db_name = defined('DB_NAME') ? DB_NAME : 'matrimony';
-} else {
-    // ==========================================
-    // FALLBACK CONFIGURATION (Development)
-    // ==========================================
-    // Edit these values for local development
-    // For production, use config.php instead
-    
-    $host = "127.0.0.1"; 
-    $username = "root"; 
-    $password = "Uttu@2025"; 
-    $db_name = "matrimony"; 
-}
+// HOSTINGER CREDENTIALS - ACTIVE
+$host = "localhost"; 
+$username = "u166093127_dbuser"; 
+$password = "Uttu@2405"; 
+$db_name = "u166093127_matrimony";
 
 // ==========================================
 // CONNECTION LOGIC (Do not edit below)
