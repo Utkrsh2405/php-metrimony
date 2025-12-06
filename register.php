@@ -70,9 +70,10 @@ $(document).ready(function(){
 		      <div class="input-group">
 		        <input type="email" id="edit-email" name="email" value="" size="60" maxlength="60" class="form-control required" required>
 		        <span class="input-group-btn">
-		          <button class="btn btn-danger" type="button">Check Availability</button>
+		          <button class="btn btn-danger" type="button" id="check-email-btn">Check Availability</button>
 		        </span>
 		      </div>
+		      <div id="email-availability-msg" class="help-block" style="margin-top: 5px;"></div>
 		    </div>
 		    
 		    <!-- Password -->
@@ -438,6 +439,57 @@ $(document).ready(function(){
 
 
 <script>
+// Email availability check
+jQuery(document).ready(function($) {
+    $('#check-email-btn').on('click', function() {
+        var email = $('#edit-email').val().trim();
+        var $btn = $(this);
+        var $msg = $('#email-availability-msg');
+        
+        // Reset message
+        $msg.html('');
+        
+        // Validate email is not empty
+        if (!email) {
+            $msg.html('<span style="color: red;">Please enter an email address</span>');
+            return;
+        }
+        
+        // Disable button and show loading
+        $btn.prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Checking...');
+        
+        // AJAX request
+        $.ajax({
+            url: 'api/check-email.php',
+            method: 'POST',
+            data: { email: email },
+            dataType: 'json',
+            success: function(response) {
+                if (response.available) {
+                    $msg.html('<span style="color: green;"><i class="fa fa-check-circle"></i> ' + response.message + '</span>');
+                } else {
+                    $msg.html('<span style="color: red;"><i class="fa fa-times-circle"></i> ' + response.message + '</span>');
+                }
+            },
+            error: function() {
+                $msg.html('<span style="color: red;">Error checking availability. Please try again.</span>');
+            },
+            complete: function() {
+                // Re-enable button
+                $btn.prop('disabled', false).html('Check Availability');
+            }
+        });
+    });
+    
+    // Also check on email field blur
+    $('#edit-email').on('blur', function() {
+        var email = $(this).val().trim();
+        if (email && email.indexOf('@') > -1) {
+            $('#check-email-btn').trigger('click');
+        }
+    });
+});
+
 // Cascading dropdown for State -> City
 jQuery(document).ready(function($) {
     var allCities = $('#edit-city option').clone();
