@@ -8,7 +8,11 @@ if(isloggedin()){
    header("location:login.php");
 }
  
-$id=$_GET['id'];
+// Sanitize and validate ID parameter
+$id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+if ($id <= 0) {
+    die("Invalid profile ID");
+}
 //safty purpose copy the get id
 $profileid=$id;
 

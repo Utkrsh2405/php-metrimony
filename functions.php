@@ -56,38 +56,42 @@ function search(){
 }
 function writepartnerprefs($id){
 	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-		$agemin=$_POST['agemin'];
-		$agemax=$_POST['agemax'];
-		$maritalstatus=$_POST['maritalstatus'];
-		$complexion=$_POST['colour'];
-		$height=$_POST['height'];
-		$diet=$_POST['diet'];
-		$religion=$_POST['religion'];
-		$caste=$_POST['caste'];
-		$mothertounge=$_POST['mothertounge'];
-		$education=$_POST['education'];
-		$occupation=$_POST['occupation'];
-		$country=$_POST['country'];
-		$descr=$_POST['descr'];
+		require_once("includes/dbconn.php");
+		
+		// Sanitize ID
+		$id = intval($id);
+		
+		// Sanitize all POST inputs
+		$agemin = intval($_POST['agemin'] ?? 0);
+		$agemax = intval($_POST['agemax'] ?? 0);
+		$maritalstatus = mysqli_real_escape_string($conn, $_POST['maritalstatus'] ?? '');
+		$complexion = mysqli_real_escape_string($conn, $_POST['colour'] ?? '');
+		$height = mysqli_real_escape_string($conn, $_POST['height'] ?? '');
+		$diet = mysqli_real_escape_string($conn, $_POST['diet'] ?? '');
+		$religion = mysqli_real_escape_string($conn, $_POST['religion'] ?? '');
+		$caste = mysqli_real_escape_string($conn, $_POST['caste'] ?? '');
+		$mothertounge = mysqli_real_escape_string($conn, $_POST['mothertounge'] ?? '');
+		$education = mysqli_real_escape_string($conn, $_POST['education'] ?? '');
+		$occupation = mysqli_real_escape_string($conn, $_POST['occupation'] ?? '');
+		$country = mysqli_real_escape_string($conn, $_POST['country'] ?? '');
+		$descr = mysqli_real_escape_string($conn, $_POST['descr'] ?? '');
 
-		$sql = "UPDATE
-				   partnerprefs 
+		$sql = "UPDATE partnerprefs 
 				SET
-				   agemin = '$agemin',
-				   agemax='$agemax',
+				   agemin = $agemin,
+				   agemax = $agemax,
 				   maritalstatus = '$maritalstatus',
 				   complexion = '$complexion',
 				   height = '$height',
 				   diet = '$diet',
-				   religion='$religion',
+				   religion = '$religion',
 				   caste = '$caste',
 				   mothertounge = '$mothertounge',
-				   education='$education',
+				   education = '$education',
 				   descr = '$descr',
 				   occupation = '$occupation',
 				   country = '$country' 
-				WHERE
-				   custId = '$id'";
+				WHERE custId = $id";
 
 		$result = mysqlexec($sql);
 		if ($result) {
@@ -101,8 +105,6 @@ function writepartnerprefs($id){
 
 	}
 }
-
-
 function register(){
 	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 	require_once("includes/dbconn.php");
@@ -264,62 +266,63 @@ function isloggedin(){
 
 
 function processprofile_form($id){
-   
-	$fname=$_POST['fname'];
-	$lname=$_POST['lname'];
-	$sex=$_POST['sex'];
-	$email=$_POST['email'];
-	
-		$day=$_POST['day'];
-		$month=$_POST['month'];
-		$year=$_POST['year'];
-	$dob=$year ."-" . $month . "-" .$day ;
-	
-	$religion=$_POST['religion'];
-	$caste = $_POST['caste'];
-	$subcaste=$_POST['subcaste'];
-	
-	$country = $_POST['country'];
-	$state=$_POST['state'];
-	$district=$_POST['district'];
-	$age=$_POST['age'];
-	$maritalstatus=$_POST['maritalstatus'];
-	$profileby=$_POST['profileby'];
-	$education=$_POST['education'];
-	$edudescr=$_POST['edudescr'];
-	$bodytype=$_POST['bodytype'];
-	$physicalstatus=$_POST['physicalstatus'];
-	$drink=$_POST['drink'];
-	$smoke=$_POST['smoke'];
-	$mothertounge=$_POST['mothertounge'];
-	$bloodgroup=$_POST['bloodgroup'];
-	$weight=$_POST['weight'];
-	$height=$_POST['height'];
-	$colour=$_POST['colour'];
-	$diet=$_POST['diet'];
-	$occupation=$_POST['occupation'];
-	$occupationdescr=$_POST['occupationdescr'];
-	$fatheroccupation=$_POST['fatheroccupation'];
-	$motheroccupation=$_POST['motheroccupation'];
-	$income=$_POST['income'];
-	$bros=$_POST['bros'];
-	$sis=$_POST['sis'];
-	$aboutme=$_POST['aboutme'];
-	
-
-
 	require_once("includes/dbconn.php");
-	$sql="SELECT cust_id FROM customer WHERE cust_id=$id";
-	$result=mysqlexec($sql);
+	
+	// Sanitize ID
+	$id = intval($id);
+	
+	// Sanitize all POST inputs
+	$fname = mysqli_real_escape_string($conn, $_POST['fname'] ?? '');
+	$lname = mysqli_real_escape_string($conn, $_POST['lname'] ?? '');
+	$sex = mysqli_real_escape_string($conn, $_POST['sex'] ?? '');
+	$email = mysqli_real_escape_string($conn, $_POST['email'] ?? '');
+	
+	$day = mysqli_real_escape_string($conn, $_POST['day'] ?? '');
+	$month = mysqli_real_escape_string($conn, $_POST['month'] ?? '');
+	$year = mysqli_real_escape_string($conn, $_POST['year'] ?? '');
+	$dob = $year . "-" . $month . "-" . $day;
+	
+	$religion = mysqli_real_escape_string($conn, $_POST['religion'] ?? '');
+	$caste = mysqli_real_escape_string($conn, $_POST['caste'] ?? '');
+	$subcaste = mysqli_real_escape_string($conn, $_POST['subcaste'] ?? '');
+	
+	$country = mysqli_real_escape_string($conn, $_POST['country'] ?? '');
+	$state = mysqli_real_escape_string($conn, $_POST['state'] ?? '');
+	$district = mysqli_real_escape_string($conn, $_POST['district'] ?? '');
+	$age = intval($_POST['age'] ?? 0);
+	$maritalstatus = mysqli_real_escape_string($conn, $_POST['maritalstatus'] ?? '');
+	$profileby = mysqli_real_escape_string($conn, $_POST['profileby'] ?? '');
+	$education = mysqli_real_escape_string($conn, $_POST['education'] ?? '');
+	$edudescr = mysqli_real_escape_string($conn, $_POST['edudescr'] ?? '');
+	$bodytype = mysqli_real_escape_string($conn, $_POST['bodytype'] ?? '');
+	$physicalstatus = mysqli_real_escape_string($conn, $_POST['physicalstatus'] ?? '');
+	$drink = mysqli_real_escape_string($conn, $_POST['drink'] ?? '');
+	$smoke = mysqli_real_escape_string($conn, $_POST['smoke'] ?? '');
+	$mothertounge = mysqli_real_escape_string($conn, $_POST['mothertounge'] ?? '');
+	$bloodgroup = mysqli_real_escape_string($conn, $_POST['bloodgroup'] ?? '');
+	$weight = intval($_POST['weight'] ?? 0);
+	$height = mysqli_real_escape_string($conn, $_POST['height'] ?? '');
+	$colour = mysqli_real_escape_string($conn, $_POST['colour'] ?? '');
+	$diet = mysqli_real_escape_string($conn, $_POST['diet'] ?? '');
+	$occupation = mysqli_real_escape_string($conn, $_POST['occupation'] ?? '');
+	$occupationdescr = mysqli_real_escape_string($conn, $_POST['occupationdescr'] ?? '');
+	$fatheroccupation = mysqli_real_escape_string($conn, $_POST['fatheroccupation'] ?? '');
+	$motheroccupation = mysqli_real_escape_string($conn, $_POST['motheroccupation'] ?? '');
+	$income = mysqli_real_escape_string($conn, $_POST['income'] ?? '');
+	$bros = intval($_POST['bros'] ?? 0);
+	$sis = intval($_POST['sis'] ?? 0);
+	$aboutme = mysqli_real_escape_string($conn, $_POST['aboutme'] ?? '');
 
-if(mysqli_num_rows($result)>=1){
+	$sql = "SELECT cust_id FROM customer WHERE cust_id = $id";
+	$result = mysqlexec($sql);
+
+if(mysqli_num_rows($result) >= 1){
 	//there is already a profile in this table for loggedin customer
 	//update the data
-	$sql="UPDATE
-   			customer 
+	$sql = "UPDATE customer 
 		SET
 		   email = '$email',
-		   age = '$age',
+		   age = $age,
 		   sex = '$sex',
 		   religion = '$religion',
 		   caste = '$caste',
@@ -338,7 +341,7 @@ if(mysqli_num_rows($result)>=1){
 		   drink =  '$drink',
 		   mothertounge = '$mothertounge',
 		   colour = '$colour',
-		   weight = '$weight',
+		   weight = $weight,
 		   smoke = '$smoke',
 		   dateofbirth = '$dob', 
 		   occupation = '$occupation', 
@@ -346,36 +349,35 @@ if(mysqli_num_rows($result)>=1){
 		   annual_income = '$income', 
 		   fathers_occupation = '$fatheroccupation',
 		   mothers_occupation = '$motheroccupation',
-		   no_bro = '$bros', 
-		   no_sis = '$sis', 
+		   no_bro = $bros, 
+		   no_sis = $sis, 
 		   aboutme = '$aboutme'
-		WHERE cust_id=$id; "
-		   ;
-   $result=mysqlexec($sql);
+		WHERE cust_id = $id";
+		   
+   $result = mysqlexec($sql);
    if ($result) {
    	echo "<script>alert(\"Successfully Updated Profile\")</script>";
    	echo "<script> window.location=\"userhome.php?id=$id\"</script>";
    }
 }else{
 	//Insert the data
-	$sql = "INSERT 
-				INTO
-				   customer
-				   (cust_id, email, age, sex, religion, caste, subcaste, district, state, country, maritalstatus, profilecreatedby, education, education_sub, firstname, lastname, body_type, physical_status, drink, mothertounge, colour, weight, height, blood_group, diet, smoke,   dateofbirth, occupation, occupation_descr, annual_income, fathers_occupation, mothers_occupation, no_bro, no_sis, aboutme, profilecreationdate  ) 
+	$sql = "INSERT INTO customer
+				   (cust_id, email, age, sex, religion, caste, subcaste, district, state, country, maritalstatus, profilecreatedby, education, education_sub, firstname, lastname, body_type, physical_status, drink, mothertounge, colour, weight, height, blood_group, diet, smoke, dateofbirth, occupation, occupation_descr, annual_income, fathers_occupation, mothers_occupation, no_bro, no_sis, aboutme, profilecreationdate) 
 				VALUES
-				   ('$id','$email', '$age', '$sex', '$religion', '$caste', '$subcaste', '$district', '$state', '$country', '$maritalstatus', '$profileby', '$education', '$edudescr', '$fname', '$lname', '$bodytype', '$physicalstatus', '$drink', '$mothertounge', '$colour', '$weight', '$height', '$bloodgroup', '$diet', '$smoke', '$dob', '$occupation', '$occupationdescr', '$income', '$fatheroccupation', '$motheroccupation', '$bros', '$sis', '$aboutme', CURDATE())
-			";
-	if (mysqli_query($conn,$sql)) {
+				   ($id, '$email', $age, '$sex', '$religion', '$caste', '$subcaste', '$district', '$state', '$country', '$maritalstatus', '$profileby', '$education', '$edudescr', '$fname', '$lname', '$bodytype', '$physicalstatus', '$drink', '$mothertounge', '$colour', $weight, '$height', '$bloodgroup', '$diet', '$smoke', '$dob', '$occupation', '$occupationdescr', '$income', '$fatheroccupation', '$motheroccupation', $bros, $sis, '$aboutme', CURDATE())";
+			
+	if (mysqli_query($conn, $sql)) {
 	  echo "Successfully Created profile";
 	  echo "<a href=\"userhome.php?id={$id}\">";
 	  echo "Back to home";
 	  echo "</a>";
 	  //creating a slot for partner prefernce table for prefs details with cust id
-	  $sql2="INSERT INTO partnerprefs (id, custId) VALUES('', '$id')";
-	  mysqli_query($conn,$sql2);
-	  $sql2="UPDATE TABLE users SET profilestat=1 WHERE id=$id";
+	  $sql2 = "INSERT INTO partnerprefs (custId) VALUES($id)";
+	  mysqli_query($conn, $sql2);
+	  $sql2 = "UPDATE users SET profilestat = 1 WHERE id = $id";
+	  mysqli_query($conn, $sql2);
 	} else {
-	  echo "Error: " . $sql . "<br>" . $conn->error;
+	  echo "Error: " . mysqli_error($conn);
 	}
 }
 
@@ -385,53 +387,80 @@ if(mysqli_num_rows($result)>=1){
 //function for upload photo
 
 function uploadphoto($id){
-	$target = "profile/". $id ."/";
-if (!file_exists($target)) {
-    mkdir($target, 0777, true);
-}
-//specifying target for each file
-$target1 = $target . basename( $_FILES['pic1']['name']);
-$target2 = $target . basename( $_FILES['pic2']['name']);
-$target3 = $target . basename( $_FILES['pic3']['name']);
-$target4 = $target . basename( $_FILES['pic4']['name']);
+	// Sanitize ID
+	$id = intval($id);
+	if ($id <= 0) {
+		die("Invalid user ID");
+	}
+	
+	$target = "profile/" . $id . "/";
+	if (!file_exists($target)) {
+		mkdir($target, 0777, true);
+	}
+	
+	// Validate and sanitize file uploads
+	$allowed_types = ['image/jpeg', 'image/jpg', 'image/png', 'image/gif'];
+	$max_size = 5 * 1024 * 1024; // 5MB
+	
+	$pics = [];
+	for ($i = 1; $i <= 4; $i++) {
+		$field = 'pic' . $i;
+		if (isset($_FILES[$field]) && $_FILES[$field]['error'] == 0) {
+			// Validate file type
+			if (!in_array($_FILES[$field]['type'], $allowed_types)) {
+				die("Invalid file type for $field. Only JPG, PNG, and GIF allowed.");
+			}
+			// Validate file size
+			if ($_FILES[$field]['size'] > $max_size) {
+				die("File $field is too large. Maximum 5MB allowed.");
+			}
+			// Sanitize filename
+			$filename = preg_replace("/[^a-zA-Z0-9._-]/", "", basename($_FILES[$field]['name']));
+			$pics[$i] = $filename;
+		} else {
+			$pics[$i] = '';
+		}
+	}
 
+	$sql = "SELECT id FROM photos WHERE cust_id = $id";
+	$result = mysqlexec($sql);
 
-// This gets all the other information from the form
-$pic1=($_FILES['pic1']['name']);
-$pic2=($_FILES['pic2']['name']);
-$pic3=($_FILES['pic3']['name']);
-$pic4=($_FILES['pic4']['name']);
-
-$sql="SELECT id FROM photos WHERE cust_id = '$id'";
-$result = mysqlexec($sql);
-
-//code part to check weather a photo already exists
-if(mysqli_num_rows($result) == 0) {
-     // no photo for curret user, do stuff...
-		$sql="INSERT INTO photos (id, cust_id, pic1, pic2, pic3, pic4) VALUES ('', '$id', '$pic1' ,'$pic2', '$pic3','$pic4')";
-		// Writes the information to the database
+	//code part to check weather a photo already exists
+	if(mysqli_num_rows($result) == 0) {
+		// no photo for current user, do stuff...
+		$sql = "INSERT INTO photos (cust_id, pic1, pic2, pic3, pic4) VALUES ($id, '" . 
+			   mysqli_real_escape_string($GLOBALS['conn'], $pics[1]) . "', '" .
+			   mysqli_real_escape_string($GLOBALS['conn'], $pics[2]) . "', '" .
+			   mysqli_real_escape_string($GLOBALS['conn'], $pics[3]) . "', '" .
+			   mysqli_real_escape_string($GLOBALS['conn'], $pics[4]) . "')";
 		mysqlexec($sql);
+	} else {
+		// There is a photo for customer so update
+		$sql = "UPDATE photos SET pic1 = '" . mysqli_real_escape_string($GLOBALS['conn'], $pics[1]) . "', " .
+			   "pic2 = '" . mysqli_real_escape_string($GLOBALS['conn'], $pics[2]) . "', " .
+			   "pic3 = '" . mysqli_real_escape_string($GLOBALS['conn'], $pics[3]) . "', " .
+			   "pic4 = '" . mysqli_real_escape_string($GLOBALS['conn'], $pics[4]) . "' " .
+			   "WHERE cust_id = $id";
+		mysqlexec($sql);
+	}
 
-		
-} else {
-    // There is a photo for customer so up
-     $sql="UPDATE photos SET pic1 = '$pic1', pic2 = '$pic2', pic3 = '$pic3', pic4 = '$pic4' WHERE cust_id=$id";
-		// Writes the information to the database
-	mysqlexec($sql);
-}
+	// Writes the photo to the server
+	$upload_success = true;
+	for ($i = 1; $i <= 4; $i++) {
+		$field = 'pic' . $i;
+		if (!empty($pics[$i]) && isset($_FILES[$field])) {
+			$target_file = $target . $pics[$i];
+			if (!move_uploaded_file($_FILES[$field]['tmp_name'], $target_file)) {
+				$upload_success = false;
+			}
+		}
+	}
 
-// Writes the photo to the server
-if(move_uploaded_file($_FILES['pic1']['tmp_name'], $target1)&&move_uploaded_file($_FILES['pic2']['tmp_name'], $target2)&&move_uploaded_file($_FILES['pic3']['tmp_name'], $target3)&&move_uploaded_file($_FILES['pic4']['tmp_name'], $target4))
-{
-
-// Tells you if its all ok
-echo "The files has been uploaded, and your information has been added to the directory";
-}
-else {
-
-// Gives and error if its not
-echo "Sorry, there was a problem uploading your file.";
-}
+	if ($upload_success) {
+		echo "The files have been uploaded, and your information has been added to the directory";
+	} else {
+		echo "Sorry, there was a problem uploading your file.";
+	}
 
 }//end uploadphoto function
 

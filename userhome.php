@@ -2,11 +2,22 @@
 <?php include_once("functions.php"); ?>
 <?php
 
-$id=$_GET['id'];
 if(isloggedin()){
  //do nothing stay here
 } else{
    header("location:login.php");
+}
+
+// Sanitize and validate ID parameter
+$id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+if ($id <= 0) {
+    die("Invalid user ID");
+}
+
+// Verify user can only access their own home page
+if ($id != $_SESSION['id']) {
+    header("location:userhome.php?id=" . $_SESSION['id']);
+    exit();
 }
 
 

@@ -12,7 +12,7 @@ $db_user = 'u166093127_dbuser';
 $db_pass = 'Uttu@2005';
 
 echo "<p><strong>Testing connection with:</strong></p>";
-echo "<ul>";
+echo "<ul>"; 
 echo "<li>Host: " . htmlspecialchars($host) . "</li>";
 echo "<li>Database: " . htmlspecialchars($db_name) . "</li>";
 echo "<li>Username: " . htmlspecialchars($db_user) . "</li>";
