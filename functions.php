@@ -107,18 +107,66 @@ function register(){
 	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 	require_once("includes/dbconn.php");
 	
+	// Collect and sanitize all form inputs
 	$uname = mysqli_real_escape_string($conn, trim($_POST['name']));
 	$pass = $_POST['pass'];
+	$pass_confirm = $_POST['pass_confirm'] ?? '';
 	$email = mysqli_real_escape_string($conn, trim($_POST['email']));
+	
+	// Date of birth
 	$day = $_POST['day'] ?? '';
 	$month = $_POST['month'] ?? '';
 	$year = $_POST['year'] ?? '';
 	$dob = $year . "-" . $month . "-" . $day;
-	$gender = $_POST['gender'] ?? 'male';
 	
-	// Validate inputs
+	// Calculate age
+	$age = date('Y') - $year;
+	
+	// Basic info
+	$gender = mysqli_real_escape_string($conn, $_POST['gender'] ?? 'Male');
+	$height = mysqli_real_escape_string($conn, $_POST['height'] ?? '');
+	$mother_tongue = mysqli_real_escape_string($conn, $_POST['mother_tongue'] ?? '');
+	
+	// Religion & Caste
+	$religion = mysqli_real_escape_string($conn, $_POST['religion'] ?? '');
+	$caste = mysqli_real_escape_string($conn, $_POST['caste'] ?? '');
+	$sub_caste = mysqli_real_escape_string($conn, $_POST['sub_caste'] ?? '');
+	
+	// Marital status
+	$marital_status = mysqli_real_escape_string($conn, $_POST['marital_status'] ?? 'Never Married');
+	$no_of_children = mysqli_real_escape_string($conn, $_POST['no_of_children'] ?? '0');
+	$children_living = mysqli_real_escape_string($conn, $_POST['children_living'] ?? '');
+	
+	// Location
+	$country = mysqli_real_escape_string($conn, $_POST['country'] ?? 'India');
+	$state = mysqli_real_escape_string($conn, $_POST['state'] ?? '');
+	$city = mysqli_real_escape_string($conn, $_POST['city'] ?? '');
+	$address = mysqli_real_escape_string($conn, $_POST['address'] ?? '');
+	
+	// Contact
+	$phone_code = mysqli_real_escape_string($conn, $_POST['phone_code'] ?? '91');
+	$phone = mysqli_real_escape_string($conn, $_POST['phone'] ?? '');
+	$mobile = mysqli_real_escape_string($conn, $_POST['mobile'] ?? '');
+	
+	// Additional fields
+	$citizenship = mysqli_real_escape_string($conn, $_POST['citizenship'] ?? 'India');
+	$nri = mysqli_real_escape_string($conn, $_POST['nri'] ?? 'No');
+	
+	// Validate required inputs
 	if (empty($uname) || empty($pass) || empty($email)) {
 		echo "<div class='alert alert-danger'>Please fill in all required fields.</div>";
+		return;
+	}
+	
+	// Validate password confirmation
+	if ($pass !== $pass_confirm) {
+		echo "<div class='alert alert-danger'>Passwords do not match!</div>";
+		return;
+	}
+	
+	// Validate password length
+	if (strlen($pass) < 6) {
+		echo "<div class='alert alert-danger'>Password must be at least 6 characters long.</div>";
 		return;
 	}
 	
@@ -142,7 +190,7 @@ function register(){
 		return;
 	}
 	
-	// Check if email already exists
+	// Check if email already exists in users table
 	$check_email_sql = "SELECT id FROM users WHERE email = '$email'";
 	$check_email_result = mysqli_query($conn, $check_email_sql);
 	if (mysqli_num_rows($check_email_result) > 0) {
@@ -150,24 +198,56 @@ function register(){
 		return;
 	}
 	
-	// Hash the password
-	$hashed_password = password_hash($pass, PASSWORD_BCRYPT);
+	// Check if email already exists in customer table
+	$check_customer_email = "SELECT id FROM customer WHERE email = '$email'";
+	$check_customer_result = mysqli_query($conn, $check_customer_email);
+	if (mysqli_num_rows($check_customer_result) > 0) {
+		echo "<div class='alert alert-danger'>Email already registered. Please use another email or <a href='login.php'>login</a>.</div>";
+		return;
+	}
+	
+	// Hash the password (using old MD5 to match existing system - should upgrade to bcrypt later)
+	$hashed_password = md5($pass);
 
-	$sql = "INSERT 
-			INTO
-			   users
-			   ( profilestat, username, password, email, dateofbirth, gender, userlevel) 
-			VALUES
-			   (0, '$uname', '$hashed_password', '$email', '$dob', '$gender', NULL)";
+	// Insert into users table
+	$sql = "INSERT INTO users (profilestat, username, password, email, dateofbirth, gender, userlevel) 
+			VALUES (0, '$uname', '$hashed_password', '$email', '$dob', '$gender', 0)";
 
 	if (mysqli_query($conn, $sql)) {
-		echo "<div class='alert alert-success' style='margin-bottom: 20px;'>";
-		echo "<i class='fa fa-check-circle'></i> <strong>Successfully Registered!</strong><br>";
-		echo "Your account has been created with username: <strong>" . htmlspecialchars($uname) . "</strong><br><br>";
-		echo "<a href='login.php' class='btn btn-primary'>Login to Your Account</a>";
-		echo "</div>";
+		// Get the inserted user ID
+		$user_id = mysqli_insert_id($conn);
+		
+		// Insert into customer table with detailed profile
+		$customer_sql = "INSERT INTO customer (
+			cust_id, email, age, height, sex, religion, caste, subcaste, 
+			district, state, country, maritalstatus, profilecreatedby, 
+			education, education_sub, firstname, lastname, body_type, 
+			physical_status, drink, mothertounge, colour, weight, 
+			blood_group, diet, smoke, dateofbirth, occupation, 
+			occupation_descr, annual_income, fathers_occupation, 
+			mothers_occupation, no_bro, no_sis, aboutme, profilecreationdate
+		) VALUES (
+			'$user_id', '$email', '$age', '$height', '$gender', '$religion', 
+			'$caste', '$sub_caste', '$city', '$state', '$country', 
+			'$marital_status', 'Self', '', '', '$uname', '', '', 
+			'', '', '$mother_tongue', '', 0, '', '', '', '$dob', '', 
+			'', '', '', '', 0, 0, '', CURDATE()
+		)";
+		
+		if (mysqli_query($conn, $customer_sql)) {
+			echo "<div class='alert alert-success' style='margin-bottom: 20px;'>";
+			echo "<i class='fa fa-check-circle'></i> <strong>Successfully Registered!</strong><br>";
+			echo "Your account has been created with username: <strong>" . htmlspecialchars($uname) . "</strong><br>";
+			echo "Email: <strong>" . htmlspecialchars($email) . "</strong><br><br>";
+			echo "<a href='login.php' class='btn btn-primary'>Login to Your Account</a>";
+			echo "</div>";
+		} else {
+			// Customer insert failed, remove user record
+			mysqli_query($conn, "DELETE FROM users WHERE id = $user_id");
+			echo "<div class='alert alert-danger'>Error creating profile: " . mysqli_error($conn) . "</div>";
+		}
 	} else {
-		echo "<div class='alert alert-danger'>Error creating account: " . $conn->error . "</div>";
+		echo "<div class='alert alert-danger'>Error creating account: " . mysqli_error($conn) . "</div>";
 	}
 }
 }

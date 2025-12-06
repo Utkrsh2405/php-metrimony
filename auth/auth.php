@@ -38,10 +38,15 @@ $result = mysqli_stmt_get_result($stmt);
 if ($row = mysqli_fetch_assoc($result)) {
     // Check if password is hashed or plain text
     if (password_verify($mypassword, $row['password'])) {
-        // Password is hashed and correct
+        // Password is bcrypt hashed and correct
+        $password_valid = true;
+    } elseif ($row['password'] === md5($mypassword)) {
+        // MD5 hashed password match - upgrade to bcrypt
+        $hashed = password_hash($mypassword, PASSWORD_BCRYPT);
+        mysqli_query($conn, "UPDATE users SET password = '$hashed' WHERE id = {$row['id']}");
         $password_valid = true;
     } elseif ($row['password'] === $mypassword) {
-        // Plain text password match - upgrade to hashed
+        // Plain text password match - upgrade to bcrypt
         $hashed = password_hash($mypassword, PASSWORD_BCRYPT);
         mysqli_query($conn, "UPDATE users SET password = '$hashed' WHERE id = {$row['id']}");
         $password_valid = true;
