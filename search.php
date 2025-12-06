@@ -11,7 +11,7 @@ require_once("includes/dbconn.php");
 $user_id = $_SESSION['id'];
 
 // Get user's gender to search opposite gender by default
-$user_query = mysqli_query($conn, "SELECT c.sex FROM customer c WHERE c.id = $user_id");
+$user_query = mysqli_query($conn, "SELECT c.sex FROM customer c WHERE c.cust_id = $user_id");
 $user_data = mysqli_fetch_assoc($user_query);
 $default_gender = ($user_data['sex'] == 'Male') ? 'Female' : 'Male';
 

@@ -17,18 +17,19 @@ if ($method === 'POST') {
     $input = json_decode(file_get_contents('php://input'), true);
     
     // Build search query
-    $query = "SELECT c.id, c.firstname, c.lastname, c.sex as gender, c.age, c.height, 
+    $query = "SELECT c.cust_id as id, c.firstname, c.lastname, c.sex as gender, c.age, c.height, 
               c.religion, c.maritalstatus as marital_status, c.education, c.occupation, 
               CONCAT(c.district, ', ', c.state) as location,
-              c.is_verified as verified, u.plan_id
+              c.mothertounge, c.caste, c.subcaste, c.country,
+              u.username, u.profilestat
               FROM customer c
-              LEFT JOIN users u ON c.id = u.id
-              WHERE c.id != $user_id AND u.userlevel = 0";
+              LEFT JOIN users u ON c.cust_id = u.id
+              WHERE c.cust_id != $user_id AND (u.userlevel = 0 OR u.userlevel IS NULL)";
     
     $params = [];
     
     // Get logged-in user's gender to auto-filter for opposite gender
-    $user_gender_query = mysqli_query($conn, "SELECT c.sex FROM customer c WHERE c.id = $user_id");
+    $user_gender_query = mysqli_query($conn, "SELECT c.sex FROM customer c WHERE c.cust_id = $user_id");
     $user_gender_data = mysqli_fetch_assoc($user_gender_query);
     $user_gender = $user_gender_data['sex'] ?? null;
     
