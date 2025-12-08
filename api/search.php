@@ -16,7 +16,7 @@ if ($method === 'POST') {
     // Perform search
     $input = json_decode(file_get_contents('php://input'), true);
     
-    // Build search query
+    // Build search query - exclude deleted and suspended users
     $query = "SELECT c.cust_id as id, c.firstname, c.lastname, c.sex as gender, c.age, c.height, 
               c.religion, c.maritalstatus as marital_status, c.education, c.occupation, 
               CONCAT(c.district, ', ', c.state) as location,
@@ -24,7 +24,9 @@ if ($method === 'POST') {
               u.username, u.profilestat
               FROM customer c
               LEFT JOIN users u ON c.cust_id = u.id
-              WHERE c.cust_id != $user_id AND (u.userlevel = 0 OR u.userlevel IS NULL)";
+              WHERE c.cust_id != $user_id 
+              AND (u.userlevel = 0 OR u.userlevel IS NULL)
+              AND (u.account_status = 'active' OR u.account_status IS NULL)";
     
     $params = [];
     

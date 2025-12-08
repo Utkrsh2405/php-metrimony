@@ -30,7 +30,11 @@
    <div class="view_profile view_profile2">
         	<h3>View Recent Profiles</h3>
     <?php
-     $sql="SELECT * FROM customer ORDER BY profilecreationdate DESC";
+     // Exclude deleted and suspended users from recent profiles
+     $sql="SELECT c.* FROM customer c 
+           INNER JOIN users u ON c.cust_id = u.id 
+           WHERE u.account_status = 'active' AND u.userlevel = 0
+           ORDER BY c.profilecreationdate DESC";
       $result=mysqlexec($sql);
       $count=1;
       while($row=mysqli_fetch_assoc($result)){
