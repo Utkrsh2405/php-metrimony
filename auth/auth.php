@@ -1,17 +1,25 @@
 <?php
 session_start();
+
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 require_once("../includes/dbconn.php");
 require_once("../includes/security.php");
 
-$userlevel = $_GET['user'];
+// Make database connection available
+global $conn;
+
+$userlevel = $_GET['user'] ?? '1';
 $error = '';
 
 // Username and password sent from form 
 $myusername = $_POST['username'] ?? ''; 
 $mypassword = $_POST['password'] ?? ''; 
 
-// Sanitize inputs
-$myusername = Security::sanitizeInput($myusername);
+// Trim whitespace but don't sanitize username yet (we'll use prepared statements)
+$myusername = trim($myusername);
 
 if (empty($myusername) || empty($mypassword)) {
     $_SESSION['login_error'] = 'Please enter both username and password.';
@@ -29,13 +37,34 @@ if (!Security::checkRateLimit('user_login_' . $ip, 100, 900)) {
 }
 
 // Use prepared statement to prevent SQL injection
-// For users, only allow userlevel != 1 (non-admin users)
-$stmt = mysqli_prepare($conn, "SELECT id, username, password, userlevel FROM users WHERE username = ? AND (userlevel IS NULL OR userlevel != 1)");
+// For users, allow userlevel = 0 or NULL (non-admin users)
+// Admin users (userlevel = 1) should use admin/login.php
+$stmt = mysqli_prepare($conn, "SELECT id, username, password, userlevel, account_status FROM users WHERE username = ?");
 mysqli_stmt_bind_param($stmt, "s", $myusername);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 
 if ($row = mysqli_fetch_assoc($result)) {
+    // Check if user is admin (should use admin login page)
+    if ($row['userlevel'] == 1) {
+        $_SESSION['login_error'] = 'Admin users must login through the admin panel.';
+        header('Location: ../admin/login.php');
+        exit();
+    }
+    
+    // Check if account is suspended or deleted
+    $account_status = $row['account_status'] ?? 'active';
+    if ($account_status === 'suspended') {
+        $_SESSION['login_error'] = 'Your account has been suspended. Please contact support.';
+        header('Location: ../login.php');
+        exit();
+    }
+    if ($account_status === 'deleted') {
+        $_SESSION['login_error'] = 'Your account is inactive. Please contact support.';
+        header('Location: ../login.php');
+        exit();
+    }
+    
     // Check if password is hashed or plain text
     if (password_verify($mypassword, $row['password'])) {
         // Password is bcrypt hashed and correct
@@ -63,6 +92,10 @@ if ($row = mysqli_fetch_assoc($result)) {
         
         // Regenerate session ID for security
         session_regenerate_id(true);
+        
+        // Update last login timestamp
+        $user_id = intval($row['id']);
+        mysqli_query($conn, "UPDATE users SET last_login = NOW() WHERE id = $user_id");
         
         // Redirect to user home
         header("location:../userhome.php?id={$row['id']}");
