@@ -108,6 +108,7 @@ function writepartnerprefs($id){
 function register(){
 	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 	require_once("includes/dbconn.php");
+	global $conn; // Make database connection available in function scope
 	
 	// Enable detailed error reporting for this function
 	error_reporting(E_ALL);
