@@ -1025,7 +1025,7 @@ function confirmAction(action, memberId) {
             iconColor = '#667eea';
             break;
         case 'delete':
-            message = 'Are you sure you want to delete this member? Their profile will be hidden from all public areas. This action can be reversed by activating the member again.';
+            message = '⚠️ <strong>WARNING: This action is PERMANENT!</strong><br><br>Are you sure you want to permanently delete this member from the database?<br><br>This will:<br>• Delete their profile and account<br>• Remove all their messages and interests<br>• Delete their subscription data<br>• Remove them from all shortlists<br><br><strong style="color: #ef4444;">This action CANNOT be undone!</strong>';
             iconClass = 'fa-trash';
             iconColor = '#ef4444';
             break;
@@ -1060,8 +1060,23 @@ function executeAction(action, memberId) {
             if (response.success) {
                 // Show success notification
                 showNotification('Success!', response.message || 'Action completed successfully', 'success');
-                loadMembers(); // Reload table
-                loadStats(); // Reload stats
+                
+                // If delete action, fade out and remove row immediately
+                if (action === 'delete') {
+                    $(`#row-${memberId}`).fadeOut(400, function() {
+                        $(this).remove();
+                        // Check if table is empty
+                        if ($('#members-tbody tr').length === 0) {
+                            $('#members-tbody').append('<tr><td colspan="11" class="text-center" style="padding: 30px;">No members found</td></tr>');
+                        }
+                    });
+                    // Update stats
+                    loadStats();
+                } else {
+                    // For other actions, reload the table
+                    loadMembers();
+                    loadStats();
+                }
             } else {
                 showNotification('Error', response.error || 'Unknown error', 'error');
             }
@@ -1164,6 +1179,7 @@ function bulkAction(action) {
     let iconColor = '#f59e0b';
     
     if (action === 'delete') {
+        message = `⚠️ <strong>WARNING: This action is PERMANENT!</strong><br><br>Are you sure you want to permanently delete ${selectedMembers.size} selected member(s) from the database?<br><br><strong style="color: #ef4444;">This action CANNOT be undone!</strong>`;
         iconClass = 'fa-trash';
         iconColor = '#ef4444';
     } else if (action === 'activate') {
@@ -1200,8 +1216,24 @@ function executeBulkAction(action, memberIds) {
     Promise.all(promises).then(() => {
         showNotification('Success!', `Bulk action completed for ${memberIds.length} member(s)`, 'success');
         clearSelection();
-        loadMembers();
-        loadStats();
+        
+        // If delete action, fade out rows immediately
+        if (action === 'bulk_delete') {
+            memberIds.forEach(id => {
+                $(`#row-${id}`).fadeOut(400, function() {
+                    $(this).remove();
+                });
+            });
+            // Reload to refresh the table properly
+            setTimeout(() => {
+                loadMembers();
+                loadStats();
+            }, 500);
+        } else {
+            loadMembers();
+            loadStats();
+        }
+        
         $('#confirm-action-btn').prop('disabled', false).text('Confirm');
     }).catch(() => {
         showNotification('Error', 'Some actions failed. Please try again.', 'error');

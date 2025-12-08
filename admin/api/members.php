@@ -137,12 +137,28 @@ elseif ($method == 'POST') {
             break;
             
         case 'delete':
-            $query = "UPDATE users SET account_status = 'deleted' WHERE id = $member_id";
+            // Permanently delete from database
+            // First, get user details for logging
+            $user_query = mysqli_query($conn, "SELECT username, email FROM users WHERE id = $member_id");
+            $user_data = mysqli_fetch_assoc($user_query);
+            $username = $user_data['username'] ?? "ID#$member_id";
+            
+            // Delete from customer table first (foreign key relationship)
+            mysqli_query($conn, "DELETE FROM customer WHERE cust_id = $member_id");
+            
+            // Delete from other related tables
+            mysqli_query($conn, "DELETE FROM user_subscriptions WHERE user_id = $member_id");
+            mysqli_query($conn, "DELETE FROM interests WHERE sender_id = $member_id OR receiver_id = $member_id");
+            mysqli_query($conn, "DELETE FROM shortlist WHERE user_id = $member_id OR shortlisted_user_id = $member_id");
+            mysqli_query($conn, "DELETE FROM messages WHERE sender_id = $member_id OR receiver_id = $member_id");
+            
+            // Finally delete from users table
+            $query = "DELETE FROM users WHERE id = $member_id AND userlevel = 0";
             if (mysqli_query($conn, $query)) {
-                $logger->log('delete', 'member', $member_id, "Marked member #$member_id as deleted");
-                echo json_encode(['success' => true, 'message' => 'Member marked as deleted']);
+                $logger->log('delete', 'member', $member_id, "Permanently deleted member: $username");
+                echo json_encode(['success' => true, 'message' => 'Member permanently deleted from database']);
             } else {
-                echo json_encode(['error' => 'Failed to delete member']);
+                echo json_encode(['error' => 'Failed to delete member: ' . mysqli_error($conn)]);
             }
             break;
             
