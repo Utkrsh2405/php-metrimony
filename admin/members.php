@@ -27,6 +27,381 @@ while ($row = mysqli_fetch_assoc($plans_query)) {
 include("../includes/admin-header.php");
 ?>
 
+<style>
+/* Enhanced Admin Members Page Styles */
+@keyframes slideIn {
+    from {
+        transform: translateX(100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+.page-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 30px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+}
+
+.page-header h2 {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 600;
+    color: white;
+}
+
+.page-header h2 i {
+    margin-right: 12px;
+    opacity: 0.9;
+}
+
+.stats-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.stat-card {
+    background: white;
+    padding: 20px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    border-left: 4px solid #667eea;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.stat-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.stat-card.success { border-left-color: #10b981; }
+.stat-card.warning { border-left-color: #f59e0b; }
+.stat-card.danger { border-left-color: #ef4444; }
+
+.stat-card .stat-value {
+    font-size: 32px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 5px;
+}
+
+.stat-card .stat-label {
+    color: #64748b;
+    font-size: 14px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.filters-card {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    margin-bottom: 25px;
+}
+
+.filters-card .form-group label {
+    font-weight: 600;
+    color: #475569;
+    margin-bottom: 8px;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.filters-card .form-control {
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 10px 15px;
+    transition: all 0.2s;
+}
+
+.filters-card .form-control:focus {
+    border-color: #667eea;
+    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    outline: none;
+}
+
+.btn {
+    padding: 10px 20px;
+    border-radius: 8px;
+    font-weight: 600;
+    transition: all 0.2s;
+    border: none;
+    cursor: pointer;
+}
+
+.btn-primary {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.btn-primary:hover {
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.btn-success {
+    background: #10b981;
+    color: white;
+}
+
+.btn-success:hover {
+    background: #059669;
+    transform: translateY(-1px);
+    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+}
+
+.btn-default {
+    background: #f1f5f9;
+    color: #475569;
+}
+
+.btn-default:hover {
+    background: #e2e8f0;
+}
+
+.members-table-card {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    overflow: hidden;
+}
+
+.table {
+    margin: 0;
+    width: 100%;
+}
+
+.table thead {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+}
+
+.table thead th {
+    padding: 16px;
+    font-weight: 700;
+    color: #1e293b;
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    border-bottom: 2px solid #e2e8f0;
+}
+
+.table tbody td {
+    padding: 16px;
+    vertical-align: middle;
+    border-bottom: 1px solid #f1f5f9;
+    color: #475569;
+}
+
+.table tbody tr:hover {
+    background-color: #f8fafc;
+}
+
+.badge {
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.3px;
+}
+
+.badge-success {
+    background: #d1fae5;
+    color: #065f46;
+}
+
+.badge-warning {
+    background: #fef3c7;
+    color: #92400e;
+}
+
+.badge-danger {
+    background: #fee2e2;
+    color: #991b1b;
+}
+
+.badge-info {
+    background: #dbeafe;
+    color: #1e40af;
+}
+
+.progress {
+    height: 8px;
+    background: #f1f5f9;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 4px;
+}
+
+.progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, #667eea 0%, #764ba2 100%);
+    transition: width 0.3s ease;
+}
+
+.btn-group {
+    display: flex;
+    gap: 5px;
+}
+
+.btn-xs {
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: 6px;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #475569;
+    transition: all 0.2s;
+}
+
+.btn-xs:hover {
+    background: #f8fafc;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
+}
+
+.btn-xs i {
+    font-size: 13px;
+}
+
+.pagination {
+    display: flex;
+    gap: 5px;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.pagination li {
+    list-style: none;
+}
+
+.pagination li a,
+.pagination li span {
+    padding: 10px 15px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    color: #475569;
+    text-decoration: none;
+    transition: all 0.2s;
+    display: inline-block;
+}
+
+.pagination li a:hover {
+    background: #f8fafc;
+    border-color: #667eea;
+    color: #667eea;
+}
+
+.pagination li.active span {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-color: #667eea;
+}
+
+.pagination li.disabled span {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+#loading {
+    padding: 60px;
+    text-align: center;
+}
+
+#loading i {
+    color: #667eea;
+    margin-bottom: 15px;
+}
+
+.modal-content {
+    border-radius: 12px;
+    border: none;
+    box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+}
+
+.modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 12px 12px 0 0;
+    padding: 20px 25px;
+}
+
+.modal-header .modal-title {
+    font-weight: 600;
+    font-size: 18px;
+}
+
+.modal-header .close {
+    color: white;
+    opacity: 0.8;
+    text-shadow: none;
+}
+
+.modal-header .close:hover {
+    opacity: 1;
+}
+
+.modal-body {
+    padding: 25px;
+}
+
+.modal-footer {
+    padding: 15px 25px;
+    border-top: 1px solid #f1f5f9;
+}
+
+/* Member name with verification badge */
+.member-name {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.member-name strong {
+    color: #1e293b;
+}
+
+.verified-badge {
+    color: #10b981;
+    font-size: 16px;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .page-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .stats-cards {
+        grid-template-columns: 1fr;
+    }
+    
+    .table {
+        font-size: 13px;
+    }
+    
+    .table tbody td,
+    .table thead th {
+        padding: 10px;
+    }
+}
+</style>
+
 <div class="page-header">
     <h2><i class="fa fa-users"></i> Member Management</h2>
     <div>
@@ -36,18 +411,38 @@ include("../includes/admin-header.php");
     </div>
 </div>
 
+<!-- Stats Cards -->
+<div class="stats-cards" id="stats-cards">
+    <div class="stat-card success">
+        <div class="stat-value" id="stat-active">-</div>
+        <div class="stat-label">Active Members</div>
+    </div>
+    <div class="stat-card warning">
+        <div class="stat-value" id="stat-suspended">-</div>
+        <div class="stat-label">Suspended</div>
+    </div>
+    <div class="stat-card danger">
+        <div class="stat-value" id="stat-deleted">-</div>
+        <div class="stat-label">Deleted</div>
+    </div>
+    <div class="stat-card">
+        <div class="stat-value" id="stat-total">-</div>
+        <div class="stat-label">Total Members</div>
+    </div>
+</div>
+
 <!-- Filters -->
-<div class="card" style="margin-bottom: 24px;">
+<div class="filters-card">
     <div class="row">
         <div class="col-md-3">
             <div class="form-group">
-                <label>Search</label>
+                <label><i class="fa fa-search"></i> Search</label>
                 <input type="text" id="search" class="form-control" placeholder="Name, email, username...">
             </div>
         </div>
         <div class="col-md-2">
             <div class="form-group">
-                <label>Status</label>
+                <label><i class="fa fa-filter"></i> Status</label>
                 <select id="status-filter" class="form-control">
                     <option value="">All Status</option>
                     <option value="active">Active</option>
@@ -58,7 +453,7 @@ include("../includes/admin-header.php");
         </div>
         <div class="col-md-2">
             <div class="form-group">
-                <label>Plan</label>
+                <label><i class="fa fa-star"></i> Plan</label>
                 <select id="plan-filter" class="form-control">
                     <option value="0">All Plans</option>
                     <?php foreach ($plans as $plan): ?>
@@ -67,38 +462,43 @@ include("../includes/admin-header.php");
                 </select>
             </div>
         </div>
-        <div class="col-md-3" style="padding-top: 25px;">
-            <button id="filter-btn" class="btn btn-primary">
-                <i class="fa fa-filter"></i> Filter
-            </button>
-            <button id="reset-btn" class="btn btn-default" style="margin-left: 10px;">
-                <i class="fa fa-refresh"></i> Reset
-            </button>
+        <div class="col-md-5" style="display: flex; align-items: flex-end; gap: 10px;">
+            <div class="form-group" style="flex: 1;">
+                <label>&nbsp;</label>
+                <div>
+                    <button id="filter-btn" class="btn btn-primary" style="width: auto;">
+                        <i class="fa fa-filter"></i> Apply Filters
+                    </button>
+                    <button id="reset-btn" class="btn btn-default" style="margin-left: 10px;">
+                        <i class="fa fa-refresh"></i> Reset
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 </div>
 
 <!-- Members Table -->
-<div class="card">
-    <div id="loading" style="text-align: center; padding: 40px; display: none;">
-        <i class="fa fa-spinner fa-spin fa-2x" style="color: var(--primary-color);"></i>
-        <p style="margin-top: 10px; color: #64748b;">Loading members...</p>
+<div class="members-table-card">
+    <div id="loading" style="display: none;">
+        <i class="fa fa-spinner fa-spin fa-3x"></i>
+        <p style="margin-top: 15px; color: #64748b; font-size: 14px;">Loading members...</p>
     </div>
     
-    <div id="members-container" class="admin-table">
+    <div id="members-container">
         <table class="table">
             <thead>
                 <tr>
-                    <th>ID</th>
+                    <th style="width: 60px;">ID</th>
                     <th>Name</th>
                     <th>Email</th>
-                    <th>Age/Gender</th>
-                    <th>State</th>
-                    <th>Plan</th>
-                    <th>Status</th>
-                    <th>Profile</th>
-                    <th>Last Login</th>
-                    <th>Actions</th>
+                    <th style="width: 120px;">Age/Gender</th>
+                    <th>Location</th>
+                    <th style="width: 100px;">Plan</th>
+                    <th style="width: 100px;">Status</th>
+                    <th style="width: 110px;">Profile</th>
+                    <th style="width: 110px;">Last Login</th>
+                    <th style="width: 180px;">Actions</th>
                 </tr>
             </thead>
             <tbody id="members-tbody">
@@ -108,7 +508,7 @@ include("../includes/admin-header.php");
     </div>
     
     <!-- Pagination -->
-    <div id="pagination" class="text-center" style="margin-top: 20px; padding-top: 20px; border-top: 1px solid #f1f5f9;">
+    <div id="pagination" class="text-center" style="padding: 20px 0; border-top: 1px solid #f1f5f9;">
         <!-- Populated by JavaScript -->
     </div>
 </div>
@@ -119,7 +519,7 @@ include("../includes/admin-header.php");
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Member Details</h4>
+                <h4 class="modal-title"><i class="fa fa-user"></i> Member Details</h4>
             </div>
             <div class="modal-body" id="modal-member-details">
                 <!-- Populated by JavaScript -->
@@ -137,9 +537,9 @@ include("../includes/admin-header.php");
         <div class="modal-content">
             <div class="modal-header">
                 <button type="button" class="close" data-dismiss="modal">&times;</button>
-                <h4 class="modal-title">Confirm Action</h4>
+                <h4 class="modal-title"><i class="fa fa-exclamation-triangle"></i> Confirm Action</h4>
             </div>
-            <div class="modal-body" id="confirm-message">
+            <div class="modal-body" id="confirm-message" style="font-size: 15px; padding: 30px 25px;">
                 <!-- Populated by JavaScript -->
             </div>
             <div class="modal-footer">
@@ -154,10 +554,12 @@ include("../includes/admin-header.php");
 let currentPage = 1;
 let currentFilters = {};
 let pendingAction = null;
+let memberStats = { active: 0, suspended: 0, deleted: 0, total: 0 };
 
 // Load members on page load
 $(document).ready(function() {
     loadMembers();
+    loadStats();
     
     // Filter button
     $('#filter-btn').click(function() {
@@ -172,6 +574,7 @@ $(document).ready(function() {
         $('#plan-filter').val('0');
         currentPage = 1;
         loadMembers();
+        loadStats();
     });
     
     // Export CSV
@@ -186,7 +589,52 @@ $(document).ready(function() {
             $('#confirmModal').modal('hide');
         }
     });
+    
+    // Search on enter
+    $('#search').on('keypress', function(e) {
+        if (e.which === 13) {
+            currentPage = 1;
+            loadMembers();
+        }
+    });
 });
+
+function loadStats() {
+    $.ajax({
+        url: '/admin/api/member-stats.php',
+        method: 'GET',
+        success: function(response) {
+            if (response.success) {
+                memberStats = response.stats;
+                updateStatsDisplay();
+            }
+        },
+        error: function() {
+            // Fallback to manual calculation
+            $.ajax({
+                url: '/admin/api/members.php',
+                method: 'GET',
+                data: { limit: 1000 },
+                success: function(response) {
+                    if (response.success && response.data) {
+                        memberStats.total = response.pagination.total;
+                        memberStats.active = response.data.filter(m => m.account_status === 'active').length;
+                        memberStats.suspended = response.data.filter(m => m.account_status === 'suspended').length;
+                        memberStats.deleted = response.data.filter(m => m.account_status === 'deleted').length;
+                        updateStatsDisplay();
+                    }
+                }
+            });
+        }
+    });
+}
+
+function updateStatsDisplay() {
+    $('#stat-active').text(memberStats.active || 0);
+    $('#stat-suspended').text(memberStats.suspended || 0);
+    $('#stat-deleted').text(memberStats.deleted || 0);
+    $('#stat-total').text(memberStats.total || 0);
+}
 
 function loadMembers() {
     $('#loading').show();
@@ -262,39 +710,50 @@ function renderMembers(members) {
         
         const row = `
             <tr>
-                <td>#${member.id}</td>
-                <td><strong>${name.trim() || member.username}</strong> ${verified}</td>
+                <td><strong style="color: #667eea;">#${member.id}</strong></td>
+                <td>
+                    <div class="member-name">
+                        <strong>${name.trim() || member.username}</strong>
+                        ${member.is_verified == 1 ? '<i class="fa fa-check-circle verified-badge" title="Verified"></i>' : ''}
+                    </div>
+                    <small style="color: #94a3b8; font-size: 12px; display: block; margin-top: 2px;">@${member.username || 'N/A'}</small>
+                </td>
                 <td>${member.email}</td>
-                <td>${age} / ${gender}</td>
-                <td>${member.state || 'N/A'}</td>
+                <td><strong>${age}</strong> / ${gender}</td>
+                <td>${member.state || '-'}</td>
                 <td><span class="badge badge-info">${plan}</span></td>
                 <td>${statusBadge}</td>
-                <td style="width: 100px;">
-                    <div class="progress" style="margin: 0; height: 10px; border-radius: 5px; background-color: #e2e8f0;">
-                        <div class="progress-bar" role="progressbar" style="width: ${progress}%; background-color: var(--primary-color);"></div>
+                <td>
+                    <div style="width: 100px;">
+                        <div class="progress">
+                            <div class="progress-bar" style="width: ${progress}%"></div>
+                        </div>
+                        <small style="color: #64748b; font-size: 11px;">${progress}%</small>
                     </div>
-                    <small style="font-size: 10px; color: #64748b;">${progress}%</small>
                 </td>
-                <td><small>${lastLogin}</small></td>
+                <td style="font-size: 13px; color: #64748b;">${lastLogin}</td>
                 <td>
                     <div class="btn-group">
-                        <a href="/admin/member-edit.php?id=${member.id}" class="btn btn-default btn-xs" title="Edit">
-                            <i class="fa fa-edit"></i>
-                        </a>
-                        <button class="btn btn-default btn-xs" onclick="viewMember(${member.id})" title="View">
+                        <button class="btn btn-xs" onclick="viewMember(${member.id})" title="View Details">
                             <i class="fa fa-eye"></i>
                         </button>
+                        <a href="/admin/member-edit.php?id=${member.id}" class="btn btn-xs" title="Edit">
+                            <i class="fa fa-edit"></i>
+                        </a>
                         ${status === 'active' ? 
-                            `<button class="btn btn-default btn-xs" onclick="confirmAction('suspend', ${member.id})" title="Suspend" style="color: var(--warning-color);">
+                            `<button class="btn btn-xs" onclick="confirmAction('suspend', ${member.id})" title="Suspend">
                                 <i class="fa fa-ban"></i>
                             </button>` : 
-                            `<button class="btn btn-default btn-xs" onclick="confirmAction('activate', ${member.id})" title="Activate" style="color: var(--success-color);">
+                            status === 'suspended' ? 
+                            `<button class="btn btn-xs" onclick="confirmAction('activate', ${member.id})" title="Activate">
                                 <i class="fa fa-check"></i>
-                            </button>`
+                            </button>` : ''
                         }
-                        <button class="btn btn-default btn-xs" onclick="confirmAction('delete', ${member.id})" title="Delete" style="color: var(--danger-color);">
-                            <i class="fa fa-trash"></i>
-                        </button>
+                        ${status !== 'deleted' ? 
+                            `<button class="btn btn-xs" onclick="confirmAction('delete', ${member.id})" title="Delete">
+                                <i class="fa fa-trash"></i>
+                            </button>` : ''
+                        }
                     </div>
                 </td>
             </tr>
@@ -366,28 +825,46 @@ function viewMember(memberId) {
 
 function confirmAction(action, memberId) {
     let message = '';
+    let iconClass = 'fa-exclamation-triangle';
+    let iconColor = '#f59e0b';
     
     switch(action) {
         case 'suspend':
-            message = 'Are you sure you want to suspend this member?';
+            message = 'Are you sure you want to suspend this member? They will not be able to login until reactivated.';
+            iconClass = 'fa-ban';
+            iconColor = '#f59e0b';
             break;
         case 'activate':
-            message = 'Are you sure you want to activate this member?';
+            message = 'Are you sure you want to activate this member? They will regain full access to their account.';
+            iconClass = 'fa-check-circle';
+            iconColor = '#10b981';
             break;
         case 'verify':
-            message = 'Are you sure you want to verify this member\'s profile?';
+            message = 'Are you sure you want to verify this member\'s profile? This will add a verified badge to their profile.';
+            iconClass = 'fa-check-circle';
+            iconColor = '#667eea';
             break;
         case 'delete':
-            message = 'Are you sure you want to delete this member? This action cannot be undone.';
+            message = 'Are you sure you want to delete this member? Their profile will be hidden from all public areas. This action can be reversed by activating the member again.';
+            iconClass = 'fa-trash';
+            iconColor = '#ef4444';
             break;
     }
     
-    $('#confirm-message').text(message);
+    $('#confirm-message').html(`
+        <div style="text-align: center; padding: 20px 0;">
+            <i class="fa ${iconClass} fa-3x" style="color: ${iconColor}; margin-bottom: 20px;"></i>
+            <p style="font-size: 15px; color: #475569; line-height: 1.6;">${message}</p>
+        </div>
+    `);
     pendingAction = { action, memberId };
     $('#confirmModal').modal('show');
 }
 
 function executeAction(action, memberId) {
+    // Show loading state
+    $('#confirm-action-btn').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Processing...');
+    
     $.ajax({
         url: '/admin/api/members.php',
         method: 'POST',
@@ -395,16 +872,47 @@ function executeAction(action, memberId) {
         data: JSON.stringify({ action, member_id: memberId }),
         success: function(response) {
             if (response.success) {
-                // alert(response.message);
+                // Show success notification
+                showNotification('Success!', response.message || 'Action completed successfully', 'success');
                 loadMembers(); // Reload table
+                loadStats(); // Reload stats
             } else {
-                alert('Error: ' + (response.error || 'Unknown error'));
+                showNotification('Error', response.error || 'Unknown error', 'error');
             }
+            $('#confirm-action-btn').prop('disabled', false).text('Confirm');
         },
         error: function() {
-            alert('Failed to execute action');
+            showNotification('Error', 'Failed to execute action. Please try again.', 'error');
+            $('#confirm-action-btn').prop('disabled', false).text('Confirm');
         }
     });
+}
+
+function showNotification(title, message, type) {
+    const bgColor = type === 'success' ? '#10b981' : type === 'error' ? '#ef4444' : '#667eea';
+    const icon = type === 'success' ? 'check-circle' : type === 'error' ? 'exclamation-circle' : 'info-circle';
+    
+    const notification = $(`
+        <div style="position: fixed; top: 20px; right: 20px; z-index: 9999; background: ${bgColor}; color: white; 
+                    padding: 16px 24px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.3); 
+                    max-width: 400px; animation: slideIn 0.3s ease-out;">
+            <div style="display: flex; align-items: center; gap: 12px;">
+                <i class="fa fa-${icon}" style="font-size: 20px;"></i>
+                <div>
+                    <strong style="display: block; font-size: 14px; margin-bottom: 4px;">${title}</strong>
+                    <span style="font-size: 13px; opacity: 0.9;">${message}</span>
+                </div>
+            </div>
+        </div>
+    `);
+    
+    $('body').append(notification);
+    
+    setTimeout(() => {
+        notification.fadeOut(300, function() {
+            $(this).remove();
+        });
+    }, 3000);
 }
 
 function exportCSV() {
