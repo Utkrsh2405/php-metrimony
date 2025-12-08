@@ -10,7 +10,7 @@ if (!isset($_SESSION['id'])) {
 require_once("../includes/dbconn.php");
 
 // Verify admin status
-$user_id = $_SESSION['id'];
+$user_id = intval($_SESSION['id']);
 $check_admin = mysqli_query($conn, "SELECT userlevel FROM users WHERE id = $user_id AND userlevel = 1");
 if (mysqli_num_rows($check_admin) == 0) {
     header("Location: /index.php");
@@ -40,6 +40,14 @@ $member = mysqli_fetch_assoc($result);
 
 // Handle form submission
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+    // Store old data for logging
+    $old_data = [
+        'username' => $member['username'],
+        'email' => $member['email'],
+        'account_status' => $member['account_status'],
+        'is_verified' => $member['is_verified']
+    ];
+    
     $username = mysqli_real_escape_string($conn, $_POST['username']);
     $email = mysqli_real_escape_string($conn, $_POST['email']);
     $firstname = mysqli_real_escape_string($conn, $_POST['firstname']);
@@ -92,6 +100,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         WHERE cust_id = $member_id";
     
     if (mysqli_query($conn, $update_user) && mysqli_query($conn, $update_customer)) {
+        // Log activity
+        require_once("../includes/activity-logger.php");
+        $logger = new ActivityLogger($conn, $user_id);
+        $new_data = [
+            'username' => $username,
+            'email' => $email,
+            'account_status' => $account_status,
+            'is_verified' => $is_verified
+        ];
+        $logger->logUserUpdate($member_id, $old_data, $new_data);
+        
         $success_message = "Member updated successfully!";
         // Refresh member data
         $result = mysqli_query($conn, $query);

@@ -10,7 +10,7 @@ if (!isset($_SESSION['id'])) {
 require_once("../includes/dbconn.php");
 
 // Verify admin status
-$user_id = $_SESSION['id'];
+$user_id = intval($_SESSION['id']);
 $check_admin = mysqli_query($conn, "SELECT userlevel FROM users WHERE id = $user_id AND userlevel = 1");
 if (mysqli_num_rows($check_admin) == 0) {
     header("Location: /index.php");

@@ -12,12 +12,16 @@ if (!isset($_SESSION['id'])) {
 require_once("../../includes/dbconn.php");
 
 // Verify admin
-$user_id = $_SESSION['id'];
+$user_id = intval($_SESSION['id']);
 $check_admin = mysqli_query($conn, "SELECT userlevel FROM users WHERE id = $user_id AND userlevel = 1");
 if (mysqli_num_rows($check_admin) == 0) {
     echo json_encode(['error' => 'Unauthorized']);
     exit();
 }
+
+// Initialize activity logger
+require_once("../../includes/activity-logger.php");
+$logger = new ActivityLogger($conn, $user_id);
 
 $method = $_SERVER['REQUEST_METHOD'];
 
@@ -105,6 +109,7 @@ elseif ($method == 'POST') {
         case 'suspend':
             $query = "UPDATE users SET account_status = 'suspended' WHERE id = $member_id";
             if (mysqli_query($conn, $query)) {
+                $logger->log('suspend', 'member', $member_id, "Suspended member #$member_id");
                 echo json_encode(['success' => true, 'message' => 'Member suspended']);
             } else {
                 echo json_encode(['error' => 'Failed to suspend member']);
@@ -114,6 +119,7 @@ elseif ($method == 'POST') {
         case 'activate':
             $query = "UPDATE users SET account_status = 'active' WHERE id = $member_id";
             if (mysqli_query($conn, $query)) {
+                $logger->log('activate', 'member', $member_id, "Activated member #$member_id");
                 echo json_encode(['success' => true, 'message' => 'Member activated']);
             } else {
                 echo json_encode(['error' => 'Failed to activate member']);
@@ -123,6 +129,7 @@ elseif ($method == 'POST') {
         case 'verify':
             $query = "UPDATE customer SET is_verified = 1 WHERE cust_id = $member_id";
             if (mysqli_query($conn, $query)) {
+                $logger->log('verify', 'member', $member_id, "Verified member #$member_id");
                 echo json_encode(['success' => true, 'message' => 'Member verified']);
             } else {
                 echo json_encode(['error' => 'Failed to verify member']);
@@ -132,6 +139,7 @@ elseif ($method == 'POST') {
         case 'delete':
             $query = "UPDATE users SET account_status = 'deleted' WHERE id = $member_id";
             if (mysqli_query($conn, $query)) {
+                $logger->log('delete', 'member', $member_id, "Marked member #$member_id as deleted");
                 echo json_encode(['success' => true, 'message' => 'Member marked as deleted']);
             } else {
                 echo json_encode(['error' => 'Failed to delete member']);
@@ -155,6 +163,7 @@ elseif ($method == 'DELETE') {
     // Delete from all related tables (cascade should handle most)
     $query = "DELETE FROM users WHERE id = $member_id AND userlevel = 0";
     if (mysqli_query($conn, $query)) {
+        $logger->log('permanent_delete', 'member', $member_id, "Permanently deleted member #$member_id");
         echo json_encode(['success' => true, 'message' => 'Member permanently deleted']);
     } else {
         echo json_encode(['error' => 'Failed to delete member']);
