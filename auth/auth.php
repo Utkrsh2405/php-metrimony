@@ -31,7 +31,7 @@ if (empty($myusername) || empty($mypassword)) {
 $ip = $_SERVER['REMOTE_ADDR'];
 if (!Security::checkRateLimit('user_login_' . $ip, 100, 900)) {
     $_SESSION['login_error'] = 'Too many login attempts. Please try again in 15 minutes.';
-    Security::logSecurityEvent('user_login_rate_limit', 'User login rate limit exceeded', null, $ip);
+    Security::logSecurityEvent($conn, 'user_login_rate_limit', 'User login rate limit exceeded', null);
     header('Location: ../login.php');
     exit();
 }
@@ -102,13 +102,13 @@ if ($row = mysqli_fetch_assoc($result)) {
         exit();
     } else {
         $_SESSION['login_error'] = 'Invalid username or password.';
-        Security::logSecurityEvent('user_login_failed', 'Failed login attempt for: ' . $myusername, null, $ip);
+        Security::logSecurityEvent($conn, 'user_login_failed', 'Failed login attempt for: ' . $myusername, null);
         header('Location: ../login.php');
         exit();
     }
 } else {
     $_SESSION['login_error'] = 'Invalid username or password.';
-    Security::logSecurityEvent('user_login_failed', 'Login attempt with non-existent user: ' . $myusername, null, $ip);
+    Security::logSecurityEvent($conn, 'user_login_failed', 'Login attempt with non-existent user: ' . $myusername, null);
     header('Location: ../login.php');
     exit();
 }
