@@ -109,6 +109,10 @@ function register(){
 	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 	require_once("includes/dbconn.php");
 	
+	// Enable detailed error reporting for this function
+	error_reporting(E_ALL);
+	ini_set('display_errors', 1);
+	
 	// Collect and sanitize all form inputs
 	$uname = mysqli_real_escape_string($conn, trim($_POST['name']));
 	$pass = $_POST['pass'];
@@ -126,7 +130,9 @@ function register(){
 	
 	// Basic info
 	$gender = mysqli_real_escape_string($conn, $_POST['gender'] ?? 'Male');
-	$height = mysqli_real_escape_string($conn, $_POST['height'] ?? '');
+	$height_raw = $_POST['height'] ?? '0';
+	// Convert height from decimal (5.6) to integer for storage (multiply by 10: 5.6 -> 56)
+	$height = (int)(floatval($height_raw) * 10);
 	$mother_tongue = mysqli_real_escape_string($conn, $_POST['mother_tongue'] ?? '');
 	
 	// Religion & Caste

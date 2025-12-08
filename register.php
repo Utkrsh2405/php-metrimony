@@ -1,4 +1,9 @@
-<?php include_once("includes/basic_includes.php");?>
+<?php 
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+include_once("includes/basic_includes.php");?>
 <?php include_once("functions.php"); ?>
 <?php include_once("includes/dbconn.php"); ?>
 <?php include_once("includes/dropdown_options.php"); ?>
