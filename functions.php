@@ -314,7 +314,7 @@ function processprofile_form($id){
 	$aboutme = mysqli_real_escape_string($conn, $_POST['aboutme'] ?? '');
 
 	$sql = "SELECT cust_id FROM customer WHERE cust_id = $id";
-	$result = mysqlexec($sql);
+	$result = mysqli_query($conn, $sql);
 
 if(mysqli_num_rows($result) >= 1){
 	//there is already a profile in this table for loggedin customer
@@ -342,6 +342,9 @@ if(mysqli_num_rows($result) >= 1){
 		   mothertounge = '$mothertounge',
 		   colour = '$colour',
 		   weight = $weight,
+		   height = '$height',
+		   blood_group = '$bloodgroup',
+		   diet = '$diet',
 		   smoke = '$smoke',
 		   dateofbirth = '$dob', 
 		   occupation = '$occupation', 
@@ -354,10 +357,11 @@ if(mysqli_num_rows($result) >= 1){
 		   aboutme = '$aboutme'
 		WHERE cust_id = $id";
 		   
-   $result = mysqlexec($sql);
-   if ($result) {
+   if (mysqli_query($conn, $sql)) {
    	echo "<script>alert(\"Successfully Updated Profile\")</script>";
    	echo "<script> window.location=\"userhome.php?id=$id\"</script>";
+   } else {
+   	echo "Error updating profile: " . mysqli_error($conn);
    }
 }else{
 	//Insert the data

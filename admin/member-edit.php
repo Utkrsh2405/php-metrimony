@@ -85,17 +85,16 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         sex = '$sex',
                         age = $age,
                         state = '$state',
-                        mobile = '$mobile',
-                        marital_status = '$marital_status',
+                        maritalstatus = '$marital_status',
                         religion = '$religion',
                         caste = '$caste',
                         education = '$education',
                         occupation = '$occupation',
-                        income = '$income',
+                        annual_income = '$income',
                         height = '$height',
                         weight = '$weight',
-                        complexion = '$complexion',
-                        about = '$about',
+                        colour = '$complexion',
+                        aboutme = '$about',
                         is_verified = $is_verified
                         WHERE cust_id = $member_id";
     
