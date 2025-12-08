@@ -605,6 +605,18 @@ $(document).ready(function(){
 </div>
 
 <div class="container profile-container">
+    <?php if (isset($_SESSION['upload_success'])): ?>
+        <div class="alert alert-success" style="border-radius: 12px; margin-bottom: 20px;">
+            <i class="fa fa-check-circle"></i> <?php echo $_SESSION['upload_success']; unset($_SESSION['upload_success']); ?>
+        </div>
+    <?php endif; ?>
+    
+    <?php if (isset($_SESSION['upload_error'])): ?>
+        <div class="alert alert-danger" style="border-radius: 12px; margin-bottom: 20px;">
+            <i class="fa fa-exclamation-circle"></i> <?php echo $_SESSION['upload_error']; unset($_SESSION['upload_error']); ?>
+        </div>
+    <?php endif; ?>
+    
     <div class="row">
         <div class="col-md-8">
             <!-- Photo Gallery -->
