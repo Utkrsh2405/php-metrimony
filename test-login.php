@@ -8,10 +8,18 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $password = $_POST['password'] ?? '';
     
     echo "<h3>Debug Info:</h3>";
-    echo "<p>Username submitted: " . htmlspecialchars($username) . "</p>";
+    echo "<p>Username/Email submitted: " . htmlspecialchars($username) . "</p>";
+    
+    // Check if input is email or username
+    $is_email = filter_var($username, FILTER_VALIDATE_EMAIL);
+    echo "<p>Input type: " . ($is_email ? 'Email' : 'Username') . "</p>";
     
     // Check if user exists
-    $stmt = mysqli_prepare($conn, "SELECT id, username, password, userlevel, account_status FROM users WHERE username = ?");
+    if ($is_email) {
+        $stmt = mysqli_prepare($conn, "SELECT id, username, email, password, userlevel, account_status FROM users WHERE email = ?");
+    } else {
+        $stmt = mysqli_prepare($conn, "SELECT id, username, email, password, userlevel, account_status FROM users WHERE username = ?");
+    }
     mysqli_stmt_bind_param($stmt, "s", $username);
     mysqli_stmt_execute($stmt);
     $result = mysqli_stmt_get_result($stmt);
@@ -20,6 +28,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         echo "<p style='color: green;'>✓ User found in database!</p>";
         echo "<p>User ID: " . $row['id'] . "</p>";
         echo "<p>Username: " . htmlspecialchars($row['username']) . "</p>";
+        echo "<p>Email: " . htmlspecialchars($row['email']) . "</p>";
         echo "<p>Userlevel: " . ($row['userlevel'] ?? 'NULL') . "</p>";
         echo "<p>Account Status: " . ($row['account_status'] ?? 'NULL') . "</p>";
         echo "<p>Password hash in DB: " . substr($row['password'], 0, 20) . "...</p>";
@@ -75,10 +84,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 <body>
     <h2>Login Test Script</h2>
     <p style="color: red;"><strong>⚠️ DELETE THIS FILE AFTER TESTING!</strong></p>
+    <p style="background: #e3f2fd; padding: 15px; border-left: 4px solid #2196f3; border-radius: 4px;">
+        <strong>Note:</strong> You can now login with either your <strong>username</strong> or <strong>email address</strong>!
+    </p>
     
     <form method="POST">
-        <label>Username:</label>
-        <input type="text" name="username" required>
+        <label>Username or Email:</label>
+        <input type="text" name="username" placeholder="Enter username or email" required>
         
         <label>Password:</label>
         <input type="password" name="password" required>

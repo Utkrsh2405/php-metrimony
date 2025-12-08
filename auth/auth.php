@@ -22,7 +22,7 @@ $mypassword = $_POST['password'] ?? '';
 $myusername = trim($myusername);
 
 if (empty($myusername) || empty($mypassword)) {
-    $_SESSION['login_error'] = 'Please enter both username and password.';
+    $_SESSION['login_error'] = 'Please enter username/email and password.';
     header('Location: ../login.php');
     exit();
 }
@@ -37,9 +37,16 @@ if (!Security::checkRateLimit('user_login_' . $ip, 100, 900)) {
 }
 
 // Use prepared statement to prevent SQL injection
+// Check if input is email or username
 // For users, allow userlevel = 0 or NULL (non-admin users)
 // Admin users (userlevel = 1) should use admin/login.php
-$stmt = mysqli_prepare($conn, "SELECT id, username, password, userlevel, account_status FROM users WHERE username = ?");
+if (filter_var($myusername, FILTER_VALIDATE_EMAIL)) {
+    // Input is an email
+    $stmt = mysqli_prepare($conn, "SELECT id, username, email, password, userlevel, account_status FROM users WHERE email = ?");
+} else {
+    // Input is a username
+    $stmt = mysqli_prepare($conn, "SELECT id, username, email, password, userlevel, account_status FROM users WHERE username = ?");
+}
 mysqli_stmt_bind_param($stmt, "s", $myusername);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
