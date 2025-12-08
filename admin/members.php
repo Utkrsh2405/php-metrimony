@@ -40,16 +40,48 @@ include("../includes/admin-header.php");
     }
 }
 
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
 .page-header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+    background-size: 200% 200%;
+    animation: gradientShift 15s ease infinite;
     color: white;
-    padding: 30px;
-    border-radius: 12px;
+    padding: 35px;
+    border-radius: 16px;
     margin-bottom: 30px;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    box-shadow: 0 4px 20px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 10px 40px rgba(102, 126, 234, 0.4);
+    position: relative;
+    overflow: hidden;
+}
+
+.page-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at top right, rgba(255,255,255,0.1), transparent);
+    pointer-events: none;
 }
 
 .page-header h2 {
@@ -66,49 +98,111 @@ include("../includes/admin-header.php");
 
 .stats-cards {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
     gap: 20px;
     margin-bottom: 30px;
+    animation: fadeIn 0.5s ease-out;
 }
 
 .stat-card {
     background: white;
-    padding: 20px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    border-left: 4px solid #667eea;
-    transition: transform 0.2s, box-shadow 0.2s;
+    padding: 24px;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    border-left: 5px solid #667eea;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    position: relative;
+    overflow: hidden;
+}
+
+.stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(135deg, transparent 0%, rgba(102, 126, 234, 0.03) 100%);
+    opacity: 0;
+    transition: opacity 0.3s;
 }
 
 .stat-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+    transform: translateY(-4px) scale(1.02);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+}
+
+.stat-card:hover::before {
+    opacity: 1;
 }
 
 .stat-card.success { border-left-color: #10b981; }
 .stat-card.warning { border-left-color: #f59e0b; }
 .stat-card.danger { border-left-color: #ef4444; }
+.stat-card.info { border-left-color: #3b82f6; }
+
+.stat-card .stat-icon {
+    font-size: 28px;
+    opacity: 0.15;
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    transition: all 0.3s;
+}
+
+.stat-card:hover .stat-icon {
+    opacity: 0.25;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.stat-card.success .stat-icon { color: #10b981; }
+.stat-card.warning .stat-icon { color: #f59e0b; }
+.stat-card.danger .stat-icon { color: #ef4444; }
+.stat-card.info .stat-icon { color: #3b82f6; }
 
 .stat-card .stat-value {
-    font-size: 32px;
-    font-weight: 700;
+    font-size: 36px;
+    font-weight: 800;
     color: #1e293b;
     margin-bottom: 5px;
+    position: relative;
+    z-index: 1;
 }
 
 .stat-card .stat-label {
     color: #64748b;
-    font-size: 14px;
+    font-size: 13px;
     text-transform: uppercase;
-    letter-spacing: 0.5px;
+    letter-spacing: 0.8px;
+    font-weight: 600;
+    position: relative;
+    z-index: 1;
 }
 
 .filters-card {
     background: white;
-    padding: 25px;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    margin-bottom: 25px;
+    padding: 30px;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.06);
+    margin-bottom: 30px;
+    border: 1px solid #f1f5f9;
+}
+
+.filters-card .section-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #1e293b;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.filters-card .section-title i {
+    color: #667eea;
 }
 
 .filters-card .form-group label {
@@ -117,59 +211,104 @@ include("../includes/admin-header.php");
     margin-bottom: 8px;
     font-size: 13px;
     text-transform: uppercase;
-    letter-spacing: 0.3px;
+    letter-spacing: 0.5px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.filters-card .form-group label i {
+    font-size: 12px;
+    opacity: 0.7;
 }
 
 .filters-card .form-control {
     border: 2px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 10px 15px;
-    transition: all 0.2s;
+    border-radius: 10px;
+    padding: 11px 16px;
+    transition: all 0.3s;
+    font-size: 14px;
+}
+
+.filters-card .form-control:hover {
+    border-color: #cbd5e1;
 }
 
 .filters-card .form-control:focus {
     border-color: #667eea;
-    box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.08);
     outline: none;
+    transform: translateY(-1px);
 }
 
 .btn {
-    padding: 10px 20px;
-    border-radius: 8px;
+    padding: 11px 24px;
+    border-radius: 10px;
     font-weight: 600;
-    transition: all 0.2s;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     border: none;
     cursor: pointer;
+    font-size: 14px;
+    letter-spacing: 0.3px;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.btn i {
+    font-size: 14px;
 }
 
 .btn-primary {
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
+    box-shadow: 0 2px 8px rgba(102, 126, 234, 0.25);
 }
 
 .btn-primary:hover {
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    background: linear-gradient(135deg, #5568d3 0%, #6a3f8f 100%);
+}
+
+.btn-primary:active {
+    transform: translateY(0);
 }
 
 .btn-success {
-    background: #10b981;
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
     color: white;
+    box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25);
 }
 
 .btn-success:hover {
-    background: #059669;
-    transform: translateY(-1px);
-    box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+    background: linear-gradient(135deg, #059669 0%, #047857 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(16, 185, 129, 0.4);
+}
+
+.btn-danger {
+    background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+    color: white;
+    box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25);
+}
+
+.btn-danger:hover {
+    background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(239, 68, 68, 0.4);
 }
 
 .btn-default {
-    background: #f1f5f9;
+    background: #f8fafc;
     color: #475569;
+    border: 2px solid #e2e8f0;
 }
 
 .btn-default:hover {
-    background: #e2e8f0;
+    background: #f1f5f9;
+    border-color: #cbd5e1;
+    transform: translateY(-1px);
 }
 
 .members-table-card {
@@ -414,18 +553,22 @@ include("../includes/admin-header.php");
 <!-- Stats Cards -->
 <div class="stats-cards" id="stats-cards">
     <div class="stat-card success">
+        <i class="fa fa-check-circle stat-icon"></i>
         <div class="stat-value" id="stat-active">-</div>
         <div class="stat-label">Active Members</div>
     </div>
     <div class="stat-card warning">
+        <i class="fa fa-pause-circle stat-icon"></i>
         <div class="stat-value" id="stat-suspended">-</div>
         <div class="stat-label">Suspended</div>
     </div>
     <div class="stat-card danger">
+        <i class="fa fa-trash stat-icon"></i>
         <div class="stat-value" id="stat-deleted">-</div>
         <div class="stat-label">Deleted</div>
     </div>
-    <div class="stat-card">
+    <div class="stat-card info">
+        <i class="fa fa-users stat-icon"></i>
         <div class="stat-value" id="stat-total">-</div>
         <div class="stat-label">Total Members</div>
     </div>
@@ -433,6 +576,10 @@ include("../includes/admin-header.php");
 
 <!-- Filters -->
 <div class="filters-card">
+    <div class="section-title">
+        <i class="fa fa-sliders"></i>
+        <span>Advanced Filters</span>
+    </div>
     <div class="row">
         <div class="col-md-3">
             <div class="form-group">
@@ -478,6 +625,32 @@ include("../includes/admin-header.php");
     </div>
 </div>
 
+<!-- Bulk Actions -->
+<div class="bulk-actions-bar" id="bulk-actions" style="display: none; margin-bottom: 20px;">
+    <div style="background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%); padding: 15px 25px; border-radius: 12px; display: flex; justify-content: space-between; align-items: center; border: 2px solid #e2e8f0;">
+        <div style="display: flex; align-items: center; gap: 15px;">
+            <span style="font-weight: 600; color: #475569;">
+                <i class="fa fa-check-square-o" style="color: #667eea; margin-right: 8px;"></i>
+                <span id="selected-count">0</span> selected
+            </span>
+        </div>
+        <div style="display: flex; gap: 10px;">
+            <button class="btn btn-xs" onclick="bulkAction('activate')" title="Activate Selected">
+                <i class="fa fa-check"></i> Activate
+            </button>
+            <button class="btn btn-xs" onclick="bulkAction('suspend')" title="Suspend Selected">
+                <i class="fa fa-ban"></i> Suspend
+            </button>
+            <button class="btn btn-xs" onclick="bulkAction('delete')" title="Delete Selected">
+                <i class="fa fa-trash"></i> Delete
+            </button>
+            <button class="btn btn-default" onclick="clearSelection()">
+                <i class="fa fa-times"></i> Clear
+            </button>
+        </div>
+    </div>
+</div>
+
 <!-- Members Table -->
 <div class="members-table-card">
     <div id="loading" style="display: none;">
@@ -489,6 +662,9 @@ include("../includes/admin-header.php");
         <table class="table">
             <thead>
                 <tr>
+                    <th style="width: 40px;">
+                        <input type="checkbox" id="select-all" onclick="toggleSelectAll(this)" style="cursor: pointer;">
+                    </th>
                     <th style="width: 60px;">ID</th>
                     <th>Name</th>
                     <th>Email</th>
@@ -555,6 +731,7 @@ let currentPage = 1;
 let currentFilters = {};
 let pendingAction = null;
 let memberStats = { active: 0, suspended: 0, deleted: 0, total: 0 };
+let selectedMembers = new Set();
 
 // Load members on page load
 $(document).ready(function() {
@@ -709,7 +886,10 @@ function renderMembers(members) {
         }
         
         const row = `
-            <tr>
+            <tr id="row-${member.id}">
+                <td>
+                    <input type="checkbox" class="member-checkbox" value="${member.id}" onclick="toggleMemberSelection(${member.id})" style="cursor: pointer;">
+                </td>
                 <td><strong style="color: #667eea;">#${member.id}</strong></td>
                 <td>
                     <div class="member-name">
@@ -862,6 +1042,12 @@ function confirmAction(action, memberId) {
 }
 
 function executeAction(action, memberId) {
+    // Check if this is a bulk action
+    if (action.startsWith('bulk_')) {
+        executeBulkAction(action, pendingAction.memberIds);
+        return;
+    }
+    
     // Show loading state
     $('#confirm-action-btn').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Processing...');
     
@@ -922,6 +1108,105 @@ function exportCSV() {
     
     // Create a temporary link and click it
     window.location.href = '/admin/api/export-members.php?' + params.toString();
+}
+
+function toggleSelectAll(checkbox) {
+    $('.member-checkbox').prop('checked', checkbox.checked);
+    if (checkbox.checked) {
+        $('.member-checkbox').each(function() {
+            selectedMembers.add(parseInt($(this).val()));
+        });
+    } else {
+        selectedMembers.clear();
+    }
+    updateBulkActionsBar();
+}
+
+function toggleMemberSelection(memberId) {
+    if (selectedMembers.has(memberId)) {
+        selectedMembers.delete(memberId);
+    } else {
+        selectedMembers.add(memberId);
+    }
+    updateBulkActionsBar();
+    
+    // Update select-all checkbox
+    const totalCheckboxes = $('.member-checkbox').length;
+    const checkedCheckboxes = $('.member-checkbox:checked').length;
+    $('#select-all').prop('checked', totalCheckboxes === checkedCheckboxes && totalCheckboxes > 0);
+}
+
+function updateBulkActionsBar() {
+    const count = selectedMembers.size;
+    if (count > 0) {
+        $('#bulk-actions').slideDown(200);
+        $('#selected-count').text(count);
+    } else {
+        $('#bulk-actions').slideUp(200);
+    }
+}
+
+function clearSelection() {
+    selectedMembers.clear();
+    $('.member-checkbox').prop('checked', false);
+    $('#select-all').prop('checked', false);
+    updateBulkActionsBar();
+}
+
+function bulkAction(action) {
+    if (selectedMembers.size === 0) {
+        showNotification('Warning', 'Please select at least one member', 'error');
+        return;
+    }
+    
+    let message = `Are you sure you want to ${action} ${selectedMembers.size} selected member(s)?`;
+    let iconClass = 'fa-exclamation-triangle';
+    let iconColor = '#f59e0b';
+    
+    if (action === 'delete') {
+        iconClass = 'fa-trash';
+        iconColor = '#ef4444';
+    } else if (action === 'activate') {
+        iconClass = 'fa-check-circle';
+        iconColor = '#10b981';
+    } else if (action === 'suspend') {
+        iconClass = 'fa-ban';
+        iconColor = '#f59e0b';
+    }
+    
+    $('#confirm-message').html(`
+        <div style="text-align: center; padding: 20px 0;">
+            <i class="fa ${iconClass} fa-3x" style="color: ${iconColor}; margin-bottom: 20px;"></i>
+            <p style="font-size: 15px; color: #475569; line-height: 1.6;">${message}</p>
+        </div>
+    `);
+    
+    pendingAction = { action: 'bulk_' + action, memberIds: Array.from(selectedMembers) };
+    $('#confirmModal').modal('show');
+}
+
+function executeBulkAction(action, memberIds) {
+    $('#confirm-action-btn').prop('disabled', true).html('<i class="fa fa-spinner fa-spin"></i> Processing...');
+    
+    const promises = memberIds.map(id => {
+        return $.ajax({
+            url: '/admin/api/members.php',
+            method: 'POST',
+            contentType: 'application/json',
+            data: JSON.stringify({ action: action.replace('bulk_', ''), member_id: id })
+        });
+    });
+    
+    Promise.all(promises).then(() => {
+        showNotification('Success!', `Bulk action completed for ${memberIds.length} member(s)`, 'success');
+        clearSelection();
+        loadMembers();
+        loadStats();
+        $('#confirm-action-btn').prop('disabled', false).text('Confirm');
+    }).catch(() => {
+        showNotification('Error', 'Some actions failed. Please try again.', 'error');
+        $('#confirm-action-btn').prop('disabled', false).text('Confirm');
+    });
 }
 </script>
 
