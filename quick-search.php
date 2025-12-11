@@ -205,7 +205,7 @@ while ($lang = mysqli_fetch_assoc($languages_query)) {
                         <label>Profile with</label>
                         <div>
                             <label class="checkbox-inline">
-                                <input type="checkbox" name="with_photo" value="1" checked> Photo
+                                <input type="checkbox" name="with_photo" value="1"> Photo
                             </label>
                             <label class="checkbox-inline">
                                 <input type="checkbox" name="with_horoscope" value="1"> Horoscope
