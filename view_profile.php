@@ -60,6 +60,10 @@ $row=mysqli_fetch_assoc($result);
 	$bros=$row['no_bro'];
 	$sis=$row['no_sis'];
 	$aboutme=$row['aboutme'];
+	
+	// Mobile number (contact info)
+	$mobile=$row['mobile'] ?? '';
+	$phone_code=$row['phone_code'] ?? '91';
 
 	$pic1="";
 	$pic2="";
@@ -550,6 +554,46 @@ $p_descr=$partner_row['descr'] ?? '';
     background: #dc2626;
     transform: scale(1.1);
 }
+
+/* Contact Information Styles */
+.view-mobile-btn, .view-email-btn {
+    margin-left: 10px;
+    padding: 5px 12px;
+    font-size: 12px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.view-mobile-btn:hover, .view-email-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.masked-number, .masked-email {
+    font-family: monospace;
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+.mobile-link, .email-link {
+    color: var(--primary-color);
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.mobile-link:hover, .email-link:hover {
+    color: #c2185b;
+    text-decoration: underline;
+}
+
+.mobile-link i, .email-link i {
+    margin-right: 5px;
+}
 </style>
 
 <script>
@@ -698,6 +742,53 @@ $(document).ready(function(){
                     </div>
                 </div>
             </div>
+
+            <!-- Contact Information - Only visible to logged-in users viewing other profiles -->
+            <?php if (!$is_own_profile && isloggedin()): ?>
+            <div class="profile-card">
+                <div class="section-title">
+                    <i class="fa fa-phone"></i> Contact Information
+                </div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-mobile"></i> Mobile Number</div>
+                        <div class="info-value">
+                            <?php if (!empty($mobile)): ?>
+                                <span id="mobile-hidden">
+                                    <span class="masked-number">+<?php echo $phone_code; ?> <?php echo substr($mobile, 0, 2) . '****' . substr($mobile, -2); ?></span>
+                                    <button class="btn btn-sm btn-primary view-mobile-btn" onclick="viewMobileNumber()">
+                                        <i class="fa fa-eye"></i> View Number
+                                    </button>
+                                </span>
+                                <span id="mobile-visible" style="display: none;">
+                                    <a href="tel:+<?php echo $phone_code . $mobile; ?>" class="mobile-link">
+                                        <i class="fa fa-phone"></i> +<?php echo $phone_code; ?> <?php echo $mobile; ?>
+                                    </a>
+                                </span>
+                            <?php else: ?>
+                                <span class="text-muted">Not provided</span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-envelope"></i> Email</div>
+                        <div class="info-value">
+                            <span id="email-hidden">
+                                <span class="masked-email"><?php echo substr($email, 0, 2) . '****@' . explode('@', $email)[1]; ?></span>
+                                <button class="btn btn-sm btn-primary view-email-btn" onclick="viewEmail()">
+                                    <i class="fa fa-eye"></i> View Email
+                                </button>
+                            </span>
+                            <span id="email-visible" style="display: none;">
+                                <a href="mailto:<?php echo $email; ?>" class="email-link">
+                                    <i class="fa fa-envelope"></i> <?php echo $email; ?>
+                                </a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
 
             <!-- Religious Background -->
             <div class="profile-card">
@@ -932,6 +1023,18 @@ function removePhoto(btn, index) {
 function sendInterest(profileId) {
     // Add AJAX call to send interest
     alert('Interest sent to profile #' + profileId);
+}
+
+// View Mobile Number function
+function viewMobileNumber() {
+    document.getElementById('mobile-hidden').style.display = 'none';
+    document.getElementById('mobile-visible').style.display = 'inline';
+}
+
+// View Email function
+function viewEmail() {
+    document.getElementById('email-hidden').style.display = 'none';
+    document.getElementById('email-visible').style.display = 'inline';
 }
 </script>
 

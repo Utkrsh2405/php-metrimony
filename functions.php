@@ -226,9 +226,9 @@ function register(){
 		// Get the inserted user ID
 		$user_id = mysqli_insert_id($conn);
 		
-		// Insert into customer table with detailed profile
+		// Insert into customer table with detailed profile (including mobile)
 		$customer_sql = "INSERT INTO customer (
-			cust_id, email, age, height, sex, religion, caste, subcaste, 
+			cust_id, email, mobile, phone_code, age, height, sex, religion, caste, subcaste, 
 			district, state, country, maritalstatus, profilecreatedby, 
 			education, education_sub, firstname, lastname, body_type, 
 			physical_status, drink, mothertounge, colour, weight, 
@@ -236,7 +236,7 @@ function register(){
 			occupation_descr, annual_income, fathers_occupation, 
 			mothers_occupation, no_bro, no_sis, aboutme, profilecreationdate
 		) VALUES (
-			'$user_id', '$email', '$age', '$height', '$gender', '$religion', 
+			'$user_id', '$email', '$mobile', '$phone_code', '$age', '$height', '$gender', '$religion', 
 			'$caste', '$sub_caste', '$city', '$state', '$country', 
 			'$marital_status', 'Self', '', '', '$uname', '', '', 
 			'', '', '$mother_tongue', '', 0, '', '', '', '$dob', '', 
@@ -283,6 +283,8 @@ function processprofile_form($id){
 	$lname = mysqli_real_escape_string($conn, $_POST['lname'] ?? '');
 	$sex = mysqli_real_escape_string($conn, $_POST['sex'] ?? '');
 	$email = mysqli_real_escape_string($conn, $_POST['email'] ?? '');
+	$mobile = mysqli_real_escape_string($conn, $_POST['mobile'] ?? '');
+	$phone_code = mysqli_real_escape_string($conn, $_POST['phone_code'] ?? '91');
 	
 	$day = mysqli_real_escape_string($conn, $_POST['day'] ?? '');
 	$month = mysqli_real_escape_string($conn, $_POST['month'] ?? '');
@@ -329,6 +331,8 @@ if(mysqli_num_rows($result) >= 1){
 	$sql = "UPDATE customer 
 		SET
 		   email = '$email',
+		   mobile = '$mobile',
+		   phone_code = '$phone_code',
 		   age = $age,
 		   sex = '$sex',
 		   religion = '$religion',
@@ -373,9 +377,9 @@ if(mysqli_num_rows($result) >= 1){
 }else{
 	//Insert the data
 	$sql = "INSERT INTO customer
-				   (cust_id, email, age, sex, religion, caste, subcaste, district, state, country, maritalstatus, profilecreatedby, education, education_sub, firstname, lastname, body_type, physical_status, drink, mothertounge, colour, weight, height, blood_group, diet, smoke, dateofbirth, occupation, occupation_descr, annual_income, fathers_occupation, mothers_occupation, no_bro, no_sis, aboutme, profilecreationdate) 
+				   (cust_id, email, mobile, phone_code, age, sex, religion, caste, subcaste, district, state, country, maritalstatus, profilecreatedby, education, education_sub, firstname, lastname, body_type, physical_status, drink, mothertounge, colour, weight, height, blood_group, diet, smoke, dateofbirth, occupation, occupation_descr, annual_income, fathers_occupation, mothers_occupation, no_bro, no_sis, aboutme, profilecreationdate) 
 				VALUES
-				   ($id, '$email', $age, '$sex', '$religion', '$caste', '$subcaste', '$district', '$state', '$country', '$maritalstatus', '$profileby', '$education', '$edudescr', '$fname', '$lname', '$bodytype', '$physicalstatus', '$drink', '$mothertounge', '$colour', $weight, '$height', '$bloodgroup', '$diet', '$smoke', '$dob', '$occupation', '$occupationdescr', '$income', '$fatheroccupation', '$motheroccupation', $bros, $sis, '$aboutme', CURDATE())";
+				   ($id, '$email', '$mobile', '$phone_code', $age, '$sex', '$religion', '$caste', '$subcaste', '$district', '$state', '$country', '$maritalstatus', '$profileby', '$education', '$edudescr', '$fname', '$lname', '$bodytype', '$physicalstatus', '$drink', '$mothertounge', '$colour', $weight, '$height', '$bloodgroup', '$diet', '$smoke', '$dob', '$occupation', '$occupationdescr', '$income', '$fatheroccupation', '$motheroccupation', $bros, $sis, '$aboutme', CURDATE())";
 			
 	if (mysqli_query($conn, $sql)) {
 	  echo "Successfully Created profile";
