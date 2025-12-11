@@ -246,6 +246,20 @@ $p_descr=$partner_row['descr'] ?? '';
     transform: translateY(-2px);
 }
 
+.btn-mobile {
+    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+    color: white;
+}
+
+.btn-mobile:hover {
+    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
+    transform: translateY(-2px);
+}
+
+.btn-mobile.revealed {
+    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+}
+
 .profile-container {
     max-width: 1200px;
     margin: 0 auto;
@@ -640,6 +654,11 @@ $(document).ready(function(){
                 <button class="btn-modern btn-interest" onclick="sendInterest(<?php echo $profileid; ?>)">
                     <i class="fa fa-heart"></i> Express Interest
                 </button>
+                <?php if (!empty($mobile)): ?>
+                <button class="btn-modern btn-mobile" onclick="showMobileNumber()">
+                    <i class="fa fa-phone"></i> <span id="mobile-btn-text">View Mobile</span>
+                </button>
+                <?php endif; ?>
                 <button class="btn-modern btn-photos">
                     <i class="fa fa-comments"></i> Send Message
                 </button>
@@ -1065,7 +1084,22 @@ function sendInterest(profileId) {
     alert('Interest sent to profile #' + profileId);
 }
 
-// View Mobile Number function
+// Show Mobile Number in header button
+function showMobileNumber() {
+    var btn = document.querySelector('.btn-mobile');
+    var btnText = document.getElementById('mobile-btn-text');
+    var mobileNumber = '<?php echo !empty($mobile) ? "+$phone_code $mobile" : "Not Available"; ?>';
+    
+    if (btnText.innerText === 'View Mobile') {
+        btnText.innerHTML = mobileNumber;
+        btn.classList.add('revealed');
+        btn.onclick = function() {
+            window.location.href = 'tel:<?php echo !empty($mobile) ? "+$phone_code$mobile" : ""; ?>';
+        };
+    }
+}
+
+// View Mobile Number function (for contact section)
 function viewMobileNumber() {
     document.getElementById('mobile-hidden').style.display = 'none';
     document.getElementById('mobile-visible').style.display = 'inline';
