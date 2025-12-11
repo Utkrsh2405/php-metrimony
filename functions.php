@@ -226,22 +226,44 @@ function register(){
 		// Get the inserted user ID
 		$user_id = mysqli_insert_id($conn);
 		
-		// Insert into customer table with detailed profile (including mobile)
-		$customer_sql = "INSERT INTO customer (
-			cust_id, email, mobile, phone_code, age, height, sex, religion, caste, subcaste, 
-			district, state, country, maritalstatus, profilecreatedby, 
-			education, education_sub, firstname, lastname, body_type, 
-			physical_status, drink, mothertounge, colour, weight, 
-			blood_group, diet, smoke, dateofbirth, occupation, 
-			occupation_descr, annual_income, fathers_occupation, 
-			mothers_occupation, no_bro, no_sis, aboutme, profilecreationdate
-		) VALUES (
-			'$user_id', '$email', '$mobile', '$phone_code', '$age', '$height', '$gender', '$religion', 
-			'$caste', '$sub_caste', '$city', '$state', '$country', 
-			'$marital_status', 'Self', '', '', '$uname', '', '', 
-			'', '', '$mother_tongue', '', 0, '', '', '', '$dob', '', 
-			'', '', '', '', 0, 0, '', CURDATE()
-		)";
+		// Check if mobile columns exist in customer table
+		$column_check = mysqli_query($conn, "SHOW COLUMNS FROM customer LIKE 'mobile'");
+		$has_mobile_column = mysqli_num_rows($column_check) > 0;
+		
+		// Insert into customer table with detailed profile
+		if ($has_mobile_column) {
+			$customer_sql = "INSERT INTO customer (
+				cust_id, email, mobile, phone_code, age, height, sex, religion, caste, subcaste, 
+				district, state, country, maritalstatus, profilecreatedby, 
+				education, education_sub, firstname, lastname, body_type, 
+				physical_status, drink, mothertounge, colour, weight, 
+				blood_group, diet, smoke, dateofbirth, occupation, 
+				occupation_descr, annual_income, fathers_occupation, 
+				mothers_occupation, no_bro, no_sis, aboutme, profilecreationdate
+			) VALUES (
+				'$user_id', '$email', '$mobile', '$phone_code', '$age', '$height', '$gender', '$religion', 
+				'$caste', '$sub_caste', '$city', '$state', '$country', 
+				'$marital_status', 'Self', '', '', '$uname', '', '', 
+				'', '', '$mother_tongue', '', 0, '', '', '', '$dob', '', 
+				'', '', '', '', 0, 0, '', CURDATE()
+			)";
+		} else {
+			$customer_sql = "INSERT INTO customer (
+				cust_id, email, age, height, sex, religion, caste, subcaste, 
+				district, state, country, maritalstatus, profilecreatedby, 
+				education, education_sub, firstname, lastname, body_type, 
+				physical_status, drink, mothertounge, colour, weight, 
+				blood_group, diet, smoke, dateofbirth, occupation, 
+				occupation_descr, annual_income, fathers_occupation, 
+				mothers_occupation, no_bro, no_sis, aboutme, profilecreationdate
+			) VALUES (
+				'$user_id', '$email', '$age', '$height', '$gender', '$religion', 
+				'$caste', '$sub_caste', '$city', '$state', '$country', 
+				'$marital_status', 'Self', '', '', '$uname', '', '', 
+				'', '', '$mother_tongue', '', 0, '', '', '', '$dob', '', 
+				'', '', '', '', 0, 0, '', CURDATE()
+			)";
+		}
 		
 		if (mysqli_query($conn, $customer_sql)) {
 			echo "<div class='alert alert-success' style='margin-bottom: 20px;'>";
@@ -324,49 +346,93 @@ function processprofile_form($id){
 
 	$sql = "SELECT cust_id FROM customer WHERE cust_id = $id";
 	$result = mysqli_query($conn, $sql);
+	
+	// Check if mobile columns exist in customer table
+	$column_check = mysqli_query($conn, "SHOW COLUMNS FROM customer LIKE 'mobile'");
+	$has_mobile_column = mysqli_num_rows($column_check) > 0;
 
 if(mysqli_num_rows($result) >= 1){
 	//there is already a profile in this table for loggedin customer
 	//update the data
-	$sql = "UPDATE customer 
-		SET
-		   email = '$email',
-		   mobile = '$mobile',
-		   phone_code = '$phone_code',
-		   age = $age,
-		   sex = '$sex',
-		   religion = '$religion',
-		   caste = '$caste',
-		   subcaste = '$subcaste',
-		   district = '$district',
-		   state = '$state',
-		   country = '$country',
-		   maritalstatus = '$maritalstatus',
-		   profilecreatedby = '$profileby',
-		   education  = '$education',
-		   education_sub = '$edudescr',
-		   firstname = '$fname',
-		   lastname = '$lname',
-		   body_type = '$bodytype',
-		   physical_status = '$physicalstatus',
-		   drink =  '$drink',
-		   mothertounge = '$mothertounge',
-		   colour = '$colour',
-		   weight = $weight,
-		   height = '$height',
-		   blood_group = '$bloodgroup',
-		   diet = '$diet',
-		   smoke = '$smoke',
-		   dateofbirth = '$dob', 
-		   occupation = '$occupation', 
-		   occupation_descr = '$occupationdescr', 
-		   annual_income = '$income', 
-		   fathers_occupation = '$fatheroccupation',
-		   mothers_occupation = '$motheroccupation',
-		   no_bro = $bros, 
-		   no_sis = $sis, 
-		   aboutme = '$aboutme'
-		WHERE cust_id = $id";
+	if ($has_mobile_column) {
+		$sql = "UPDATE customer 
+			SET
+			   email = '$email',
+			   mobile = '$mobile',
+			   phone_code = '$phone_code',
+			   age = $age,
+			   sex = '$sex',
+			   religion = '$religion',
+			   caste = '$caste',
+			   subcaste = '$subcaste',
+			   district = '$district',
+			   state = '$state',
+			   country = '$country',
+			   maritalstatus = '$maritalstatus',
+			   profilecreatedby = '$profileby',
+			   education  = '$education',
+			   education_sub = '$edudescr',
+			   firstname = '$fname',
+			   lastname = '$lname',
+			   body_type = '$bodytype',
+			   physical_status = '$physicalstatus',
+			   drink =  '$drink',
+			   mothertounge = '$mothertounge',
+			   colour = '$colour',
+			   weight = $weight,
+			   height = '$height',
+			   blood_group = '$bloodgroup',
+			   diet = '$diet',
+			   smoke = '$smoke',
+			   dateofbirth = '$dob', 
+			   occupation = '$occupation', 
+			   occupation_descr = '$occupationdescr', 
+			   annual_income = '$income', 
+			   fathers_occupation = '$fatheroccupation',
+			   mothers_occupation = '$motheroccupation',
+			   no_bro = $bros, 
+			   no_sis = $sis, 
+			   aboutme = '$aboutme'
+			WHERE cust_id = $id";
+	} else {
+		$sql = "UPDATE customer 
+			SET
+			   email = '$email',
+			   age = $age,
+			   sex = '$sex',
+			   religion = '$religion',
+			   caste = '$caste',
+			   subcaste = '$subcaste',
+			   district = '$district',
+			   state = '$state',
+			   country = '$country',
+			   maritalstatus = '$maritalstatus',
+			   profilecreatedby = '$profileby',
+			   education  = '$education',
+			   education_sub = '$edudescr',
+			   firstname = '$fname',
+			   lastname = '$lname',
+			   body_type = '$bodytype',
+			   physical_status = '$physicalstatus',
+			   drink =  '$drink',
+			   mothertounge = '$mothertounge',
+			   colour = '$colour',
+			   weight = $weight,
+			   height = '$height',
+			   blood_group = '$bloodgroup',
+			   diet = '$diet',
+			   smoke = '$smoke',
+			   dateofbirth = '$dob', 
+			   occupation = '$occupation', 
+			   occupation_descr = '$occupationdescr', 
+			   annual_income = '$income', 
+			   fathers_occupation = '$fatheroccupation',
+			   mothers_occupation = '$motheroccupation',
+			   no_bro = $bros, 
+			   no_sis = $sis, 
+			   aboutme = '$aboutme'
+			WHERE cust_id = $id";
+	}
 		   
    if (mysqli_query($conn, $sql)) {
    	echo "<script>alert(\"Successfully Updated Profile\")</script>";
@@ -376,10 +442,17 @@ if(mysqli_num_rows($result) >= 1){
    }
 }else{
 	//Insert the data
-	$sql = "INSERT INTO customer
-				   (cust_id, email, mobile, phone_code, age, sex, religion, caste, subcaste, district, state, country, maritalstatus, profilecreatedby, education, education_sub, firstname, lastname, body_type, physical_status, drink, mothertounge, colour, weight, height, blood_group, diet, smoke, dateofbirth, occupation, occupation_descr, annual_income, fathers_occupation, mothers_occupation, no_bro, no_sis, aboutme, profilecreationdate) 
-				VALUES
-				   ($id, '$email', '$mobile', '$phone_code', $age, '$sex', '$religion', '$caste', '$subcaste', '$district', '$state', '$country', '$maritalstatus', '$profileby', '$education', '$edudescr', '$fname', '$lname', '$bodytype', '$physicalstatus', '$drink', '$mothertounge', '$colour', $weight, '$height', '$bloodgroup', '$diet', '$smoke', '$dob', '$occupation', '$occupationdescr', '$income', '$fatheroccupation', '$motheroccupation', $bros, $sis, '$aboutme', CURDATE())";
+	if ($has_mobile_column) {
+		$sql = "INSERT INTO customer
+					   (cust_id, email, mobile, phone_code, age, sex, religion, caste, subcaste, district, state, country, maritalstatus, profilecreatedby, education, education_sub, firstname, lastname, body_type, physical_status, drink, mothertounge, colour, weight, height, blood_group, diet, smoke, dateofbirth, occupation, occupation_descr, annual_income, fathers_occupation, mothers_occupation, no_bro, no_sis, aboutme, profilecreationdate) 
+					VALUES
+					   ($id, '$email', '$mobile', '$phone_code', $age, '$sex', '$religion', '$caste', '$subcaste', '$district', '$state', '$country', '$maritalstatus', '$profileby', '$education', '$edudescr', '$fname', '$lname', '$bodytype', '$physicalstatus', '$drink', '$mothertounge', '$colour', $weight, '$height', '$bloodgroup', '$diet', '$smoke', '$dob', '$occupation', '$occupationdescr', '$income', '$fatheroccupation', '$motheroccupation', $bros, $sis, '$aboutme', CURDATE())";
+	} else {
+		$sql = "INSERT INTO customer
+					   (cust_id, email, age, sex, religion, caste, subcaste, district, state, country, maritalstatus, profilecreatedby, education, education_sub, firstname, lastname, body_type, physical_status, drink, mothertounge, colour, weight, height, blood_group, diet, smoke, dateofbirth, occupation, occupation_descr, annual_income, fathers_occupation, mothers_occupation, no_bro, no_sis, aboutme, profilecreationdate) 
+					VALUES
+					   ($id, '$email', $age, '$sex', '$religion', '$caste', '$subcaste', '$district', '$state', '$country', '$maritalstatus', '$profileby', '$education', '$edudescr', '$fname', '$lname', '$bodytype', '$physicalstatus', '$drink', '$mothertounge', '$colour', $weight, '$height', '$bloodgroup', '$diet', '$smoke', '$dob', '$occupation', '$occupationdescr', '$income', '$fatheroccupation', '$motheroccupation', $bros, $sis, '$aboutme', CURDATE())";
+	}
 			
 	if (mysqli_query($conn, $sql)) {
 	  echo "Successfully Created profile";
