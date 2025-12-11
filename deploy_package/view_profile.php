@@ -8,7 +8,15 @@ if(isloggedin()){
    header("location:login.php");
 }
  
-$id=$_GET['id'];
+// Sanitize and validate ID parameter
+$id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+if ($id <= 0) {
+    die("Invalid profile ID");
+}
+
+// Check if this is the logged-in user's own profile
+$is_own_profile = (isset($_SESSION['id']) && $_SESSION['id'] == $id);
+
 //safty purpose copy the get id
 $profileid=$id;
 
@@ -52,10 +60,10 @@ $row=mysqli_fetch_assoc($result);
 	$bros=$row['no_bro'];
 	$sis=$row['no_sis'];
 	$aboutme=$row['aboutme'];
-
-//end of getting profile detils
-
-
+	
+	// Mobile number (contact info)
+	$mobile=$row['mobile'] ?? '';
+	$phone_code=$row['phone_code'] ?? '91';
 
 	$pic1="";
 	$pic2="";
@@ -66,37 +74,528 @@ $sql2="SELECT * FROM photos WHERE cust_id = $profileid";
 $result2 = mysqlexec($sql2);
 if($result2){
 	$row2=mysqli_fetch_array($result2);
-	$pic1=$row2['pic1'];
-	$pic2=$row2['pic2'];
-	$pic3=$row2['pic3'];
-	$pic4=$row2['pic4'];
+	$pic1=$row2['pic1'] ?? 'default-avatar.jpg';
+	$pic2=$row2['pic2'] ?? '';
+	$pic3=$row2['pic3'] ?? '';
+	$pic4=$row2['pic4'] ?? '';
 }
 }else{
 	echo "<script>alert(\"Invalid Profile ID\")</script>";
 }
 
+//getting partner preference
+$sql = "SELECT * FROM partnerprefs WHERE custId = $id";
+$result = mysqlexec($sql);
+$partner_row = mysqli_fetch_assoc($result);
+
+$agemin=$partner_row['agemin'] ?? '';
+$agemax=$partner_row['agemax'] ?? '';
+$p_maritalstatus=$partner_row['maritalstatus'] ?? '';
+$p_complexion=$partner_row['complexion'] ?? '';
+$p_height=$partner_row['height'] ?? '';
+$p_diet=$partner_row['diet'] ?? '';
+$p_religion=$partner_row['religion'] ?? '';
+$p_caste=$partner_row['caste'] ?? '';
+$p_mothertounge=$partner_row['mothertounge'] ?? '';
+$p_education=$partner_row['education'] ?? '';
+$p_occupation=$partner_row['occupation'] ?? '';
+$p_country=$partner_row['country'] ?? '';
+$p_descr=$partner_row['descr'] ?? '';
+
 ?>
 <!DOCTYPE HTML>
 <html>
 <head>
-<title>Find Your Perfect Partner - Makemylove
- | View_profile :: Make My Love
-</title>
+<title><?php echo $fname . " " . $lname; ?>'s Profile | Make My Love</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
 
-<script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
 <link href="css/bootstrap-3.1.1.min.css" rel='stylesheet' type='text/css' />
-<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
 <script src="js/jquery.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
-<!-- Custom Theme files -->
 <link href="css/style.css" rel='stylesheet' type='text/css' />
 <link href='//fonts.googleapis.com/css?family=Oswald:300,400,700' rel='stylesheet' type='text/css'>
 <link href='//fonts.googleapis.com/css?family=Ubuntu:300,400,500,700' rel='stylesheet' type='text/css'>
-<!--font-Awesome-->
 <link href="css/font-awesome.css" rel="stylesheet"> 
-<!--font-Awesome-->
+
+<style>
+/* Modern Profile Page Styles */
+:root {
+    --primary-color: #e91e63;
+    --secondary-color: #667eea;
+    --success-color: #10b981;
+    --text-dark: #1e293b;
+    --text-light: #64748b;
+    --border-color: #e2e8f0;
+    --bg-light: #f8fafc;
+}
+
+.profile-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #e91e63 100%);
+    background-size: 200% 200%;
+    animation: gradientShift 15s ease infinite;
+    padding: 40px 0;
+    margin-bottom: 30px;
+    color: white;
+    position: relative;
+    overflow: hidden;
+}
+
+.profile-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: radial-gradient(circle at top right, rgba(255,255,255,0.1), transparent);
+}
+
+@keyframes gradientShift {
+    0% { background-position: 0% 50%; }
+    50% { background-position: 100% 50%; }
+    100% { background-position: 0% 50%; }
+}
+
+.profile-header-content {
+    position: relative;
+    z-index: 1;
+}
+
+.profile-id-badge {
+    background: rgba(255,255,255,0.2);
+    padding: 8px 20px;
+    border-radius: 25px;
+    display: inline-block;
+    font-size: 14px;
+    font-weight: 600;
+    margin-bottom: 10px;
+    backdrop-filter: blur(10px);
+}
+
+.profile-name {
+    font-size: 36px;
+    font-weight: 700;
+    margin: 0 0 10px 0;
+    text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.profile-meta {
+    font-size: 16px;
+    opacity: 0.95;
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+}
+
+.profile-meta span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.action-buttons {
+    margin-top: 20px;
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.btn-modern {
+    padding: 12px 28px;
+    border-radius: 25px;
+    font-weight: 600;
+    border: none;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.btn-edit {
+    background: white;
+    color: var(--primary-color);
+}
+
+.btn-edit:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+.btn-photos {
+    background: rgba(255,255,255,0.2);
+    color: white;
+    backdrop-filter: blur(10px);
+    border: 2px solid rgba(255,255,255,0.3);
+}
+
+.btn-photos:hover {
+    background: rgba(255,255,255,0.3);
+    transform: translateY(-2px);
+}
+
+.btn-interest {
+    background: var(--success-color);
+    color: white;
+}
+
+.btn-interest:hover {
+    background: #059669;
+    transform: translateY(-2px);
+}
+
+.profile-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 15px;
+}
+
+.profile-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    padding: 30px;
+    margin-bottom: 25px;
+    border: 1px solid var(--border-color);
+}
+
+.photo-gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 15px;
+    margin-bottom: 25px;
+}
+
+.photo-item {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    aspect-ratio: 3/4;
+    background: var(--bg-light);
+}
+
+.photo-item img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.3s;
+}
+
+.photo-item:hover img {
+    transform: scale(1.05);
+}
+
+.photo-main {
+    grid-column: span 2;
+    grid-row: span 2;
+}
+
+.section-title {
+    font-size: 22px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 3px solid var(--primary-color);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.section-title i {
+    color: var(--primary-color);
+}
+
+.info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 20px;
+}
+
+.info-item {
+    display: flex;
+    padding: 15px;
+    border-radius: 10px;
+    background: var(--bg-light);
+    transition: all 0.3s;
+}
+
+.info-item:hover {
+    background: #f1f5f9;
+    transform: translateX(5px);
+}
+
+.info-label {
+    font-weight: 600;
+    color: var(--text-light);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    min-width: 140px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.info-label i {
+    color: var(--primary-color);
+    font-size: 16px;
+}
+
+.info-value {
+    color: var(--text-dark);
+    font-weight: 500;
+    font-size: 15px;
+}
+
+.about-text {
+    background: var(--bg-light);
+    padding: 20px;
+    border-radius: 12px;
+    border-left: 4px solid var(--primary-color);
+    line-height: 1.8;
+    color: var(--text-dark);
+    font-size: 15px;
+}
+
+.nav-tabs-modern {
+    border-bottom: 2px solid var(--border-color);
+    margin-bottom: 25px;
+}
+
+.nav-tabs-modern li a {
+    border: none;
+    color: var(--text-light);
+    font-weight: 600;
+    padding: 12px 24px;
+    border-radius: 8px 8px 0 0;
+    margin-right: 5px;
+}
+
+.nav-tabs-modern li.active a,
+.nav-tabs-modern li a:hover {
+    background: var(--primary-color);
+    color: white;
+    border: none;
+}
+
+.sidebar-card {
+    background: white;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    padding: 25px;
+    margin-bottom: 25px;
+    border: 1px solid var(--border-color);
+}
+
+.sidebar-title {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text-dark);
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid var(--primary-color);
+}
+
+.recent-profile-item {
+    display: flex;
+    gap: 12px;
+    padding: 12px;
+    border-radius: 10px;
+    margin-bottom: 12px;
+    transition: all 0.3s;
+    border: 1px solid var(--border-color);
+}
+
+.recent-profile-item:hover {
+    background: var(--bg-light);
+    transform: translateX(5px);
+    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+
+.recent-profile-img {
+    width: 70px;
+    height: 70px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.recent-profile-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.recent-profile-info h5 {
+    font-size: 15px;
+    font-weight: 600;
+    color: var(--text-dark);
+    margin: 0 0 5px 0;
+}
+
+.recent-profile-info p {
+    font-size: 13px;
+    color: var(--text-light);
+    margin: 0 0 5px 0;
+}
+
+.recent-profile-info .view-link {
+    color: var(--primary-color);
+    font-size: 12px;
+    font-weight: 600;
+    text-decoration: none;
+}
+
+.recent-profile-info .view-link:hover {
+    text-decoration: underline;
+}
+
+@media (max-width: 768px) {
+    .profile-name {
+        font-size: 28px;
+    }
+    
+    .photo-main {
+        grid-column: span 1;
+        grid-row: span 1;
+    }
+    
+    .info-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .action-buttons {
+        flex-direction: column;
+    }
+    
+    .btn-modern {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Photo Upload Modal */
+.modal-modern .modal-content {
+    border-radius: 16px;
+    border: none;
+}
+
+.modal-modern .modal-header {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border-radius: 16px 16px 0 0;
+    padding: 20px 25px;
+}
+
+.modal-modern .modal-title {
+    font-weight: 700;
+}
+
+.photo-upload-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.upload-box {
+    border: 2px dashed var(--border-color);
+    border-radius: 12px;
+    padding: 30px 20px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.3s;
+    background: var(--bg-light);
+}
+
+.upload-box:hover {
+    border-color: var(--primary-color);
+    background: white;
+}
+
+.upload-box i {
+    font-size: 36px;
+    color: var(--text-light);
+    margin-bottom: 10px;
+}
+
+.upload-box.has-image {
+    padding: 0;
+    position: relative;
+    aspect-ratio: 3/4;
+}
+
+.upload-box.has-image img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.upload-box .remove-photo {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background: rgba(239, 68, 68, 0.9);
+    color: white;
+    width: 32px;
+    height: 32px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.upload-box .remove-photo:hover {
+    background: #dc2626;
+    transform: scale(1.1);
+}
+
+/* Contact Information Styles */
+.view-mobile-btn, .view-email-btn {
+    margin-left: 10px;
+    padding: 5px 12px;
+    font-size: 12px;
+    border-radius: 20px;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border: none;
+    color: white;
+    cursor: pointer;
+    transition: all 0.3s;
+}
+
+.view-mobile-btn:hover, .view-email-btn:hover {
+    transform: scale(1.05);
+    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+}
+
+.masked-number, .masked-email {
+    font-family: monospace;
+    color: var(--text-light);
+    font-size: 14px;
+}
+
+.mobile-link, .email-link {
+    color: var(--primary-color);
+    font-weight: 600;
+    text-decoration: none;
+    transition: all 0.3s;
+}
+
+.mobile-link:hover, .email-link:hover {
+    color: #c2185b;
+    text-decoration: underline;
+}
+
+.mobile-link i, .email-link i {
+    margin-right: 5px;
+}
+</style>
+
 <script>
 $(document).ready(function(){
     $(".dropdown").hover(            
@@ -113,397 +612,472 @@ $(document).ready(function(){
 </script>
 </head>
 <body>
-<!-- ============================  Navigation Start =========================== -->
- <?php include_once("includes/navigation.php");?>
-<!-- ============================  Navigation End ============================ -->
-<div class="grid_3">
-  <div class="container">
-   <div class="breadcrumb1">
-     <ul>
-        <a href="index.php"><i class="fa fa-home home_1"></i></a>
-        <span class="divider">&nbsp;|&nbsp;</span>
-        <li class="current-page">View Profile</li>
-     </ul>
-   </div>
-   <div class="profile">
-   	 <div class="col-md-8 profile_left">
-   	 	<h2>Profile Id : <?php echo $profileid;?></h2>
-   	 	<div class="col_3">
-   	        <div class="col-sm-4 row_2">
-				<div class="flexslider">
-					 <ul class="slides">
-						<li data-thumb="profile/<?php echo $profileid;?>/<?php echo $pic1;?>">
-							<img src="profile/<?php echo $profileid;?>/<?php echo $pic1;?>" />
-						</li>
-						<li data-thumb="profile/<?php echo $profileid;?>/<?php echo $pic2;?>">
-							<img src="profile/<?php echo $profileid;?>/<?php echo $pic2;?>" />
-						</li>
-						<li data-thumb="profile/<?php echo $profileid;?>/<?php echo $pic3;?>">
-							<img src="profile/<?php echo $profileid;?>/<?php echo $pic3;?>" />
-						</li>
-						<li data-thumb="profile/<?php echo $profileid;?>/<?php echo $pic4;?>">
-							<img src="profile/<?php echo $profileid;?>/<?php echo $pic4;?>" />
-						</li>
-					 </ul>
-				  </div>
-			</div>
-			<div class="col-sm-8 row_1">
-				<table class="table_working_hours">
-		        	<tbody>
-		        		<tr class="opened_1">
-							<td class="day_label">Name :</td>
-							<td class="day_value"><?php echo $fname . " " .$lname; ?></td>
-						</tr><tr class="opened_1">
-							<td class="day_label">Age / Height :</td>
-							<td class="day_value"><?php echo $age . " Years"; ?>/<?php echo $height . " Cm";?> </td>
-						</tr>
-					  	<tr class="opened">
-							<td class="day_label">Religion :</td>
-							<td class="day_value"><?php echo $religion;?></td>
-						</tr>
-					    <tr class="opened">
-							<td class="day_label">Marital Status :</td>
-							<td class="day_value"><?php echo $maritalstatus;?></td>
-						</tr>
-					    <tr class="opened">
-							<td class="day_label">Country :</td>
-							<td class="day_value"><?php echo $country;?></td>
-						</tr>
-					    <tr class="closed">
-							<td class="day_label">Profile Created by :</td>
-							<td class="day_value closed"><span><?php echo $profileby;?></span></td>
-						</tr>
-					    <tr class="closed">
-							<td class="day_label">Education :</td>
-							<td class="day_value closed"><span><?php echo $education;?></span></td>
-						</tr>
-				    </tbody>
-				</table>
-				</div>
-			<div class="clearfix"> </div>
-		</div>
-		<div class="col_4">
-		    <div class="bs-example bs-example-tabs" role="tabpanel" data-example-id="togglable-tabs">
-			   <ul id="myTab" class="nav nav-tabs nav-tabs1" role="tablist">
-				  <li role="presentation" class="active"><a href="#home" id="home-tab" role="tab" data-toggle="tab" aria-controls="home" aria-expanded="true">About Myself</a></li>
-				  <li role="presentation"><a href="#profile" role="tab" id="profile-tab" data-toggle="tab" aria-controls="profile">Family Details</a></li>
-				  <li role="presentation"><a href="#profile1" role="tab" id="profile-tab1" data-toggle="tab" aria-controls="profile1">Partner Preference</a></li>
-			   </ul>
-			   <div id="myTabContent" class="tab-content">
-				  <div role="tabpanel" class="tab-pane fade in active" id="home" aria-labelledby="home-tab">
-				    <div class="tab_box">
-				    	<h1>About Me.</h1>
-				    	<p><?php echo $aboutme; ?></p>
-				    </div>
-				    <div class="basic_1">
-				    	<h3>Basics &amp; Lifestyle</h3>
-				    	<div class="col-md-6 basic_1-left">
-				    	  <table class="table_working_hours">
-				        	<tbody>
-				        		<tr class="opened_1">
-									<td class="day_label">Name :</td>
-									<td class="day_value"><?php echo $fname . " " .$lname; ?></td>
-								</tr>
-							    <tr class="opened">
-									<td class="day_label">Marital Status :</td>
-									<td class="day_value"><?php echo $maritalstatus;?></td>
-								</tr>
-							    <tr class="opened">
-									<td class="day_label">Body Type :</td>
-									<td class="day_value"><?php echo $bodytype;?></td>
-								</tr>
-							    
-							    <tr class="opened">
-									<td class="day_label">Age / Height :</td>
-									<td class="day_value"><?php echo $age; ?>/<?php echo $height;?> cm</td>
-								</tr>
-							    <tr class="opened">
-									<td class="day_label">Physical Status :</td>
-									<td class="day_value closed"><span><?php echo $physicalstatus;?></span></td>
-								</tr>
-							    <tr class="opened">
-									<td class="day_label">Profile Created by :</td>
-									<td class="day_value closed"><span><?php echo $profileby;?></span></td>
-								</tr>
-								<tr class="opened">
-									<td class="day_label">Drink :</td>
-									<td class="day_value closed"><span><?php echo $drink;?></span></td>
-								</tr>
-						    </tbody>
-				          </table>
-				         </div>
-				         <div class="col-md-6 basic_1-left">
-				          <table class="table_working_hours">
-				        	<tbody>
-				        		<tr class="opened_1">
-									<td class="day_label">Age :</td>
-									<td class="day_value"><?php echo $age;?></td>
-								</tr>
-							    <tr class="opened">
-									<td class="day_label">Mother Tongue :</td>
-									<td class="day_value"><?php echo $mothertounge;?></td>
-								</tr>
-							    <tr class="opened">
-									<td class="day_label">Complexion :</td>
-									<td class="day_value"><?php echo $colour;?></td>
-								</tr>
-							    <tr class="opened">
-									<td class="day_label">Weight :</td>
-									<td class="day_value"><?php echo $weight;?> KG</td>
-								</tr>
-							    <tr class="opened">
-									<td class="day_label">Blood Group :</td>
-									<td class="day_value"><?php echo $bloodgroup;?></td>
-								</tr>
-							    <tr class="closed">
-									<td class="day_label">Diet :</td>
-									<td class="day_value closed"><span><?php echo $diet;?></span></td>
-								</tr>
-							    <tr class="closed">
-									<td class="day_label">Smoke :</td>
-									<td class="day_value closed"><span><?php echo $smoke;?></span></td>
-								</tr>
-						    </tbody>
-				        </table>
-				        </div>
-				        <div class="clearfix"> </div>
-				    </div>
-				    <div class="basic_1">
-				    	<h3>Religious / Social & Astro Background</h3>
-				    	<div class="col-md-6 basic_1-left">
-				    	  <table class="table_working_hours">
-				        	<tbody>
-				        		<tr class="opened">
-									<td class="day_label">Caste :</td>
-									<td class="day_value"><?php echo $caste;?></td>
-								</tr>
-							    <tr class="opened">
-									<td class="day_label">
- of Birth :</td>
-									<td class="day_value closed"><span><?php echo $dob;?></span></td>
-								</tr>
-							</tbody>
-				          </table>
-				         </div>
-				         <div class="col-md-6 basic_1-left">
-				          <table class="table_working_hours">
-				        	<tbody>
-				        		<tr class="opened_1">
-									<td class="day_label">Religion :</td>
-									<td class="day_value"><?php echo $religion;?></td>
-								</tr>
-							    <tr class="opened">
-									<td class="day_label">Sub Caste :</td>
-									<td class="day_value"><?php echo $subcaste;?></td>
-								</tr>
-							    
-							</tbody>
-				        </table>
-				        </div>
-				        <div class="clearfix"> </div>
-				    </div>
-				    <div class="basic_1 basic_2">
-				    	<h3>Education & Career</h3>
-				    	<div class="basic_1-left">
-				    	  <table class="table_working_hours">
-				        	<tbody>
-				        		<tr class="opened">
-									<td class="day_label">Education   :</td>
-									<td class="day_value"><?php echo $education;?></td>
-								</tr>
-				        		<tr class="opened">
-									<td class="day_label">Education Detail :</td>
-									<td class="day_value"><?php echo $edudescr;?></td>
-								</tr>
-							    <tr class="opened">
-									<td class="day_label">Occupation Detail :</td>
-									<td class="day_value closed"><span><?php echo $occupationdescr;?></span></td>
-								</tr>
-							    <tr class="opened">
-									<td class="day_label">Annual Income :</td>
-									<td class="day_value closed"><span><?php echo $income;?></span></td>
-								</tr>
-							 </tbody>
-				          </table>
-				         </div>
-				         <div class="clearfix"> </div>
-				    </div>
-				  </div>
-				  <div role="tabpanel" class="tab-pane fade" id="profile" aria-labelledby="profile-tab">
-				    <div class="basic_3">
-				    	<h4>Family Details</h4>
-				    	<div class="basic_1 basic_2">
-				    	<h3>Basics</h3>
-				    	<div class="col-md-6 basic_1-left">
-				    	  <table class="table_working_hours">
-				        	<tbody>
-				        		<tr class="opened">
-									<td class="day_label">Father's Occupation :</td>
-									<td class="day_value"><?php echo $fatheroccupation;?></td>
-								</tr>
-				        		<tr class="opened">
-									<td class="day_label">Mother's Occupation :</td>
-									<td class="day_value"><?php echo $motheroccupation;?></td>
-								</tr>
-							    <tr class="opened">
-									<td class="day_label">No. of Brothers :</td>
-									<td class="day_value closed"><span><?php echo $bros;?></span></td>
-								</tr>
-							    <tr class="opened">
-									<td class="day_label">No. of Sisters :</td>
-									<td class="day_value closed"><span><?php echo $sis;?></span></td>
-								</tr>
-							 </tbody>
-				          </table>
-				         </div>
-				       </div>
-				    </div>
-				 </div>
+<?php include_once("includes/navigation.php");?>
 
-<?php
-//getting partner prefernce
-$sql = "SELECT * FROM partnerprefs WHERE custId = $id";
-$result = mysqlexec($sql);
-$row= mysqli_fetch_assoc($result);
-
-$agemin=$row['agemin'];
-$agemax=$row['agemax'];
-$maritalstatus=$row['maritalstatus'];
-$complexion=$row['complexion'];
-$height=$row['height'];
-$diet=$row['diet'];
-$religion=$row['religion'];
-$caste=$row['caste'];
-$mothertounge=$row['mothertounge'];
-$education=$row['education'];
-$occupation=$row['occupation'];
-$country=$row['country'];
-$descr=$row['descr'];
-
-
-
-?>
-				 <div role="tabpanel" class="tab-pane fade" id="profile1" aria-labelledby="profile-tab1">
-				    <div class="basic_1 basic_2">
-				       <div class="basic_1-left">
-				    	  <table class="table_working_hours">
-				        	<tbody>
-				        		<tr class="opened">
-									<td class="day_label">Age   :</td>
-									<td class="day_value"><?php echo $agemin . " to " . $agemax;?></td>
-								</tr>
-				        		<tr class="opened">
-									<td class="day_label">Marital Status :</td>
-									<td class="day_value"><?php echo $maritalstatus;?></td>
-								</tr>
-							    <tr class="opened">
-									<td class="day_label">Body Type :</td>
-									<td class="day_value closed"><span><?php echo $bodytype;?></span></td>
-								</tr>
-							    <tr class="opened">
-									<td class="day_label">Complexion :</td>
-									<td class="day_value closed"><span><?php echo $colour;?></span></td>
-								</tr>
-								<tr class="opened">
-									<td class="day_label">Height:</td>
-									<td class="day_value closed"><span><?php echo $height;?> Cm</span></td>
-								</tr>
-								<tr class="opened">
-									<td class="day_label">Diet :</td>
-									<td class="day_value closed"><span><?php echo $diet;?></span></td>
-								</tr>
-								<tr class="opened">
-									<td class="day_label">Religion :</td>
-									<td class="day_value closed"><span><?php echo $religion;?></span></td>
-								</tr>
-								<tr class="opened">
-									<td class="day_label">Caste :</td>
-									<td class="day_value closed"><span><?php echo $caste;?></span></td>
-								</tr>
-								<tr class="opened">
-									<td class="day_label">Mother Tongue :</td>
-									<td class="day_value closed"><span><?php echo $mothertounge;?></span></td>
-								</tr>
-								<tr class="opened">
-									<td class="day_label">Education :</td>
-									<td class="day_value closed"><span><?php echo $education;?></span></td>
-								</tr>
-								<tr class="opened">
-									<td class="day_label">Occupation :</td>
-									<td class="day_value closed"><span><?php echo $occupation;?></span></td>
-								</tr>
-								<tr class="opened">
-									<td class="day_label">Country of Residence :</td>
-									<td class="day_value closed"><span><?php echo $country;?></span></td>
-								</tr>
-								<tr class="opened">
-									<td class="day_label">State :</td>
-									<td class="day_value closed"><span><?php echo $state;?></span></td>
-								</tr>
-								
-							 </tbody>
-				          </table>
-				        </div>
-				     </div>
-				 </div>
-		     </div>
-		  </div>
-	   </div>
-   	 </div>
-     <div class="col-md-4 profile_right">
-     <!-- 	<div class="newsletter">
-		   <form>
-			  <input type="text" name="ne" size="30" required="" placeholder="Enter Profile ID :">
-			  <input type="submit" value="Go">
-		   </form>
-        </div> -->
-        <div class="view_profile view_profile2">
-        	<h3>View Recent Profiles</h3>
-    <?php
-     $sql="SELECT * FROM customer ORDER BY profilecreationdate ASC";
-      $result=mysqlexec($sql);
-      $count=1;
-      while($row=mysqli_fetch_assoc($result)){
-            $profid=$row['cust_id'];
-          //getting photo
-          $sql="SELECT * FROM photos WHERE cust_id=$profid";
-          $result2=mysqlexec($sql);
-          $photo=mysqli_fetch_assoc($result2);
-          $pic=$photo['pic1'];
-          echo "<ul class=\"profile_item\">";
-            echo"<a href=\"view_profile.php?id={$profid}\">";
-              echo "<li class=\"profile_item-img\"><img src=\"profile/". $profid."/".$pic ."\"" . "class=\"img-responsive\" alt=\"\"/></li>";
-               echo "<li class=\"profile_item-desc\">";
-                  echo "<h4>" . $row['firstname'] . " " . $row['lastname'] . "</h4>";
-                  echo "<p>" . $row['age']. "Yrs," . $row['religion'] . "</p>";
-                  echo "<h5>" . "View Full Profile" . "</h5>";
-               echo "</li>";
-      echo "</a>";
-      echo "</ul>";
-      $count++;
-      }
-     ?>
-           
-</div>
-       
+<!-- Profile Header -->
+<div class="profile-header">
+    <div class="container profile-header-content">
+        <div class="profile-id-badge">
+            <i class="fa fa-id-card"></i> Profile ID: <?php echo $profileid; ?>
         </div>
-       <div class="clearfix"> </div>
+        <h1 class="profile-name"><?php echo $fname . " " . $lname; ?></h1>
+        <div class="profile-meta">
+            <span><i class="fa fa-birthday-cake"></i> <?php echo $age; ?> Years</span>
+            <span><i class="fa fa-venus-mars"></i> <?php echo $sex; ?></span>
+            <span><i class="fa fa-map-marker"></i> <?php echo $state . ", " . $country; ?></span>
+            <span><i class="fa fa-briefcase"></i> <?php echo $occupation; ?></span>
+        </div>
+        
+        <div class="action-buttons">
+            <?php if ($is_own_profile): ?>
+                <button class="btn-modern btn-edit" onclick="window.location.href='edit-profile.php'">
+                    <i class="fa fa-edit"></i> Edit Profile
+                </button>
+                <button class="btn-modern btn-photos" data-toggle="modal" data-target="#photoModal">
+                    <i class="fa fa-camera"></i> Manage Photos
+                </button>
+            <?php else: ?>
+                <button class="btn-modern btn-interest" onclick="sendInterest(<?php echo $profileid; ?>)">
+                    <i class="fa fa-heart"></i> Express Interest
+                </button>
+                <button class="btn-modern btn-photos">
+                    <i class="fa fa-comments"></i> Send Message
+                </button>
+            <?php endif; ?>
+        </div>
     </div>
-  </div>
 </div>
+
+<div class="container profile-container">
+    <?php if (isset($_SESSION['upload_success'])): ?>
+        <div class="alert alert-success" style="border-radius: 12px; margin-bottom: 20px;">
+            <i class="fa fa-check-circle"></i> <?php echo $_SESSION['upload_success']; unset($_SESSION['upload_success']); ?>
+        </div>
+    <?php endif; ?>
+    
+    <?php if (isset($_SESSION['upload_error'])): ?>
+        <div class="alert alert-danger" style="border-radius: 12px; margin-bottom: 20px;">
+            <i class="fa fa-exclamation-circle"></i> <?php echo $_SESSION['upload_error']; unset($_SESSION['upload_error']); ?>
+        </div>
+    <?php endif; ?>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <!-- Photo Gallery -->
+            <div class="profile-card">
+                <div class="section-title">
+                    <i class="fa fa-camera"></i> Photos
+                </div>
+                <div class="photo-gallery">
+                    <?php if($pic1): ?>
+                        <div class="photo-item photo-main">
+                            <img src="profile/<?php echo $profileid;?>/<?php echo $pic1;?>" alt="<?php echo $fname;?>">
+                        </div>
+                    <?php endif; ?>
+                    <?php if($pic2): ?>
+                        <div class="photo-item">
+                            <img src="profile/<?php echo $profileid;?>/<?php echo $pic2;?>" alt="<?php echo $fname;?>">
+                        </div>
+                    <?php endif; ?>
+                    <?php if($pic3): ?>
+                        <div class="photo-item">
+                            <img src="profile/<?php echo $profileid;?>/<?php echo $pic3;?>" alt="<?php echo $fname;?>">
+                        </div>
+                    <?php endif; ?>
+                    <?php if($pic4): ?>
+                        <div class="photo-item">
+                            <img src="profile/<?php echo $profileid;?>/<?php echo $pic4;?>" alt="<?php echo $fname;?>">
+                        </div>
+                    <?php endif; ?>
+                </div>
+            </div>
+
+            <!-- About Me -->
+            <div class="profile-card">
+                <div class="section-title">
+                    <i class="fa fa-user"></i> About Me
+                </div>
+                <div class="about-text">
+                    <?php echo $aboutme ? $aboutme : "No description provided yet."; ?>
+                </div>
+            </div>
+
+            <!-- Basic Information -->
+            <div class="profile-card">
+                <div class="section-title">
+                    <i class="fa fa-info-circle"></i> Basic Information
+                </div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-user"></i> Name</div>
+                        <div class="info-value"><?php echo $fname . " " . $lname; ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-calendar"></i> Age</div>
+                        <div class="info-value"><?php echo $age; ?> Years</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-arrows-v"></i> Height</div>
+                        <div class="info-value"><?php echo $height; ?> cm</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-balance-scale"></i> Weight</div>
+                        <div class="info-value"><?php echo $weight; ?> kg</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-venus-mars"></i> Marital Status</div>
+                        <div class="info-value"><?php echo $maritalstatus; ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-language"></i> Mother Tongue</div>
+                        <div class="info-value"><?php echo $mothertounge; ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-tint"></i> Blood Group</div>
+                        <div class="info-value"><?php echo $bloodgroup; ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-cutlery"></i> Diet</div>
+                        <div class="info-value"><?php echo $diet; ?></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Information - Only visible to logged-in users viewing other profiles -->
+            <?php if (!$is_own_profile && isloggedin()): ?>
+            <div class="profile-card">
+                <div class="section-title">
+                    <i class="fa fa-phone"></i> Contact Information
+                </div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-mobile"></i> Mobile Number</div>
+                        <div class="info-value">
+                            <?php if (!empty($mobile)): ?>
+                                <span id="mobile-hidden">
+                                    <span class="masked-number">+<?php echo $phone_code; ?> <?php echo substr($mobile, 0, 2) . '****' . substr($mobile, -2); ?></span>
+                                    <button class="btn btn-sm btn-primary view-mobile-btn" onclick="viewMobileNumber()">
+                                        <i class="fa fa-eye"></i> View Number
+                                    </button>
+                                </span>
+                                <span id="mobile-visible" style="display: none;">
+                                    <a href="tel:+<?php echo $phone_code . $mobile; ?>" class="mobile-link">
+                                        <i class="fa fa-phone"></i> +<?php echo $phone_code; ?> <?php echo $mobile; ?>
+                                    </a>
+                                </span>
+                            <?php else: ?>
+                                <span class="text-muted">Not provided</span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-envelope"></i> Email</div>
+                        <div class="info-value">
+                            <span id="email-hidden">
+                                <span class="masked-email"><?php echo substr($email, 0, 2) . '****@' . explode('@', $email)[1]; ?></span>
+                                <button class="btn btn-sm btn-primary view-email-btn" onclick="viewEmail()">
+                                    <i class="fa fa-eye"></i> View Email
+                                </button>
+                            </span>
+                            <span id="email-visible" style="display: none;">
+                                <a href="mailto:<?php echo $email; ?>" class="email-link">
+                                    <i class="fa fa-envelope"></i> <?php echo $email; ?>
+                                </a>
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <?php endif; ?>
+
+            <!-- Religious Background -->
+            <div class="profile-card">
+                <div class="section-title">
+                    <i class="fa fa-book"></i> Religious Background
+                </div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-book"></i> Religion</div>
+                        <div class="info-value"><?php echo $religion; ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-users"></i> Caste</div>
+                        <div class="info-value"><?php echo $caste; ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-user"></i> Sub Caste</div>
+                        <div class="info-value"><?php echo $subcaste; ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-birthday-cake"></i> Date of Birth</div>
+                        <div class="info-value"><?php echo $dob; ?></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Education & Career -->
+            <div class="profile-card">
+                <div class="section-title">
+                    <i class="fa fa-graduation-cap"></i> Education & Career
+                </div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-graduation-cap"></i> Education</div>
+                        <div class="info-value"><?php echo $education; ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-book"></i> Education Details</div>
+                        <div class="info-value"><?php echo $edudescr; ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-briefcase"></i> Occupation</div>
+                        <div class="info-value"><?php echo $occupation; ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-file-text"></i> Occupation Details</div>
+                        <div class="info-value"><?php echo $occupationdescr; ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-money"></i> Annual Income</div>
+                        <div class="info-value"><?php echo $income; ?></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Family Details -->
+            <div class="profile-card">
+                <div class="section-title">
+                    <i class="fa fa-users"></i> Family Details
+                </div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-male"></i> Father's Occupation</div>
+                        <div class="info-value"><?php echo $fatheroccupation; ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-female"></i> Mother's Occupation</div>
+                        <div class="info-value"><?php echo $motheroccupation; ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-male"></i> Brothers</div>
+                        <div class="info-value"><?php echo $bros; ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-female"></i> Sisters</div>
+                        <div class="info-value"><?php echo $sis; ?></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Partner Preference -->
+            <div class="profile-card">
+                <div class="section-title">
+                    <i class="fa fa-heart"></i> Partner Preference
+                </div>
+                <div class="info-grid">
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-calendar"></i> Age Range</div>
+                        <div class="info-value"><?php echo $agemin . " to " . $agemax; ?> Years</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-arrows-v"></i> Height</div>
+                        <div class="info-value"><?php echo $p_height; ?> cm</div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-venus-mars"></i> Marital Status</div>
+                        <div class="info-value"><?php echo $p_maritalstatus; ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-book"></i> Religion</div>
+                        <div class="info-value"><?php echo $p_religion; ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-users"></i> Caste</div>
+                        <div class="info-value"><?php echo $p_caste; ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-graduation-cap"></i> Education</div>
+                        <div class="info-value"><?php echo $p_education; ?></div>
+                    </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-globe"></i> Country</div>
+                        <div class="info-value"><?php echo $p_country; ?></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-md-4">
+            <div class="sidebar-card">
+                <div class="sidebar-title">
+                    <i class="fa fa-clock-o"></i> Recent Profiles
+                </div>
+                <?php
+                $sql="SELECT c.*, u.account_status FROM customer c 
+                      LEFT JOIN users u ON c.cust_id = u.id 
+                      WHERE (u.account_status = 'active' OR u.account_status IS NULL)
+                      ORDER BY c.profilecreationdate DESC LIMIT 10";
+                $result=mysqlexec($sql);
+                while($row=mysqli_fetch_assoc($result)){
+                    $profid=$row['cust_id'];
+                    //getting photo
+                    $sql2="SELECT * FROM photos WHERE cust_id=$profid";
+                    $result2=mysqlexec($sql2);
+                    $photo=mysqli_fetch_assoc($result2);
+                    $pic=$photo['pic1'] ?? 'default-avatar.jpg';
+                    
+                    echo '<a href="view_profile.php?id='.$profid.'" style="text-decoration: none;">';
+                    echo '<div class="recent-profile-item">';
+                    echo '<div class="recent-profile-img">';
+                    echo '<img src="profile/'.$profid.'/'.$pic.'" alt="'.$row['firstname'].'">';
+                    echo '</div>';
+                    echo '<div class="recent-profile-info">';
+                    echo '<h5>'.$row['firstname'].' '.$row['lastname'].'</h5>';
+                    echo '<p>'.$row['age'].' Yrs, '.$row['religion'].'</p>';
+                    echo '<span class="view-link">View Profile <i class="fa fa-arrow-right"></i></span>';
+                    echo '</div>';
+                    echo '</div>';
+                    echo '</a>';
+                }
+                ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Photo Upload Modal -->
+<div class="modal fade modal-modern" id="photoModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" style="color: white; opacity: 1;">&times;</button>
+                <h4 class="modal-title"><i class="fa fa-camera"></i> Manage Photos</h4>
+            </div>
+            <div class="modal-body">
+                <form id="photoUploadForm" action="photouploader.php" method="POST" enctype="multipart/form-data">
+                    <div class="photo-upload-grid">
+                        <div class="upload-box" onclick="document.getElementById('photo1').click()">
+                            <i class="fa fa-camera"></i>
+                            <p>Upload Photo 1<br><small>Main Photo</small></p>
+                            <input type="file" id="photo1" name="photo1" accept="image/*" style="display:none;" onchange="previewPhoto(this, 0)">
+                        </div>
+                        <div class="upload-box" onclick="document.getElementById('photo2').click()">
+                            <i class="fa fa-camera"></i>
+                            <p>Upload Photo 2</p>
+                            <input type="file" id="photo2" name="photo2" accept="image/*" style="display:none;" onchange="previewPhoto(this, 1)">
+                        </div>
+                        <div class="upload-box" onclick="document.getElementById('photo3').click()">
+                            <i class="fa fa-camera"></i>
+                            <p>Upload Photo 3</p>
+                            <input type="file" id="photo3" name="photo3" accept="image/*" style="display:none;" onchange="previewPhoto(this, 2)">
+                        </div>
+                        <div class="upload-box" onclick="document.getElementById('photo4').click()">
+                            <i class="fa fa-camera"></i>
+                            <p>Upload Photo 4</p>
+                            <input type="file" id="photo4" name="photo4" accept="image/*" style="display:none;" onchange="previewPhoto(this, 3)">
+                        </div>
+                    </div>
+                    <input type="hidden" name="profile_id" value="<?php echo $profileid; ?>">
+                </form>
+                <p style="margin-top: 20px; color: #64748b; font-size: 13px;">
+                    <i class="fa fa-info-circle"></i> Allowed formats: JPG, PNG, GIF. Maximum size: 5MB per photo.
+                </p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                <button type="submit" form="photoUploadForm" class="btn btn-primary">
+                    <i class="fa fa-upload"></i> Upload Photos
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function previewPhoto(input, index) {
+    if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        var fileInput = input; // Store reference before innerHTML destroys it
+        reader.onload = function(e) {
+            var uploadBox = fileInput.parentElement;
+            uploadBox.classList.add('has-image');
+            // Create preview without destroying the input
+            // First, remove all content except file input
+            while (uploadBox.firstChild) {
+                if (uploadBox.firstChild !== fileInput) {
+                    uploadBox.removeChild(uploadBox.firstChild);
+                } else {
+                    break;
+                }
+            }
+            // Remove remaining children after input
+            while (fileInput.nextSibling) {
+                uploadBox.removeChild(fileInput.nextSibling);
+            }
+            // Add preview image before input
+            var img = document.createElement('img');
+            img.src = e.target.result;
+            img.alt = 'Preview';
+            uploadBox.insertBefore(img, fileInput);
+            // Add remove button
+            var removeBtn = document.createElement('div');
+            removeBtn.className = 'remove-photo';
+            removeBtn.innerHTML = '<i class="fa fa-times"></i>';
+            removeBtn.onclick = function(event) { removePhoto(event, this, index); };
+            uploadBox.appendChild(removeBtn);
+            uploadBox.onclick = null;
+        }
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
+function removePhoto(event, btn, index) {
+    event.stopPropagation();
+    var uploadBox = btn.parentElement;
+    var photoInput = document.getElementById('photo' + (index + 1));
+    photoInput.value = '';
+    
+    uploadBox.classList.remove('has-image');
+    // Clear everything except the input
+    while (uploadBox.firstChild) {
+        if (uploadBox.firstChild !== photoInput) {
+            uploadBox.removeChild(uploadBox.firstChild);
+        } else {
+            break;
+        }
+    }
+    while (photoInput.nextSibling) {
+        uploadBox.removeChild(photoInput.nextSibling);
+    }
+    // Add back default content
+    var icon = document.createElement('i');
+    icon.className = 'fa fa-camera';
+    uploadBox.insertBefore(icon, photoInput);
+    var p = document.createElement('p');
+    p.innerHTML = 'Upload Photo ' + (index + 1) + (index === 0 ? '<br><small>Main Photo</small>' : '');
+    uploadBox.insertBefore(p, photoInput);
+    uploadBox.onclick = function() { photoInput.click(); };
+}
+
+function sendInterest(profileId) {
+    // Add AJAX call to send interest
+    alert('Interest sent to profile #' + profileId);
+}
+
+// View Mobile Number function
+function viewMobileNumber() {
+    document.getElementById('mobile-hidden').style.display = 'none';
+    document.getElementById('mobile-visible').style.display = 'inline';
+}
+
+// View Email function
+function viewEmail() {
+    document.getElementById('email-hidden').style.display = 'none';
+    document.getElementById('email-visible').style.display = 'inline';
+}
+</script>
 
 <?php include_once("footer.php");?>
-<!-- FlexSlider -->
-<script defer src="js/jquery.flexslider.js"></script>
-<link rel="stylesheet" href="css/flexslider.css" type="text/css" media="screen" />
-<script>
-// Can also be used with $(document).ready()
-$(window).load(function() {
-  $('.flexslider').flexslider({
-    animation: "slide",
-    controlNav: "thumbnails"
-  });
-});
-</script>   
 </body>
-</html>	
+</html>

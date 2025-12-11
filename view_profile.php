@@ -998,25 +998,65 @@ $(document).ready(function(){
 function previewPhoto(input, index) {
     if (input.files && input.files[0]) {
         var reader = new FileReader();
+        var fileInput = input; // Store reference before innerHTML destroys it
         reader.onload = function(e) {
-            var uploadBox = input.parentElement;
+            var uploadBox = fileInput.parentElement;
             uploadBox.classList.add('has-image');
-            uploadBox.innerHTML = '<img src="' + e.target.result + '" alt="Preview">';
-            uploadBox.innerHTML += '<div class="remove-photo" onclick="removePhoto(this, ' + index + ')"><i class="fa fa-times"></i></div>';
+            // Create preview without destroying the input
+            // First, remove all content except file input
+            while (uploadBox.firstChild) {
+                if (uploadBox.firstChild !== fileInput) {
+                    uploadBox.removeChild(uploadBox.firstChild);
+                } else {
+                    break;
+                }
+            }
+            // Remove remaining children after input
+            while (fileInput.nextSibling) {
+                uploadBox.removeChild(fileInput.nextSibling);
+            }
+            // Add preview image before input
+            var img = document.createElement('img');
+            img.src = e.target.result;
+            img.alt = 'Preview';
+            uploadBox.insertBefore(img, fileInput);
+            // Add remove button
+            var removeBtn = document.createElement('div');
+            removeBtn.className = 'remove-photo';
+            removeBtn.innerHTML = '<i class="fa fa-times"></i>';
+            removeBtn.onclick = function(event) { removePhoto(event, this, index); };
+            uploadBox.appendChild(removeBtn);
             uploadBox.onclick = null;
         }
         reader.readAsDataURL(input.files[0]);
     }
 }
 
-function removePhoto(btn, index) {
+function removePhoto(event, btn, index) {
     event.stopPropagation();
     var uploadBox = btn.parentElement;
     var photoInput = document.getElementById('photo' + (index + 1));
     photoInput.value = '';
     
     uploadBox.classList.remove('has-image');
-    uploadBox.innerHTML = '<i class="fa fa-camera"></i><p>Upload Photo ' + (index + 1) + (index === 0 ? '<br><small>Main Photo</small>' : '') + '</p>';
+    // Clear everything except the input
+    while (uploadBox.firstChild) {
+        if (uploadBox.firstChild !== photoInput) {
+            uploadBox.removeChild(uploadBox.firstChild);
+        } else {
+            break;
+        }
+    }
+    while (photoInput.nextSibling) {
+        uploadBox.removeChild(photoInput.nextSibling);
+    }
+    // Add back default content
+    var icon = document.createElement('i');
+    icon.className = 'fa fa-camera';
+    uploadBox.insertBefore(icon, photoInput);
+    var p = document.createElement('p');
+    p.innerHTML = 'Upload Photo ' + (index + 1) + (index === 0 ? '<br><small>Main Photo</small>' : '');
+    uploadBox.insertBefore(p, photoInput);
     uploadBox.onclick = function() { photoInput.click(); };
 }
 
