@@ -12,64 +12,179 @@ $offset = ($page - 1) * $per_page;
 
 // Build search query based on parameters
 $where_conditions = ["(u.account_status = 'active' OR u.account_status IS NULL)"];
-$params = [];
+$where_conditions[] = "c.cust_id > 0"; // Ensure valid profile
 
-// Gender filter
+// Gender filter - exact match
 if (!empty($_GET['gender'])) {
-    $gender = mysqli_real_escape_string($conn, $_GET['gender']);
-    $where_conditions[] = "c.sex = '$gender'";
+    $gender = mysqli_real_escape_string($conn, trim($_GET['gender']));
+    $where_conditions[] = "LOWER(c.sex) = LOWER('$gender')";
 }
 
-// Age filter
+// Age filter - precise range with validation
 if (!empty($_GET['age_min'])) {
     $age_min = intval($_GET['age_min']);
-    $where_conditions[] = "CAST(c.age AS UNSIGNED) >= $age_min";
+    if ($age_min >= 18 && $age_min <= 80) {
+        $where_conditions[] = "(CAST(c.age AS UNSIGNED) >= $age_min OR (c.dateofbirth IS NOT NULL AND c.dateofbirth != '0000-00-00' AND TIMESTAMPDIFF(YEAR, c.dateofbirth, CURDATE()) >= $age_min))";
+    }
 }
 if (!empty($_GET['age_max'])) {
     $age_max = intval($_GET['age_max']);
-    $where_conditions[] = "CAST(c.age AS UNSIGNED) <= $age_max";
+    if ($age_max >= 18 && $age_max <= 80) {
+        $where_conditions[] = "(CAST(c.age AS UNSIGNED) <= $age_max OR (c.dateofbirth IS NOT NULL AND c.dateofbirth != '0000-00-00' AND TIMESTAMPDIFF(YEAR, c.dateofbirth, CURDATE()) <= $age_max))";
+    }
 }
 
-// Religion filter
+// Religion filter - exact match, case-insensitive
 if (!empty($_GET['religion'])) {
-    $religion = mysqli_real_escape_string($conn, $_GET['religion']);
-    $where_conditions[] = "c.religion = '$religion'";
+    $religion = mysqli_real_escape_string($conn, trim($_GET['religion']));
+    $where_conditions[] = "LOWER(TRIM(c.religion)) = LOWER('$religion')";
 }
 
-// Caste filter
+// Caste filter - exact match or contains for sub-castes
 if (!empty($_GET['caste'])) {
-    $caste = mysqli_real_escape_string($conn, $_GET['caste']);
-    $where_conditions[] = "c.caste = '$caste'";
+    $caste = mysqli_real_escape_string($conn, trim($_GET['caste']));
+    $where_conditions[] = "(LOWER(TRIM(c.caste)) = LOWER('$caste') OR LOWER(c.caste) LIKE LOWER('%$caste%'))";
 }
 
-// Mother tongue filter
+// Sub-caste filter
+if (!empty($_GET['subcaste'])) {
+    $subcaste = mysqli_real_escape_string($conn, trim($_GET['subcaste']));
+    $where_conditions[] = "LOWER(c.subcaste) LIKE LOWER('%$subcaste%')";
+}
+
+// Mother tongue filter - exact match, case-insensitive
 if (!empty($_GET['mother_tongue'])) {
-    $mother_tongue = mysqli_real_escape_string($conn, $_GET['mother_tongue']);
-    $where_conditions[] = "c.mothertounge = '$mother_tongue'";
+    $mother_tongue = mysqli_real_escape_string($conn, trim($_GET['mother_tongue']));
+    $where_conditions[] = "LOWER(TRIM(c.mothertounge)) = LOWER('$mother_tongue')";
 }
 
-// State filter
+// Country filter
+if (!empty($_GET['country'])) {
+    $country = mysqli_real_escape_string($conn, trim($_GET['country']));
+    $where_conditions[] = "LOWER(TRIM(c.country)) = LOWER('$country')";
+}
+
+// State filter - exact match
 if (!empty($_GET['state'])) {
-    $state = mysqli_real_escape_string($conn, $_GET['state']);
-    $where_conditions[] = "c.state = '$state'";
+    $state = mysqli_real_escape_string($conn, trim($_GET['state']));
+    $where_conditions[] = "LOWER(TRIM(c.state)) = LOWER('$state')";
 }
 
-// Marital status filter
+// District/City filter
+if (!empty($_GET['district'])) {
+    $district = mysqli_real_escape_string($conn, trim($_GET['district']));
+    $where_conditions[] = "LOWER(c.district) LIKE LOWER('%$district%')";
+}
+
+// Marital status filter - exact match
 if (!empty($_GET['marital_status'])) {
-    $marital_status = mysqli_real_escape_string($conn, $_GET['marital_status']);
-    $where_conditions[] = "c.maritalstatus = '$marital_status'";
+    $marital_status = mysqli_real_escape_string($conn, trim($_GET['marital_status']));
+    $where_conditions[] = "LOWER(TRIM(c.maritalstatus)) = LOWER('$marital_status')";
 }
 
-// Education filter
+// Education filter - flexible matching
 if (!empty($_GET['education'])) {
-    $education = mysqli_real_escape_string($conn, $_GET['education']);
-    $where_conditions[] = "c.education LIKE '%$education%'";
+    $education = mysqli_real_escape_string($conn, trim($_GET['education']));
+    // Match exact or contains for education levels
+    $where_conditions[] = "(LOWER(c.education) = LOWER('$education') OR LOWER(c.education) LIKE LOWER('%$education%') OR LOWER(c.education_sub) LIKE LOWER('%$education%'))";
 }
 
-// Occupation filter
+// Occupation filter - flexible matching
 if (!empty($_GET['occupation'])) {
-    $occupation = mysqli_real_escape_string($conn, $_GET['occupation']);
-    $where_conditions[] = "c.occupation LIKE '%$occupation%'";
+    $occupation = mysqli_real_escape_string($conn, trim($_GET['occupation']));
+    $where_conditions[] = "(LOWER(c.occupation) LIKE LOWER('%$occupation%') OR LOWER(c.occupation_descr) LIKE LOWER('%$occupation%'))";
+}
+
+// Annual income filter - range
+if (!empty($_GET['income_min'])) {
+    $income_min = mysqli_real_escape_string($conn, trim($_GET['income_min']));
+    $where_conditions[] = "CAST(REPLACE(REPLACE(c.annual_income, ',', ''), ' ', '') AS UNSIGNED) >= '$income_min'";
+}
+if (!empty($_GET['income_max'])) {
+    $income_max = mysqli_real_escape_string($conn, trim($_GET['income_max']));
+    $where_conditions[] = "CAST(REPLACE(REPLACE(c.annual_income, ',', ''), ' ', '') AS UNSIGNED) <= '$income_max'";
+}
+
+// Height filter - range (in cm)
+if (!empty($_GET['height_min'])) {
+    $height_min = intval($_GET['height_min']);
+    $where_conditions[] = "CAST(c.height AS UNSIGNED) >= $height_min";
+}
+if (!empty($_GET['height_max'])) {
+    $height_max = intval($_GET['height_max']);
+    $where_conditions[] = "CAST(c.height AS UNSIGNED) <= $height_max";
+}
+
+// Body type filter
+if (!empty($_GET['body_type'])) {
+    $body_type = mysqli_real_escape_string($conn, trim($_GET['body_type']));
+    $where_conditions[] = "LOWER(TRIM(c.body_type)) = LOWER('$body_type')";
+}
+
+// Complexion/Color filter
+if (!empty($_GET['complexion'])) {
+    $complexion = mysqli_real_escape_string($conn, trim($_GET['complexion']));
+    $where_conditions[] = "LOWER(TRIM(c.colour)) = LOWER('$complexion')";
+}
+
+// Diet filter
+if (!empty($_GET['diet'])) {
+    $diet = mysqli_real_escape_string($conn, trim($_GET['diet']));
+    $where_conditions[] = "LOWER(TRIM(c.diet)) = LOWER('$diet')";
+}
+
+// Smoking filter
+if (!empty($_GET['smoke'])) {
+    $smoke = mysqli_real_escape_string($conn, trim($_GET['smoke']));
+    $where_conditions[] = "LOWER(TRIM(c.smoke)) = LOWER('$smoke')";
+}
+
+// Drinking filter
+if (!empty($_GET['drink'])) {
+    $drink = mysqli_real_escape_string($conn, trim($_GET['drink']));
+    $where_conditions[] = "LOWER(TRIM(c.drink)) = LOWER('$drink')";
+}
+
+// Physical status filter
+if (!empty($_GET['physical_status'])) {
+    $physical_status = mysqli_real_escape_string($conn, trim($_GET['physical_status']));
+    $where_conditions[] = "LOWER(TRIM(c.physical_status)) = LOWER('$physical_status')";
+}
+
+// Profile with photo filter
+if (!empty($_GET['with_photo']) && $_GET['with_photo'] == '1') {
+    $where_conditions[] = "EXISTS (SELECT 1 FROM photos p WHERE p.cust_id = c.cust_id AND (p.pic1 IS NOT NULL AND p.pic1 != ''))";
+}
+
+// Profile ID search (exact match)
+if (!empty($_GET['profile_id'])) {
+    $profile_id = mysqli_real_escape_string($conn, trim($_GET['profile_id']));
+    // Remove SP prefix if present
+    $profile_id = preg_replace('/^SP/i', '', $profile_id);
+    $profile_id = intval($profile_id);
+    if ($profile_id > 0) {
+        $where_conditions[] = "c.cust_id = $profile_id";
+    }
+}
+
+// Keyword search - search across multiple fields
+if (!empty($_GET['keyword'])) {
+    $keyword = mysqli_real_escape_string($conn, trim($_GET['keyword']));
+    $where_conditions[] = "(
+        LOWER(c.firstname) LIKE LOWER('%$keyword%') OR 
+        LOWER(c.lastname) LIKE LOWER('%$keyword%') OR 
+        LOWER(c.aboutme) LIKE LOWER('%$keyword%') OR 
+        LOWER(c.occupation) LIKE LOWER('%$keyword%') OR 
+        LOWER(c.education) LIKE LOWER('%$keyword%') OR
+        LOWER(c.district) LIKE LOWER('%$keyword%') OR
+        LOWER(c.state) LIKE LOWER('%$keyword%')
+    )";
+}
+
+// Exclude own profile if logged in
+if (isset($_SESSION['id'])) {
+    $current_user = intval($_SESSION['id']);
+    $where_conditions[] = "c.cust_id != $current_user";
 }
 
 // Build the WHERE clause
@@ -83,12 +198,35 @@ $count_result = mysqli_query($conn, $count_sql);
 $total_records = mysqli_fetch_assoc($count_result)['total'];
 $total_pages = ceil($total_records / $per_page);
 
+// Determine sort order
+$sort_by = $_GET['sort'] ?? 'newest';
+$order_clause = "c.profilecreationdate DESC"; // Default: newest first
+
+switch ($sort_by) {
+    case 'newest':
+        $order_clause = "c.profilecreationdate DESC";
+        break;
+    case 'oldest':
+        $order_clause = "c.profilecreationdate ASC";
+        break;
+    case 'age_asc':
+        $order_clause = "CAST(c.age AS UNSIGNED) ASC";
+        break;
+    case 'age_desc':
+        $order_clause = "CAST(c.age AS UNSIGNED) DESC";
+        break;
+    case 'relevance':
+        // Profiles with photos first, then by date
+        $order_clause = "(SELECT COUNT(*) FROM photos p WHERE p.cust_id = c.cust_id AND p.pic1 IS NOT NULL) DESC, c.profilecreationdate DESC";
+        break;
+}
+
 // Fetch results
 $sql = "SELECT c.*, u.account_status, u.username 
         FROM customer c 
         LEFT JOIN users u ON c.cust_id = u.id 
         WHERE $where_clause 
-        ORDER BY c.profilecreationdate DESC 
+        ORDER BY $order_clause 
         LIMIT $offset, $per_page";
 $result = mysqli_query($conn, $sql);
 
@@ -193,6 +331,103 @@ $query_string = http_build_query($query_params);
     font-weight: 600;
     color: #333;
     margin-bottom: 25px;
+}
+
+/* Search Controls */
+.search-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 15px;
+    margin-bottom: 25px;
+    padding: 15px 20px;
+    background: #f8f9fa;
+    border-radius: 8px;
+    border: 1px solid #e0e0e0;
+}
+
+.search-controls .total-count {
+    font-size: 18px;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.search-controls .sort-filter {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.search-controls .sort-filter label {
+    font-weight: 600;
+    color: #555;
+    margin: 0;
+}
+
+.search-controls .sort-filter select {
+    padding: 8px 15px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+    cursor: pointer;
+}
+
+/* Active Filters */
+.active-filters {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+}
+
+.filter-tag {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    background: #e9ecef;
+    padding: 6px 12px;
+    border-radius: 20px;
+    font-size: 13px;
+    color: #495057;
+}
+
+.filter-tag strong {
+    color: #8B4C4F;
+}
+
+.filter-tag .remove-filter {
+    background: #dc3545;
+    color: white;
+    border: none;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    font-size: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-left: 5px;
+}
+
+.filter-tag .remove-filter:hover {
+    background: #c82333;
+}
+
+.clear-all-filters {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 6px 15px;
+    border-radius: 20px;
+    font-size: 13px;
+    cursor: pointer;
+}
+
+.clear-all-filters:hover {
+    background: #545b62;
 }
 
 /* Profile Card Styles */
@@ -411,8 +646,77 @@ $query_string = http_build_query($query_params);
 
 <div class="container" style="padding: 40px 15px;">
     
-    <!-- Pagination Top -->
     <?php if ($total_records > 0): ?>
+    <!-- Search Controls: Count and Sort -->
+    <div class="search-controls">
+        <div class="total-count">
+            <i class="fa fa-users"></i> <?php echo number_format($total_records); ?> Record(s) Found
+        </div>
+        <div class="sort-filter">
+            <label for="sort-select">Sort by:</label>
+            <select id="sort-select" onchange="changeSortOrder(this.value)">
+                <option value="newest" <?php echo ($sort_by == 'newest') ? 'selected' : ''; ?>>Newest First</option>
+                <option value="oldest" <?php echo ($sort_by == 'oldest') ? 'selected' : ''; ?>>Oldest First</option>
+                <option value="age_asc" <?php echo ($sort_by == 'age_asc') ? 'selected' : ''; ?>>Age: Low to High</option>
+                <option value="age_desc" <?php echo ($sort_by == 'age_desc') ? 'selected' : ''; ?>>Age: High to Low</option>
+                <option value="relevance" <?php echo ($sort_by == 'relevance') ? 'selected' : ''; ?>>Relevance (with Photo)</option>
+            </select>
+        </div>
+    </div>
+    
+    <!-- Active Filters Display -->
+    <?php
+    $active_filters = [];
+    $filter_labels = [
+        'gender' => 'Gender',
+        'age_min' => 'Min Age',
+        'age_max' => 'Max Age',
+        'religion' => 'Religion',
+        'caste' => 'Caste',
+        'mother_tongue' => 'Mother Tongue',
+        'state' => 'State',
+        'district' => 'City/District',
+        'country' => 'Country',
+        'marital_status' => 'Marital Status',
+        'education' => 'Education',
+        'occupation' => 'Occupation',
+        'height_min' => 'Min Height',
+        'height_max' => 'Max Height',
+        'body_type' => 'Body Type',
+        'complexion' => 'Complexion',
+        'diet' => 'Diet',
+        'smoke' => 'Smoking',
+        'drink' => 'Drinking',
+        'with_photo' => 'With Photo',
+        'keyword' => 'Keyword'
+    ];
+    
+    foreach ($filter_labels as $key => $label) {
+        if (!empty($_GET[$key])) {
+            $value = $_GET[$key];
+            if ($key == 'with_photo' && $value == '1') {
+                $value = 'Yes';
+            }
+            $active_filters[$key] = ['label' => $label, 'value' => $value];
+        }
+    }
+    
+    if (!empty($active_filters)): ?>
+    <div class="active-filters">
+        <span style="font-weight: 600; color: #555; margin-right: 10px;">Active Filters:</span>
+        <?php foreach ($active_filters as $key => $filter): ?>
+        <span class="filter-tag">
+            <strong><?php echo $filter['label']; ?>:</strong> <?php echo htmlspecialchars($filter['value']); ?>
+            <button class="remove-filter" onclick="removeFilter('<?php echo $key; ?>')" title="Remove filter">×</button>
+        </span>
+        <?php endforeach; ?>
+        <button class="clear-all-filters" onclick="clearAllFilters()">
+            <i class="fa fa-times"></i> Clear All
+        </button>
+    </div>
+    <?php endif; ?>
+    
+    <!-- Pagination Top -->
     <div class="pagination-container">
         <span class="page-info">Page <?php echo $page; ?> of <?php echo $total_pages; ?></span>
         
@@ -450,10 +754,6 @@ $query_string = http_build_query($query_params);
             <a href="?<?php echo $query_string; ?>&page=<?php echo $page + 1; ?>" class="next-btn">Next</a>
             <a href="?<?php echo $query_string; ?>&page=<?php echo $total_pages; ?>" class="last-btn">Last</a>
         <?php endif; ?>
-    </div>
-    
-    <div class="total-records">
-        <?php echo number_format($total_records); ?> Record(s) Found
     </div>
     <?php endif; ?>
     
@@ -624,6 +924,38 @@ function sendMessage(profileId) {
     <?php endif; ?>
     
     window.location.href = 'messages.php?to=' + profileId;
+}
+
+// Change sort order
+function changeSortOrder(sortValue) {
+    const url = new URL(window.location.href);
+    url.searchParams.set('sort', sortValue);
+    url.searchParams.delete('page'); // Reset to first page when sorting changes
+    window.location.href = url.toString();
+}
+
+// Remove a single filter
+function removeFilter(filterKey) {
+    const url = new URL(window.location.href);
+    url.searchParams.delete(filterKey);
+    url.searchParams.delete('page'); // Reset to first page
+    window.location.href = url.toString();
+}
+
+// Clear all filters
+function clearAllFilters() {
+    const url = new URL(window.location.href);
+    const mode = url.searchParams.get('mode');
+    const sort = url.searchParams.get('sort');
+    
+    // Clear all params
+    url.search = '';
+    
+    // Keep mode and sort if they exist
+    if (mode) url.searchParams.set('mode', mode);
+    if (sort) url.searchParams.set('sort', sort);
+    
+    window.location.href = url.toString();
 }
 </script>
 
