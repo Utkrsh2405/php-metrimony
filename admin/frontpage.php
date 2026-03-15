@@ -16,6 +16,7 @@ if (mysqli_num_rows($check_admin) == 0) {
 }
 
 include("../includes/admin-header.php");
+?>
 <div class="container-fluid" style="margin-top: 15px;">
     <ul class="nav nav-tabs" style="margin-bottom: 20px;">
         <li class="active"><a href="#config-tab" data-toggle="tab"><i class="fa fa-cogs"></i> Configuration</a></li>
@@ -1268,3 +1269,4 @@ function saveSection(key, data) {
     </div>
 </div>
 <?php include("../includes/admin-footer.php"); ?>
+
