@@ -119,7 +119,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
                 </a>
             </li>
             <li>
-                <a href="homepage-sections.php" class="<?php echo ($current_page == 'homepage-sections.php') ? 'active' : ''; ?>">
+
                     <i class="fa fa-th-large"></i> Homepage Sections
                 </a>
             </li>
