@@ -943,7 +943,7 @@ function sendMessage(profileId) {
     return;
     <?php endif; ?>
     
-    window.location.href = 'messages.php?to=' + profileId;
+    window.location.href = 'messages.php?user=' + profileId;
 }
 
 // Change sort order

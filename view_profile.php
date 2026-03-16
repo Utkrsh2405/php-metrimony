@@ -659,7 +659,7 @@ $(document).ready(function(){
                     <i class="fa fa-phone"></i> <?php echo "+" . $phone_code . " " . $mobile; ?>
                 </a>
                 <?php endif; ?>
-                <button class="btn-modern btn-photos">
+                <button class="btn-modern btn-photos" onclick="window.location.href='messages.php?user=<?php echo $profileid; ?>'">
                     <i class="fa fa-comments"></i> Send Message
                 </button>
             <?php endif; ?>
