@@ -224,7 +224,7 @@ if ($method === 'POST') {
         $message_id = mysqli_insert_id($conn);
         
         // Get sender info for SMS
-        $sender_query = mysqli_query($conn, "SELECT firstname as name FROM customer WHERE id = $user_id LIMIT 1");
+        $sender_query = mysqli_query($conn, "SELECT firstname as name FROM customer WHERE cust_id = $user_id LIMIT 1");
         $sender = mysqli_fetch_assoc($sender_query);
         
         // Get recipient info for SMS
