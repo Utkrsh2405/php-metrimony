@@ -12,7 +12,7 @@
 				  <?php 
 				  if(isloggedin()){
 				  	$id=$_SESSION['id'];
-				  	echo "<li><a href=\"userhome.php?id=$id\">Home</a></li>";
+				  	echo "<li><a href=\"userhome.php?id=$id\">Home</a></li>"; echo "<li><a href=\"view_profile.php?id=$id\">My Profile</a></li>";
 				  	echo "<li><a href=\"logout.php\">Logout</a></li>";
 				  }
 				  else{
@@ -61,8 +61,8 @@
                     <?php if(!isloggedin()): ?>
                         <li><a href="login.php">Login</a></li>
                         <li class="last"><a href="register.php">Signup</a></li>
-                    <?php else: ?>
-                        <li><a href="logout.php">Logout</a></li>
+                    <?php else: ?>                        <li><a href="userhome.php?id=<?php echo $_SESSION['id']; ?>">Dashboard</a></li>
+                        <li><a href="view_profile.php?id=<?php echo $_SESSION['id']; ?>">My Profile</a></li>                        <li><a href="logout.php">Logout</a></li>
                     <?php endif; ?>
 		        </ul>
 		     </div><!-- /.navbar-collapse -->
