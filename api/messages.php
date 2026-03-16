@@ -23,13 +23,13 @@ if ($method === 'GET') {
     // Get inbox messages
     if ($action === 'inbox') {
         $query = "SELECT m.*, 
-            u.name as sender_name, 
+            c.firstname as sender_name, 
             c.verified as sender_verified,
-            u.age as sender_age,
-            u.location as sender_location
+            c.age as sender_age,
+            c.district as sender_location
             FROM messages m
             LEFT JOIN users u ON m.from_user_id = u.id
-            LEFT JOIN customer c ON m.from_user_id = c.user_id
+            LEFT JOIN customer c ON m.from_user_id = c.cust_id
             WHERE m.to_user_id = $user_id 
             AND m.is_deleted_by_receiver = 0
             ORDER BY m.created_at DESC
@@ -69,11 +69,11 @@ if ($method === 'GET') {
     // Get sent messages
     if ($action === 'sent') {
         $query = "SELECT m.*, 
-            u.name as receiver_name, 
+            c.firstname as receiver_name, 
             c.verified as receiver_verified
             FROM messages m
             LEFT JOIN users u ON m.to_user_id = u.id
-            LEFT JOIN customer c ON m.to_user_id = c.user_id
+            LEFT JOIN customer c ON m.to_user_id = c.cust_id
             WHERE m.from_user_id = $user_id 
             AND m.is_deleted_by_sender = 0
             ORDER BY m.created_at DESC
@@ -111,15 +111,15 @@ if ($method === 'GET') {
         }
         
         $query = "SELECT m.*, 
-            u1.name as from_name,
-            u2.name as to_name,
+            c1.firstname as from_name,
+            c2.firstname as to_name,
             c1.verified as from_verified,
             c2.verified as to_verified
             FROM messages m
             LEFT JOIN users u1 ON m.from_user_id = u1.id
             LEFT JOIN users u2 ON m.to_user_id = u2.id
-            LEFT JOIN customer c1 ON m.from_user_id = c1.user_id
-            LEFT JOIN customer c2 ON m.to_user_id = c2.user_id
+            LEFT JOIN customer c1 ON m.from_user_id = c1.cust_id
+            LEFT JOIN customer c2 ON m.to_user_id = c2.cust_id
             WHERE ((m.from_user_id = $user_id AND m.to_user_id = $with_user_id AND m.is_deleted_by_sender = 0)
             OR (m.from_user_id = $with_user_id AND m.to_user_id = $user_id AND m.is_deleted_by_receiver = 0))
             ORDER BY m.created_at ASC
@@ -137,7 +137,7 @@ if ($method === 'GET') {
         
         // Get user info
         $user_query = "SELECT u.*, c.verified FROM users u 
-            LEFT JOIN customer c ON u.id = c.user_id 
+            LEFT JOIN customer c ON u.id = c.cust_id 
             WHERE u.id = $with_user_id LIMIT 1";
         $user_result = mysqli_query($conn, $user_query);
         $user_info = mysqli_fetch_assoc($user_result);
@@ -224,12 +224,12 @@ if ($method === 'POST') {
         $message_id = mysqli_insert_id($conn);
         
         // Get sender info for SMS
-        $sender_query = mysqli_query($conn, "SELECT name FROM users WHERE id = $user_id LIMIT 1");
+        $sender_query = mysqli_query($conn, "SELECT firstname as name FROM customer WHERE id = $user_id LIMIT 1");
         $sender = mysqli_fetch_assoc($sender_query);
         
         // Get recipient info for SMS
-        $recipient_query = mysqli_query($conn, "SELECT u.name, c.phone FROM users u 
-            LEFT JOIN customer c ON u.id = c.user_id 
+        $recipient_query = mysqli_query($conn, "SELECT c.firstname as name, c.phone FROM users u 
+            LEFT JOIN customer c ON u.id = c.cust_id 
             WHERE u.id = $to_user_id LIMIT 1");
         $recipient = mysqli_fetch_assoc($recipient_query);
         
