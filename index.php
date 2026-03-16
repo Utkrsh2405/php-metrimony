@@ -420,10 +420,23 @@ $search_by = $sections['search_by'] ?? null;
         <h2 class="section-title">Featured Profile</h2>
         <div class="profile-slider">
             <?php
+            $gender_filter_clause = "";
+            if(isset($_SESSION['id'])) {
+                $logged_user_id = intval($_SESSION['id']);
+                $gender_sql = "SELECT sex FROM customer WHERE cust_id = $logged_user_id";
+                $gender_result = mysqlexec($gender_sql);
+                if($gender_result && mysqli_num_rows($gender_result) > 0) {
+                    $gender_row = mysqli_fetch_assoc($gender_result);
+                    $user_gender = strtolower(trim($gender_row['sex']));
+                    $opposite_gender = ($user_gender == 'male') ? 'Female' : 'Male';
+                    $gender_filter_clause = "AND c.sex = '$opposite_gender'";
+                }
+            }
             // Get featured profiles - exclude deleted and suspended users
-            $sql = "SELECT c.* FROM customer c 
-                    INNER JOIN users u ON c.cust_id = u.id 
+            $sql = "SELECT c.* FROM customer c
+                    INNER JOIN users u ON c.cust_id = u.id
                     WHERE u.account_status = 'active' AND u.userlevel = 0
+                    $gender_filter_clause
                     ORDER BY c.cust_id DESC LIMIT 12";
             $result = mysqlexec($sql);
             if($result && mysqli_num_rows($result) > 0) {
@@ -605,3 +618,5 @@ $search_by = $sections['search_by'] ?? null;
 
 </body>
 </html>
+
+

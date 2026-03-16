@@ -655,9 +655,9 @@ $(document).ready(function(){
                     <i class="fa fa-heart"></i> Express Interest
                 </button>
                 <?php if (!empty($mobile)): ?>
-                <button class="btn-modern btn-mobile" onclick="showMobileNumber()">
-                    <i class="fa fa-phone"></i> <span id="mobile-btn-text">View Mobile</span>
-                </button>
+                <a href="tel:+<?php echo $phone_code . $mobile; ?>" class="btn-modern btn-mobile" style="text-decoration: none;">
+                    <i class="fa fa-phone"></i> <?php echo "+" . $phone_code . " " . $mobile; ?>
+                </a>
                 <?php endif; ?>
                 <button class="btn-modern btn-photos">
                     <i class="fa fa-comments"></i> Send Message
@@ -773,17 +773,9 @@ $(document).ready(function(){
                         <div class="info-label"><i class="fa fa-mobile"></i> Mobile Number</div>
                         <div class="info-value">
                             <?php if (!empty($mobile)): ?>
-                                <span id="mobile-hidden">
-                                    <span class="masked-number">+<?php echo $phone_code; ?> <?php echo substr($mobile, 0, 2) . '****' . substr($mobile, -2); ?></span>
-                                    <button class="btn btn-sm btn-primary view-mobile-btn" onclick="viewMobileNumber()">
-                                        <i class="fa fa-eye"></i> View Number
-                                    </button>
-                                </span>
-                                <span id="mobile-visible" style="display: none;">
-                                    <a href="tel:+<?php echo $phone_code . $mobile; ?>" class="mobile-link">
-                                        <i class="fa fa-phone"></i> +<?php echo $phone_code; ?> <?php echo $mobile; ?>
-                                    </a>
-                                </span>
+                                <a href="tel:+<?php echo $phone_code . $mobile; ?>" class="mobile-link" style="text-decoration: none; color: #333; font-weight: 500;">
+                                    <i class="fa fa-phone"></i> +<?php echo $phone_code; ?> <?php echo $mobile; ?>
+                                </a>
                             <?php else: ?>
                                 <span class="text-muted">Not provided</span>
                             <?php endif; ?>
@@ -792,17 +784,9 @@ $(document).ready(function(){
                     <div class="info-item">
                         <div class="info-label"><i class="fa fa-envelope"></i> Email</div>
                         <div class="info-value">
-                            <span id="email-hidden">
-                                <span class="masked-email"><?php echo substr($email, 0, 2) . '****@' . explode('@', $email)[1]; ?></span>
-                                <button class="btn btn-sm btn-primary view-email-btn" onclick="viewEmail()">
-                                    <i class="fa fa-eye"></i> View Email
-                                </button>
-                            </span>
-                            <span id="email-visible" style="display: none;">
-                                <a href="mailto:<?php echo $email; ?>" class="email-link">
-                                    <i class="fa fa-envelope"></i> <?php echo $email; ?>
-                                </a>
-                            </span>
+                            <a href="mailto:<?php echo $email; ?>" class="email-link" style="text-decoration: none; color: #333; font-weight: 500;">
+                                <i class="fa fa-envelope"></i> <?php echo $email; ?>
+                            </a>
                         </div>
                     </div>
                 </div>
@@ -933,9 +917,23 @@ $(document).ready(function(){
                     <i class="fa fa-clock-o"></i> Recent Profiles
                 </div>
                 <?php
-                $sql="SELECT c.*, u.account_status FROM customer c 
-                      LEFT JOIN users u ON c.cust_id = u.id 
+                $recent_gender_filter = "";
+                if(isset($_SESSION['id'])) {
+                    $logged_user_id = intval($_SESSION['id']);
+                    $gender_sql = "SELECT sex FROM customer WHERE cust_id = $logged_user_id";
+                    $gender_result = mysqlexec($gender_sql);
+                    if($gender_result && mysqli_num_rows($gender_result) > 0) {
+                        $gender_row = mysqli_fetch_assoc($gender_result);
+                        $user_gender = strtolower(trim($gender_row['sex']));
+                        $opposite_gender = ($user_gender == 'male') ? 'Female' : 'Male';
+                        $recent_gender_filter = "AND c.sex = '$opposite_gender'";
+                    }
+                }
+                
+                $sql="SELECT c.*, u.account_status FROM customer c
+                      LEFT JOIN users u ON c.cust_id = u.id
                       WHERE (u.account_status = 'active' OR u.account_status IS NULL)
+                      $recent_gender_filter
                       ORDER BY c.profilecreationdate DESC LIMIT 10";
                 $result=mysqlexec($sql);
                 while($row=mysqli_fetch_assoc($result)){

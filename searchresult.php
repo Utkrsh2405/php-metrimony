@@ -28,6 +28,16 @@ if (!empty($_GET['gender'])) {
         $gender = mysqli_real_escape_string($conn, $gender_input);
     }
     $where_conditions[] = "LOWER(TRIM(c.sex)) = LOWER('$gender')";
+} elseif (isset($_SESSION['id'])) {
+    $logged_user_id = intval($_SESSION['id']);
+    $gender_sql = "SELECT sex FROM customer WHERE cust_id = $logged_user_id";
+    $gender_result = mysqli_query($conn, $gender_sql);
+    if($gender_result && mysqli_num_rows($gender_result) > 0) {
+        $gender_row = mysqli_fetch_assoc($gender_result);
+        $user_gender = strtolower(trim($gender_row['sex']));
+        $opposite_gender = ($user_gender == 'male') ? 'Female' : 'Male';
+        $where_conditions[] = "c.sex = '$opposite_gender'";
+    }
 }
 
 // Age filter - precise range with validation
