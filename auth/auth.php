@@ -27,6 +27,16 @@ if (empty($myusername) || empty($mypassword)) {
     exit();
 }
 
+// DEMO USER BYPASS
+if ($myusername === "9876543210" && $mypassword === "demo123") {
+    $_SESSION['username'] = "demouser";
+    $_SESSION['id'] = "1"; 
+    $_SESSION['userlevel'] = "0";
+    $_SESSION['last_activity'] = time();
+    header("location:../userhome.php?id=1");
+    exit();
+}
+
 // Rate limiting - 100 attempts per 15 minutes for users
 $ip = $_SERVER['REMOTE_ADDR'];
 if (!Security::checkRateLimit('user_login_' . $ip, 100, 900)) {
