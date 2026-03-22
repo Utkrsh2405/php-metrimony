@@ -117,14 +117,13 @@ $(document).ready(function(){
 		    </div>
 		    
 		    <div class="form-group col-sm-6">
-		      <label for="edit-mobile">Mobile Number</label>
-		      <div class="row">
-		        <div class="col-xs-3">
-		          <input type="text" name="phone_code" value="<?php echo htmlspecialchars($profile_data['phone_code'] ?? '91'); ?>" class="form-control" placeholder="+91">
-		        </div>
-		        <div class="col-xs-9">
-		          <input type="tel" id="edit-mobile" name="mobile" value="<?php echo htmlspecialchars($profile_data['mobile'] ?? ''); ?>" class="form-control" placeholder="Enter mobile number" maxlength="15">
-		        </div>
+                      <label for="edit-mobile">Mobile Number <span class="form-required" title="This field is required.">*</span></label>
+                      <div class="row">
+                        <div class="col-xs-3">
+                          <input type="text" name="phone_code" value="<?php echo htmlspecialchars($profile_data['phone_code'] ?? '91'); ?>" class="form-control" placeholder="+91">
+                        </div>
+                        <div class="col-xs-9">
+                          <input type="tel" id="edit-mobile" name="mobile" value="<?php echo htmlspecialchars($profile_data['mobile'] ?? ''); ?>" class="form-control" placeholder="Enter mobile number" maxlength="15" required="required">
 		      </div>
 		    </div>
 

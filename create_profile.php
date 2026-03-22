@@ -88,10 +88,18 @@ $(document).ready(function(){
 		      <label for="edit-name">Email <span class="form-required" title="This field is required.">*</span></label>
 		      <input type="text" id="edit-name" name="email" value="" size="60" maxlength="60" class="form-text required">
 		    </div>
-
-	    <div class="form-group col-sm-6">
-			    <div class="age_select">
-			      <label for="edit-pass">
+                    
+                    <div class="form-group col-sm-6">
+                      <label for="edit-mobile">Mobile Number <span class="form-required" title="This field is required.">*</span></label>
+                      <div class="row">
+                        <div class="col-xs-3">
+                          <input type="text" name="phone_code" value="91" class="form-control" placeholder="+91">
+                        </div>
+                        <div class="col-xs-9">
+                          <input type="tel" id="edit-mobile" name="mobile" value="" class="form-control required" placeholder="Enter mobile number" maxlength="15" required="required">
+                        </div>
+                      </div>
+                    </div>
  Date Of Birth <span class="form-required" title="This field is required.">*</span></label>
 			        <div class="age_grid">
 			         <div class="col-sm-4 form_box">

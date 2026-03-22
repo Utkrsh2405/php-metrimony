@@ -42,8 +42,8 @@ CREATE TABLE IF NOT EXISTS `admin` (
 CREATE TABLE IF NOT EXISTS `customer` (
 `id` int(10) NOT NULL,
   `cust_id` int(5) NOT NULL,
-  `email` varchar(60) NOT NULL,
-  `age` varchar(10) NOT NULL,
+  `email` varchar(60) NOT NULL,  `mobile` varchar(20) NOT NULL,
+  `phone_code` varchar(10) NOT NULL DEFAULT '91',  `age` varchar(10) NOT NULL,
   `height` int(10) NOT NULL,
   `sex` varchar(6) NOT NULL,
   `religion` varchar(20) NOT NULL,
