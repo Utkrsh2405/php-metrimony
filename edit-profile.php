@@ -542,7 +542,7 @@ $(document).ready(function(){
 		    	<label for="about me">About Me<span class="form-required" title="This field is required.">*</span></label>
 		    	<textarea rows="5" name="aboutme" placeholder="Write about you" class="form-text"><?php echo htmlspecialchars($profile_data['aboutme'] ?? ''); ?></textarea>
 		    </div>
-		    <div class="form-actions">} else{
+		    <div class="form-actions">
 			    <input type="submit" id="edit-submit" name="op" value="Submit" class="btn_1 submit">
 			  </div>
 			  </div>
@@ -569,9 +569,15 @@ jQuery(document).ready(function($) {
     
     // Pre-select existing values
     <?php if (!empty($profile_data)): ?>
-        $('select[name="day"]').val('<?php echo $profile_data['day'] ?? ''; ?>');
-        $('select[name="month"]').val('<?php echo $profile_data['month'] ?? ''; ?>');
-        $('select[name="year"]').val('<?php echo $profile_data['year'] ?? ''; ?>');
+          <?php 
+          $dob = isset($profile_data['dateofbirth']) ? explode('-', $profile_data['dateofbirth']) : ['', '', ''];
+          $p_year = $dob[0] ?? '';
+          $p_month = ltrim($dob[1] ?? '', '0');
+          $p_day = ltrim($dob[2] ?? '', '0');
+          ?>
+          $('select[name="day"]').val('<?php echo $p_day; ?>');
+          $('select[name="month"]').val('<?php echo $p_month; ?>');
+          $('select[name="year"]').val('<?php echo $p_year; ?>');
         $('select[name="age"]').val('<?php echo $profile_data['age'] ?? ''; ?>');
         $('select[name="religion"]').val('<?php echo $profile_data['religion'] ?? ''; ?>').trigger('change');
         $('select[name="subcaste"]').val('<?php echo $profile_data['subcaste'] ?? ''; ?>');

@@ -82,7 +82,7 @@ $(document).ready(function(){
 		              <ul class="dropdown-menu" role="menu">
 		               <li><a href="photouploader.php?id=<?php echo $id;?>">Upload Photos</a></li>
 		               <li><a href="view_profile.php?id=<?php echo $id;?>">View Profile</a></li>
-		               <li><a href="create_profile.php?id=<?php echo $id;?>">Edit Profile</a></li>  
+		               <li><a href="edit-profile.php?id=<?php echo $id;?>">Edit Profile</a></li>  
 		              </ul>
 		            </li>
 					<li class="dropdown">

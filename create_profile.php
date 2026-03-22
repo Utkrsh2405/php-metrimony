@@ -503,7 +503,7 @@ $(document).ready(function(){
 		    	<label for="about me">About Me<span class="form-required" title="This field is required.">*</span></label>
 		    	<textarea rows="5" name="aboutme" placeholder="Write about you" class="form-text"></textarea>
 		    </div>
-		    <div class="form-actions">} else{
+		    <div class="form-actions">
 			    <input type="submit" id="edit-submit" name="op" value="Submit" class="btn_1 submit">
 			  </div>
 			  </div>
