@@ -142,11 +142,19 @@ include("includes/header.php");
                         <div class="col-md-3">
                             <div class="filter-group">
                                 <label>Gender</label>
-                                <select name="gender" class="form-control">
-                                    <option value="">Any</option>
-                                    <option value="Male" <?= $default_gender == 'Male' ? 'selected' : '' ?>>Male</option>
-                                    <option value="Female" <?= $default_gender == 'Female' ? 'selected' : '' ?>>Female</option>
-                                </select>
+                                  <?php if (isset($_SESSION['id'])) { ?>
+                                      <input type="hidden" name="gender" value="<?= $default_gender ?>">
+                                      <select class="form-control" disabled>
+                                          <option value="Male" <?= $default_gender == 'Male' ? 'selected' : '' ?>>Male</option>
+                                          <option value="Female" <?= $default_gender == 'Female' ? 'selected' : '' ?>>Female</option>
+                                      </select>
+                                  <?php } else { ?>
+                                      <select name="gender" class="form-control">
+                                          <option value="">Any</option>
+                                          <option value="Male" <?= $default_gender == 'Male' ? 'selected' : '' ?>>Male</option>
+                                          <option value="Female" <?= $default_gender == 'Female' ? 'selected' : '' ?>>Female</option>
+                                      </select>
+                                  <?php } ?>
                             </div>
                         </div>
                         <div class="col-md-3">

@@ -26,10 +26,28 @@ $result = mysqlexec($sql);
 if($result){
 $row=mysqli_fetch_assoc($result);
 
-	$fname=$row['firstname'];
-	$lname=$row['lastname'];
-	$sex=$row['sex'];
-	$email=$row['email'];
+  $fname=$row['firstname'];
+  $lname=$row['lastname'];
+  $sex=$row['sex'];
+
+  // Ensure user cannot view same gender unless it's their own profile
+  if(isset($_SESSION['id']) && !$is_own_profile) {
+      $viewer_id = $_SESSION['id'];
+      $viewer_sql = "SELECT sex FROM customer WHERE cust_id = '$viewer_id'";
+      $viewer_res = mysqlexec($viewer_sql);
+      if($viewer_res && mysqli_num_rows($viewer_res) > 0) {
+          $viewer_row = mysqli_fetch_assoc($viewer_res);
+          $viewer_gender = strtolower(trim($viewer_row['sex']));
+          $profile_gender = strtolower(trim($sex));
+          
+          if($viewer_gender == $profile_gender) {
+              echo "<script>alert('You can only view profiles of the opposite gender.'); window.location.href='userhome.php';</script>";
+              exit;
+          }
+      }
+  }
+
+  $email=$row['email'];
 	$dob=$row['dateofbirth'];
 	$religion=$row['religion'];
 	$caste = $row['caste'];

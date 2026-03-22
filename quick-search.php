@@ -139,11 +139,12 @@ while ($lang = mysqli_fetch_assoc($languages_query)) {
                     <div class="form-group">
                         <label>Looking for</label>
                         <div>
-                            <label class="radio-inline">
-                                <input type="radio" name="gender" value="Male" <?= $default_gender == 'Male' ? 'checked' : '' ?>> Groom
-                            </label>
-                            <label class="radio-inline">
-                                <input type="radio" name="gender" value="Female" <?= $default_gender == 'Female' ? 'checked' : '' ?>> Bride
+                              <input type="hidden" name="gender" value="<?= $default_gender ?>">
+                              <label class="radio-inline text-muted" style="cursor: not-allowed;">
+                                  <input type="radio" value="Male" <?= $default_gender == 'Male' ? 'checked' : '' ?> disabled> Groom
+                              </label>
+                              <label class="radio-inline text-muted" style="cursor: not-allowed;">
+                                  <input type="radio" value="Female" <?= $default_gender == 'Female' ? 'checked' : '' ?> disabled> Bride
                             </label>
                         </div>
                     </div>

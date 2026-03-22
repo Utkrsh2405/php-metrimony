@@ -16,28 +16,28 @@ $where_conditions = ["(u.account_status = 'active' OR u.account_status IS NULL O
 $where_conditions[] = "c.cust_id > 0"; // Ensure valid profile
 $where_conditions[] = "(c.firstname IS NOT NULL AND c.firstname != '')"; // Must have a name
 
-// Gender filter - handle Groom/Bride mapping
-if (!empty($_GET['gender'])) {
-    $gender_input = trim($_GET['gender']);
-    // Map Groom to Male and Bride to Female
-    if (strtolower($gender_input) == 'groom') {
-        $gender = 'Male';
-    } elseif (strtolower($gender_input) == 'bride') {
-        $gender = 'Female';
-    } else {
-        $gender = mysqli_real_escape_string($conn, $gender_input);
-    }
-    $where_conditions[] = "LOWER(TRIM(c.sex)) = LOWER('$gender')";
-} elseif (isset($_SESSION['id'])) {
-    $logged_user_id = intval($_SESSION['id']);
-    $gender_sql = "SELECT sex FROM customer WHERE cust_id = $logged_user_id";
-    $gender_result = mysqli_query($conn, $gender_sql);
-    if($gender_result && mysqli_num_rows($gender_result) > 0) {
-        $gender_row = mysqli_fetch_assoc($gender_result);
-        $user_gender = strtolower(trim($gender_row['sex']));
-        $opposite_gender = ($user_gender == 'male') ? 'Female' : 'Male';
-        $where_conditions[] = "c.sex = '$opposite_gender'";
-    }
+// Gender filter - Enforce opposite gender for logged-in users
+  if (isset($_SESSION['id'])) {
+      $logged_user_id = intval($_SESSION['id']);
+      $gender_sql = "SELECT sex FROM customer WHERE cust_id = $logged_user_id";
+      $gender_result = mysqli_query($conn, $gender_sql);
+      if($gender_result && mysqli_num_rows($gender_result) > 0) {
+          $gender_row = mysqli_fetch_assoc($gender_result);
+          $user_gender = strtolower(trim($gender_row['sex']));
+          $opposite_gender = ($user_gender == 'male') ? 'Female' : 'Male';
+          $where_conditions[] = "c.sex = '$opposite_gender'";
+      }
+  } elseif (!empty($_GET['gender'])) {
+      $gender_input = trim($_GET['gender']);
+      // Map Groom to Male and Bride to Female
+      if (strtolower($gender_input) == 'groom') {
+          $gender = 'Male';
+      } elseif (strtolower($gender_input) == 'bride') {
+          $gender = 'Female';
+      } else {
+          $gender = mysqli_real_escape_string($conn, $gender_input);
+      }
+      $where_conditions[] = "LOWER(TRIM(c.sex)) = LOWER('$gender')";
 }
 
 // Age filter - precise range with validation

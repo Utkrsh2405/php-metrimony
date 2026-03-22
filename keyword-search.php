@@ -13,7 +13,7 @@ require_once("functions.php");
 $user_id = $_SESSION['id'];
 
 // Get user data
-$user_query = mysqli_query($conn, "SELECT sex FROM customer WHERE id = $user_id");
+$user_query = mysqli_query($conn, "SELECT sex FROM customer WHERE cust_id = $user_id");
 $user_data = mysqli_fetch_assoc($user_query);
 $default_gender = ($user_data['sex'] == 'male') ? 'Female' : 'Male';
 ?>
@@ -135,11 +135,12 @@ $default_gender = ($user_data['sex'] == 'male') ? 'Female' : 'Male';
                     <div class="form-group">
                         <label>Looking for</label>
                         <div>
-                            <label class="radio-inline">
-                                <input type="radio" name="gender" value="Male" <?= $default_gender == 'Male' ? 'checked' : '' ?>> Groom
-                            </label>
-                            <label class="radio-inline">
-                                <input type="radio" name="gender" value="Female" <?= $default_gender == 'Female' ? 'checked' : '' ?>> Bride
+                              <input type="hidden" name="gender" value="<?= $default_gender ?>">
+                              <label class="radio-inline text-muted" style="cursor: not-allowed;">
+                                  <input type="radio" value="Male" <?= $default_gender == 'Male' ? 'checked' : '' ?> disabled> Groom
+                              </label>
+                              <label class="radio-inline text-muted" style="cursor: not-allowed;">
+                                  <input type="radio" value="Female" <?= $default_gender == 'Female' ? 'checked' : '' ?> disabled> Bride
                             </label>
                         </div>
                     </div>

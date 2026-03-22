@@ -21,10 +21,7 @@ function mysqlexec($sql){
 function searchid(){
 	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
 		$profid=$_POST['profid'];
-		$sql="SELECT * FROM customer WHERE id=$profid";
-		$result = mysqlexec($sql);
-    	return $result;
-	}
+                $sql="SELECT * FROM customer WHERE cust_id=$profid";
 }
 
 function search(){
@@ -38,8 +35,17 @@ function search(){
     $mothertounge=$_POST['mothertounge'];
     $sex = $_POST['sex'];
 
-    $sql="SELECT * FROM customer WHERE 
-    sex='$sex' 
+    if(isset($_SESSION['id'])){
+        $logged_in_id = $_SESSION['id'];
+        $gender_res = mysqlexec("SELECT sex FROM customer WHERE cust_id='$logged_in_id'");
+        if($gender_res && mysqli_num_rows($gender_res) > 0){
+           $row = mysqli_fetch_assoc($gender_res);
+           $sex = (strtolower(trim($row['sex'])) == 'male') ? 'Female' : 'Male';
+        }
+    }
+
+    $sql="SELECT * FROM customer WHERE
+    sex='$sex'
     AND age>='$agemin'
     AND age<='$agemax'
     AND maritalstatus = '$maritalstatus'
@@ -553,3 +559,5 @@ function uploadphoto($id){
 }//end uploadphoto function
 
 ?>
+
+
