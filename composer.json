@@ -1,0 +1,8 @@
+{
+    "name": "matrimony/php-project",
+    "description": "Native PHP Matrimony Application",
+    "type": "project",
+    "require": {
+        "php": ">=7.4"
+    }
+}
