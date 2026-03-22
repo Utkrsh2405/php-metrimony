@@ -34,17 +34,8 @@
      $gender_filter = "";
      if(isset($_SESSION['id'])) {
          $logged_user_id = intval($_SESSION['id']);
-         $my_gender_sql = "SELECT sex FROM customer WHERE cust_id = ".$logged_user_id;
-         if(function_exists('mysqlexec')) {
-             $my_gender_result = mysqlexec($my_gender_sql);
-         } else {
-             global $conn;
-             $my_gender_result = mysqli_query($conn, $my_gender_sql);
-         }
-         
-         if($my_gender_result && mysqli_num_rows($my_gender_result) > 0) {
-             $my_gender_row = mysqli_fetch_assoc($my_gender_result);
-             $my_user_gender = $my_gender_row['sex'];
+         $my_user_gender = get_user_gender($logged_user_id);
+         if($my_user_gender) {
              $my_opposite_gender = (strtolower($my_user_gender) == 'male') ? 'Female' : 'Male';
              $gender_filter = " AND LOWER(TRIM(c.sex)) = LOWER('$my_opposite_gender')";
          }

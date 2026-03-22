@@ -1,4 +1,17 @@
 <?php
+
+function get_user_gender($user_id) {
+    global $conn;
+    $query = "SELECT c.sex, u.gender FROM users u LEFT JOIN customer c ON u.id = c.cust_id WHERE u.id = " . intval($user_id);
+    $result = mysqlexec($query);
+    if ($result && mysqli_num_rows($result) > 0) {
+        $row = mysqli_fetch_assoc($result);
+        $sex = !empty($row['sex']) ? trim($row['sex']) : trim($row['gender'] ?? '');
+        return (strtolower($sex) == 'female' || strtolower($sex) == 'femal') ? 'Female' : 'Male';
+    }
+    return 'Male';
+}
+
 function mysqlexec($sql){
 	// HOSTINGER CREDENTIALS - ACTIVE
 	$host = "localhost";
@@ -40,10 +53,9 @@ function search(){
 
     if(isset($_SESSION['id'])){
         $logged_in_id = $_SESSION['id'];
-        $gender_res = mysqlexec("SELECT sex FROM customer WHERE cust_id='$logged_in_id'");
-        if($gender_res && mysqli_num_rows($gender_res) > 0){
-           $row = mysqli_fetch_assoc($gender_res);
-           $sex = (strtolower(trim($row['sex'])) == 'male') ? 'Female' : 'Male';
+        $user_gender = get_user_gender($logged_in_id);
+        if($user_gender){
+            $sex = (strtolower(trim($user_gender)) == 'male') ? 'Female' : 'Male';
         }
     }
 
@@ -562,5 +574,6 @@ function uploadphoto($id){
 }//end uploadphoto function
 
 ?>
+
 
 

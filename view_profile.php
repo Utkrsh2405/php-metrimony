@@ -33,13 +33,10 @@ $row=mysqli_fetch_assoc($result);
   // Ensure user cannot view same gender unless it's their own profile
   if(isset($_SESSION['id']) && !$is_own_profile) {
       $viewer_id = $_SESSION['id'];
-      $viewer_sql = "SELECT sex FROM customer WHERE cust_id = '$viewer_id'";
-      $viewer_res = mysqlexec($viewer_sql);
-      if($viewer_res && mysqli_num_rows($viewer_res) > 0) {
-          $viewer_row = mysqli_fetch_assoc($viewer_res);
-          $viewer_gender = strtolower(trim($viewer_row['sex']));
+      $viewer_gender = strtolower(trim(get_user_gender($viewer_id)));
+      if($viewer_gender) {
           $profile_gender = strtolower(trim($sex));
-          
+
           if($viewer_gender == $profile_gender) {
               echo "<script>alert('You can only view profiles of the opposite gender.'); window.location.href='userhome.php';</script>";
               exit;
@@ -938,16 +935,13 @@ $(document).ready(function(){
                 $recent_gender_filter = "";
                 if(isset($_SESSION['id'])) {
                     $logged_user_id = intval($_SESSION['id']);
-                    $gender_sql = "SELECT sex FROM customer WHERE cust_id = $logged_user_id";
-                    $gender_result = mysqlexec($gender_sql);
-                    if($gender_result && mysqli_num_rows($gender_result) > 0) {
-                        $gender_row = mysqli_fetch_assoc($gender_result);
-                        $user_gender = strtolower(trim($gender_row['sex']));
+                    $user_gender = strtolower(trim(get_user_gender($logged_user_id)));
+                    if($user_gender) {
                         $opposite_gender = ($user_gender == 'male') ? 'Female' : 'Male';
                         $recent_gender_filter = "AND c.sex = '$opposite_gender'";
                     }
                 }
-                
+
                 $sql="SELECT c.*, u.account_status FROM customer c
                       LEFT JOIN users u ON c.cust_id = u.id
                       WHERE (u.account_status = 'active' OR u.account_status IS NULL)

@@ -13,8 +13,8 @@ require_once("functions.php");
 $user_id = $_SESSION['id'];
 
 // Get user data
-$user_query = mysqli_query($conn, "SELECT sex FROM customer WHERE cust_id = $user_id");
-$user_data = mysqli_fetch_assoc($user_query);
+  $user_gender = get_user_gender($user_id);
+  $user_data = ['sex' => $user_gender];
 $default_gender = ($user_data['sex'] == 'male') ? 'Female' : 'Male';
 ?>
 <!DOCTYPE HTML>

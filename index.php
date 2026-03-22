@@ -423,14 +423,9 @@ $search_by = $sections['search_by'] ?? null;
             $gender_filter_clause = "";
             if(isset($_SESSION['id'])) {
                 $logged_user_id = intval($_SESSION['id']);
-                $gender_sql = "SELECT sex FROM customer WHERE cust_id = $logged_user_id";
-                $gender_result = mysqlexec($gender_sql);
-                if($gender_result && mysqli_num_rows($gender_result) > 0) {
-                    $gender_row = mysqli_fetch_assoc($gender_result);
-                    $user_gender = strtolower(trim($gender_row['sex']));
-                    $opposite_gender = ($user_gender == 'male') ? 'Female' : 'Male';
-                    $gender_filter_clause = "AND c.sex = '$opposite_gender'";
-                }
+                  $user_gender = get_user_gender($logged_user_id);
+                  $opposite_gender = ($user_gender == 'Male') ? 'Female' : 'Male';
+                  $gender_filter_clause = "AND c.sex = '$opposite_gender'";
             }
             // Get featured profiles - exclude deleted and suspended users
             $sql = "SELECT c.* FROM customer c
@@ -489,15 +484,9 @@ $search_by = $sections['search_by'] ?? null;
                 $bg_gender_filter = "WHERE u.account_status = 'active' AND u.userlevel = 0";
                 if(isset($_SESSION['id'])) {
                     $logged_user_id = intval($_SESSION['id']);
-                    $bg_gender_sql = "SELECT sex FROM customer WHERE cust_id = $logged_user_id";
-                    $bg_gender_result = mysqlexec($bg_gender_sql);
-                    if($bg_gender_result && mysqli_num_rows($bg_gender_result) > 0) {
-                        $bg_gender_row = mysqli_fetch_assoc($bg_gender_result);
-                        $bg_user_gender = $bg_gender_row['sex'];
-                        // Show opposite gender
-                        $bg_opposite_gender = ($bg_user_gender == 'Male') ? 'Female' : 'Male';
-                        $bg_gender_filter .= " AND c.sex = '$bg_opposite_gender'";
-                    }
+                      $bg_user_gender = get_user_gender($logged_user_id);
+                      $bg_opposite_gender = ($bg_user_gender == 'Male') ? 'Female' : 'Male';
+                      $bg_gender_filter .= " AND c.sex = '$bg_opposite_gender'";
                 }
                 $featured_sql = "SELECT c.* FROM customer c 
                                 INNER JOIN users u ON c.cust_id = u.id 

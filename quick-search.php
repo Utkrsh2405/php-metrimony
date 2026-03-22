@@ -13,8 +13,8 @@ require_once("functions.php");
 $user_id = $_SESSION['id'];
 
 // Get user's sex to search opposite sex by default
-$user_query = mysqli_query($conn, "SELECT sex FROM customer WHERE cust_id = $user_id");
-$user_data = mysqli_fetch_assoc($user_query);
+  $user_gender = get_user_gender($user_id);
+  $user_data = ['sex' => $user_gender];
 $default_gender = (strcasecmp($user_data['sex'], 'Male') == 0) ? 'Female' : 'Male';
 
 // Get religions from database

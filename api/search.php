@@ -8,6 +8,7 @@ if (!isset($_SESSION['id'])) {
 }
 
 require_once("../includes/dbconn.php");
+require_once("../functions.php");
 
 $user_id = $_SESSION['id'];
 $method = $_SERVER['REQUEST_METHOD'];
@@ -31,10 +32,8 @@ if ($method === 'POST') {
     $params = [];
     
     // Get logged-in user's gender to auto-filter for opposite gender
-    $user_gender_query = mysqli_query($conn, "SELECT c.sex FROM customer c WHERE c.cust_id = $user_id");
-    $user_gender_data = mysqli_fetch_assoc($user_gender_query);
-    $user_gender = $user_gender_data['sex'] ?? null;
-    
+    $user_gender = get_user_gender($user_id);
+
     // Apply gender filter - if user specifies a gender, use that; otherwise show opposite gender
     if (!empty($input['gender'])) {
         $gender = mysqli_real_escape_string($conn, $input['gender']);

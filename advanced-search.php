@@ -11,10 +11,8 @@ require_once("includes/dbconn.php");
 $user_id = $_SESSION['id'];
 
 // Get user's gender to search opposite gender by default
-$user_query = mysqli_query($conn, "SELECT c.sex FROM customer c WHERE c.id = $user_id");
-$user_data = mysqli_fetch_assoc($user_query);
-$default_gender = ($user_data['sex'] == 'Male') ? 'Female' : 'Male';
-
+  $user_gender = get_user_gender($user_id);
+  $default_gender = ($user_gender == 'Male') ? 'Female' : 'Male';
 // Get saved searches
 $saved_searches = mysqli_query($conn, "SELECT * FROM saved_searches WHERE user_id = $user_id ORDER BY is_default DESC, search_name");
 
