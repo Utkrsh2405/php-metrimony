@@ -19,9 +19,12 @@ function mysqlexec($sql){
 
 }
 function searchid(){
-	if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-		$profid=$_POST['profid'];
+        if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+                $profid=$_POST['profid'];
                 $sql="SELECT * FROM customer WHERE cust_id=$profid";
+                $result = mysqlexec($sql);
+                return $result;
+        }
 }
 
 function search(){
