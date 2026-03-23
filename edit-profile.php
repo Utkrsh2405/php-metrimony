@@ -111,6 +111,7 @@ $(document).ready(function(){
 	                </select>
 			    </div>
 		    </div>
+                    <div class="clearfix"> </div>
 		    <div class="form-group col-sm-6">
 		      <label for="edit-name">Email <span class="form-required" title="This field is required.">*</span></label>
 		      <input type="text" id="edit-name" name="email" value="<?php echo htmlspecialchars($profile_data['email'] ?? ''); ?>" size="60" maxlength="60" class="form-text required">
@@ -124,10 +125,12 @@ $(document).ready(function(){
                         </div>
                         <div class="col-xs-9">
                           <input type="tel" id="edit-mobile" name="mobile" value="<?php echo htmlspecialchars($profile_data['mobile'] ?? ''); ?>" class="form-control" placeholder="Enter mobile number" maxlength="15" required="required">
-		      </div>
-		    </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div class="clearfix"> </div>
 
-	    <div class="form-group col-sm-6">
+            <div class="form-group col-sm-6">
 			    <div class="age_select">
 			      <label for="edit-pass">
  Date Of Birth <span class="form-required" title="This field is required.">*</span></label>
@@ -266,6 +269,7 @@ $(document).ready(function(){
 	                 </div>
 	              </div>
             </div>
+            <div class="clearfix"> </div>
 
             <!-- Fourth Row starts -->
               <div class="form-group col-sm-6">
@@ -310,6 +314,7 @@ $(document).ready(function(){
             </div>
 
             <!-- Fourth Row ends -->
+            <div class="clearfix"> </div>
             <!-- Fifth Row starts -->
             <div class="form-group col-sm-2">
 		      <label for="edit-name">Age<span class="form-required" title="This field is required.">*</span></label>
@@ -409,6 +414,7 @@ $(document).ready(function(){
 			    </div>
 		    </div>
             <!-- Fifth Row ends -->
+            <div class="clearfix"> </div>
             <!-- sixth Row starts-->
             <div class="form-group col-sm-2">
 		      <label for="edit-name">Drinks<span class="form-required" title="This field is required.">*</span></label>
@@ -456,6 +462,7 @@ $(document).ready(function(){
 			  <input type="text" id="edit-name" name="weight" value="<?php echo htmlspecialchars($profile_data['weight'] ?? ''); ?>" size="60" maxlength="60" class="form-text">
 		    </div>
 		    <!-- sixth Row ends-->
+            <div class="clearfix"> </div>
 		    <!-- Seventh Row starts-->
 		    <div class="col-lg-12">
 		    <div class="form-group col-sm-2">
@@ -501,6 +508,7 @@ $(document).ready(function(){
 
 
              <!-- Seventh Row ends-->
+            <div class="clearfix"> </div>
   
            <!-- eighth Row starts-->
            <div class="col-lg-12">
@@ -546,6 +554,7 @@ $(document).ready(function(){
 			  </div>
 			  </div>
              <!-- eighth Row ends-->
+            <div class="clearfix"> </div>
          <hr/>
 			  
 
@@ -634,3 +643,6 @@ jQuery(document).ready(function($) {
 
 </body>
 </html>	
+
+
+
