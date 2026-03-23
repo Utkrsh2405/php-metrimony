@@ -236,22 +236,28 @@ function switchTab(tab) {
 }
 
 function loadMessages(type, silent = false) {
-    $.get('/api/messages.php?action=' + type, function(response) {
-        if (response.success) {
-            if (type === 'inbox') {
-                unreadCount = response.unread;
-                if (unreadCount > 0) {
-                    $('#unread-count').text(unreadCount).show();
-                } else {
-                    $('#unread-count').hide();
-                }
-            }
-            
-            if (!silent) {
-                renderMessagesList(response.data, type);
-            }
-        }
-    });
+      $.get('/api/messages.php?action=' + type)
+      .done(function(response) {
+          if (response.success) {
+              if (type === 'inbox') {
+                  unreadCount = response.unread;
+                  if (unreadCount > 0) {
+                      $('#unread-count').text(unreadCount).show();
+                  } else {
+                      $('#unread-count').hide();
+                  }
+              }
+
+              if (!silent) {
+                  renderMessagesList(response.data, type);
+              }
+          } else {
+              $('#messages-list').html('<p style="text-align: center; padding: 20px; color: red;">API Error: ' + response.error + '</p>');
+          }
+      })
+      .fail(function(jqXHR, textStatus, errorThrown) {
+          $('#messages-list').html('<p style="text-align: center; padding: 20px; color: red;">Network Error: ' + errorThrown + '</p>');
+          console.error(jqXHR.responseText);
 }
 
 function renderMessagesList(messages, type) {
@@ -304,24 +310,21 @@ function loadConversation(userId, silent = false) {
         }
     });
     
-    $.get('/api/messages.php?action=conversation&user_id=' + userId, function(response) {
-        if (response.success) {
-            if (!silent) {
-                renderConversation(response.data, response.user_info);
-            } else {
-                // Just append new messages
-                updateConversation(response.data);
-            }
-        }
-    });
-}
-
-function renderConversation(messages, userInfo) {
-    const initials = userInfo.name ? userInfo.name.charAt(0).toUpperCase() : '?';
-    const verified = userInfo.verified == 1 
-        ? '<i class="fa fa-check-circle" style="color: #4caf50;"></i> ' : '';
-    
-    const conversationHtml = `
+      $.get('/api/messages.php?action=conversation&user_id=' + userId)
+      .done(function(response) {
+          if (response.success) {
+              if (!silent) {
+                  renderConversation(response.data, response.user_info);
+              } else {
+                  // Just append new messages
+                  updateConversation(response.data);
+              }
+          } else {
+              $('#conversation-area').html('<p style="text-align: center; padding: 20px; color: red;">API Error: ' + response.error + '</p>');
+          }
+      })
+      .fail(function(jqXHR, textStatus, errorThrown) {
+          $('#conversation-area').html('<p style="text-align: center; padding: 20px; color: red;">Network Error: ' + errorThrown + '</p>');
         <div class="conversation-header">
             <div style="display: flex; align-items: center; justify-content: space-between;">
                 <div style="display: flex; align-items: center;">

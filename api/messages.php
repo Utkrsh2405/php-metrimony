@@ -22,9 +22,9 @@ if ($method === 'GET') {
     
     // Get inbox messages
     if ($action === 'inbox') {
-        $query = "SELECT m.*, 
-            c.firstname as sender_name, 
-            c.is_verified as sender_verified,
+        $query = "SELECT m.*,
+            c.firstname as sender_name,
+            0 as sender_verified,
             c.age as sender_age,
             c.district as sender_location
             FROM messages m
@@ -68,9 +68,9 @@ if ($method === 'GET') {
     
     // Get sent messages
     if ($action === 'sent') {
-        $query = "SELECT m.*, 
+        $query = "SELECT m.*,
             c.firstname as receiver_name,
-            c.is_verified as receiver_verified
+            0 as receiver_verified
             FROM messages m
             LEFT JOIN users u ON m.to_user_id = u.id
             LEFT JOIN customer c ON m.to_user_id = c.cust_id
@@ -110,11 +110,11 @@ if ($method === 'GET') {
             exit();
         }
         
-        $query = "SELECT m.*, 
+        $query = "SELECT m.*,
             c1.firstname as from_name,
             c2.firstname as to_name,
-            c1.is_verified as from_verified,
-            c2.is_verified as to_verified
+            0 as from_verified,
+            0 as to_verified
             FROM messages m
             LEFT JOIN users u1 ON m.from_user_id = u1.id
             LEFT JOIN users u2 ON m.to_user_id = u2.id
@@ -136,7 +136,7 @@ if ($method === 'GET') {
             WHERE from_user_id = $with_user_id AND to_user_id = $user_id AND is_read = 0");
         
         // Get user info
-        $user_query = "SELECT u.*, c.is_verified FROM users u
+        $user_query = "SELECT u.*, 0 as verified FROM users u
             LEFT JOIN customer c ON u.id = c.cust_id
             WHERE u.id = $with_user_id LIMIT 1";
         $user_result = mysqli_query($conn, $user_query);
