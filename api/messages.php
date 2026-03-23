@@ -24,7 +24,7 @@ if ($method === 'GET') {
     if ($action === 'inbox') {
         $query = "SELECT m.*, 
             c.firstname as sender_name, 
-            c.verified as sender_verified,
+            c.is_verified as sender_verified,
             c.age as sender_age,
             c.district as sender_location
             FROM messages m
@@ -69,8 +69,8 @@ if ($method === 'GET') {
     // Get sent messages
     if ($action === 'sent') {
         $query = "SELECT m.*, 
-            c.firstname as receiver_name, 
-            c.verified as receiver_verified
+            c.firstname as receiver_name,
+            c.is_verified as receiver_verified
             FROM messages m
             LEFT JOIN users u ON m.to_user_id = u.id
             LEFT JOIN customer c ON m.to_user_id = c.cust_id
@@ -113,8 +113,8 @@ if ($method === 'GET') {
         $query = "SELECT m.*, 
             c1.firstname as from_name,
             c2.firstname as to_name,
-            c1.verified as from_verified,
-            c2.verified as to_verified
+            c1.is_verified as from_verified,
+            c2.is_verified as to_verified
             FROM messages m
             LEFT JOIN users u1 ON m.from_user_id = u1.id
             LEFT JOIN users u2 ON m.to_user_id = u2.id
@@ -136,8 +136,8 @@ if ($method === 'GET') {
             WHERE from_user_id = $with_user_id AND to_user_id = $user_id AND is_read = 0");
         
         // Get user info
-        $user_query = "SELECT u.*, c.verified FROM users u 
-            LEFT JOIN customer c ON u.id = c.cust_id 
+        $user_query = "SELECT u.*, c.is_verified FROM users u
+            LEFT JOIN customer c ON u.id = c.cust_id
             WHERE u.id = $with_user_id LIMIT 1";
         $user_result = mysqli_query($conn, $user_query);
         $user_info = mysqli_fetch_assoc($user_result);
@@ -228,21 +228,26 @@ if ($method === 'POST') {
         $sender = mysqli_fetch_assoc($sender_query);
         
         // Get recipient info for SMS
-        $recipient_query = mysqli_query($conn, "SELECT c.firstname as name, c.phone FROM users u 
-            LEFT JOIN customer c ON u.id = c.cust_id 
+        $recipient_query = mysqli_query($conn, "SELECT c.firstname as name, c.mobile FROM users u
+            LEFT JOIN customer c ON u.id = c.cust_id
             WHERE u.id = $to_user_id LIMIT 1");
         $recipient = mysqli_fetch_assoc($recipient_query);
-        
+
         // Send SMS notification
-        if ($recipient && !empty($recipient['phone'])) {
+        if ($recipient && !empty($recipient['mobile'])) {
             $sms_vars = [
                 'name' => $recipient['name'],
                 'sender_name' => $sender['name'],
                 'inbox_url' => 'https://' . $_SERVER['HTTP_HOST'] . '/messages.php'
             ];
-            sendSMSFromTemplate($recipient['phone'], 'message_received', $sms_vars, $conn);
+            
+            $tmpl_q = mysqli_query($conn, "SELECT id FROM sms_templates WHERE event_trigger = 'message_received' AND is_active = 1 LIMIT 1");
+            if ($tmpl_q && mysqli_num_rows($tmpl_q) > 0) {
+                $tmpl = mysqli_fetch_assoc($tmpl_q);
+                sendSMSFromTemplate($tmpl['id'], $to_user_id, $sms_vars);
+            }
         }
-        
+
         echo json_encode([
             'success' => true, 
             'message_id' => $message_id,
