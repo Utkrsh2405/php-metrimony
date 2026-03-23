@@ -157,6 +157,7 @@ if ($method === 'GET') {
 
 // POST - Send a new message
 if ($method === 'POST') {
+    ob_start(); // Prevent warnings from breaking JSON
     try {
         $input = json_decode(file_get_contents('php://input'), true);
         $to_user_id = isset($input['to_user_id']) ? intval($input['to_user_id']) : 0;
@@ -164,18 +165,21 @@ if ($method === 'POST') {
         $message = isset($input['message']) ? mysqli_real_escape_string($conn, trim($input['message'])) : '';
         
         if ($to_user_id <= 0 || $to_user_id == $user_id) {
+            ob_clean();
             echo json_encode(['success' => false, 'error' => 'Invalid recipient']);
             exit();
         }
         
         if (empty($message)) {
+            ob_clean();
             echo json_encode(['success' => false, 'error' => 'Message cannot be empty']);
             exit();
         }
         
         // Check if recipient exists
         $user_check = mysqli_query($conn, "SELECT id FROM users WHERE id = $to_user_id LIMIT 1");
-        if (mysqli_num_rows($user_check) === 0) {
+        if (!$user_check || mysqli_num_rows($user_check) === 0) {
+            ob_clean();
             echo json_encode(['success' => false, 'error' => 'Recipient not found']);
             exit();
         }
@@ -204,6 +208,7 @@ if ($method === 'POST') {
                     $current_count = intval($count_row['cnt']);
                     
                     if ($current_count >= $message_limit) {
+                        ob_clean();
                         echo json_encode([
                             'success' => false, 
                             'error' => 'Message quota exceeded for your current plan',
@@ -228,45 +233,50 @@ if ($method === 'POST') {
             
             // Get sender info for SMS
             $sender_query = @mysqli_query($conn, "SELECT firstname as name FROM customer WHERE cust_id = $user_id LIMIT 1");
-            $sender = $sender_query ? mysqli_fetch_assoc($sender_query) : ['name' => 'Member'];
+            $sender = ($sender_query && mysqli_num_rows($sender_query) > 0) ? mysqli_fetch_assoc($sender_query) : ['name' => 'Member'];
             
             // Get recipient info for SMS
             $recipient_query = @mysqli_query($conn, "SELECT c.firstname as name, c.mobile FROM users u
                 LEFT JOIN customer c ON u.id = c.cust_id
                 WHERE u.id = $to_user_id LIMIT 1");
-            $recipient = $recipient_query ? mysqli_fetch_assoc($recipient_query) : null;
+            $recipient = ($recipient_query && mysqli_num_rows($recipient_query) > 0) ? mysqli_fetch_assoc($recipient_query) : null;
 
             // Send SMS notification
             if ($recipient && !empty($recipient['mobile'])) {
                 try {
+                    $sender_name = (isset($sender) && isset($sender['name']) && !empty($sender['name'])) ? $sender['name'] : 'A Member';
+                    $recipient_name = (isset($recipient) && isset($recipient['name'])) ? $recipient['name'] : 'Member';
+                    
                     $sms_vars = [
-                        'name' => $recipient['name'],
-                        'sender_name' => $sender['name'] ? $sender['name'] : 'A Member',
+                        'name' => $recipient_name,
+                        'sender_name' => $sender_name,
                         'inbox_url' => 'https://' . $_SERVER['HTTP_HOST'] . '/messages.php'
                     ];
                     
                     $tmpl_q = @mysqli_query($conn, "SELECT id FROM sms_templates WHERE event_trigger = 'message_received' AND is_active = 1 LIMIT 1");
                     if ($tmpl_q && mysqli_num_rows($tmpl_q) > 0) {
                         $tmpl = mysqli_fetch_assoc($tmpl_q);
-                        // Make sure we pass correct params: id, user_id, vars
                         if(function_exists('sendSMSFromTemplate')) {
                             sendSMSFromTemplate($tmpl['id'], $to_user_id, $sms_vars);
                         }
                     }
-                } catch (Exception $e) {
-                    // ignore SMS errors so message still sends
+                } catch (\Throwable $e) {
+                    // ignore SMS errors
                 }
             }
 
+            ob_clean();
             echo json_encode([
                 'success' => true, 
                 'message_id' => $message_id,
                 'message' => 'Message sent successfully'
             ]);
         } else {
+            ob_clean();
             echo json_encode(['success' => false, 'error' => 'Failed to send message: ' . mysqli_error($conn)]);
         }
-    } catch (Exception $e) {
+    } catch (\Throwable $e) {
+        ob_clean();
         echo json_encode(['success' => false, 'error' => 'Server Error: ' . $e->getMessage()]);
     }
     exit();
