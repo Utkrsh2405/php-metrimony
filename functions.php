@@ -316,8 +316,9 @@ function isloggedin(){
 
 
 function processprofile_form($id){
+	global $conn;
 	require_once("includes/dbconn.php");
-	
+
 	// Sanitize ID
 	$id = intval($id);
 	
