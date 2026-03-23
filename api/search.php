@@ -32,8 +32,9 @@ if ($method === 'POST') {
     $params = [];
     
     // Get logged-in user's gender to auto-filter for opposite gender
-    $user_gender = get_user_gender($user_id);
-
+    $user_gender_str = get_user_gender($user_id);
+    $user_gender = $user_gender_str ?? null;
+    
     // Apply gender filter - if user specifies a gender, use that; otherwise show opposite gender
     if (!empty($input['gender'])) {
         $gender = mysqli_real_escape_string($conn, $input['gender']);

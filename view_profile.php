@@ -33,10 +33,9 @@ $row=mysqli_fetch_assoc($result);
   // Ensure user cannot view same gender unless it's their own profile
   if(isset($_SESSION['id']) && !$is_own_profile) {
       $viewer_id = $_SESSION['id'];
-      $viewer_gender = strtolower(trim(get_user_gender($viewer_id)));
-      if($viewer_gender) {
-          $profile_gender = strtolower(trim($sex));
-
+        $viewer_gender = get_user_gender($viewer_id);
+        if($viewer_gender) {
+            $viewer_gender = strtolower(trim($viewer_gender));
           if($viewer_gender == $profile_gender) {
               echo "<script>alert('You can only view profiles of the opposite gender.'); window.location.href='userhome.php';</script>";
               exit;
@@ -935,13 +934,14 @@ $(document).ready(function(){
                 $recent_gender_filter = "";
                 if(isset($_SESSION['id'])) {
                     $logged_user_id = intval($_SESSION['id']);
-                    $user_gender = strtolower(trim(get_user_gender($logged_user_id)));
-                    if($user_gender) {
-                        $opposite_gender = ($user_gender == 'male') ? 'Female' : 'Male';
-                        $recent_gender_filter = "AND c.sex = '$opposite_gender'";
+                    $user_gender = get_user_gender($logged_user_id);
+                      if($user_gender) {
+                          $user_gender = strtolower(trim($user_gender));
+                          $opposite_gender = ($user_gender == 'male') ? 'Female' : 'Male';
+                          $recent_gender_filter = "AND c.sex = '$opposite_gender'";
                     }
                 }
-
+                
                 $sql="SELECT c.*, u.account_status FROM customer c
                       LEFT JOIN users u ON c.cust_id = u.id
                       WHERE (u.account_status = 'active' OR u.account_status IS NULL)

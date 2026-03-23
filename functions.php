@@ -53,11 +53,9 @@ function search(){
 
     if(isset($_SESSION['id'])){
         $logged_in_id = $_SESSION['id'];
-        $user_gender = get_user_gender($logged_in_id);
-        if($user_gender){
-            $sex = (strtolower(trim($user_gender)) == 'male') ? 'Female' : 'Male';
-        }
-    }
+          $user_gender = get_user_gender($logged_in_id);
+          if($user_gender){
+             $sex = (strtolower(trim($user_gender)) == 'male') ? 'Female' : 'Male';
 
     $sql="SELECT * FROM customer WHERE
     sex='$sex'

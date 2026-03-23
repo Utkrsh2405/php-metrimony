@@ -7,12 +7,15 @@ if (!isset($_SESSION['id'])) {
 }
 
 require_once("includes/dbconn.php");
+require_once("functions.php");
 
 $user_id = $_SESSION['id'];
 
 // Get user's gender to search opposite gender by default
-  $user_gender = get_user_gender($user_id);
-  $default_gender = ($user_gender == 'Male') ? 'Female' : 'Male';
+$user_gender = get_user_gender($user_id);
+$user_data = ['sex' => $user_gender];
+$default_gender = ($user_data['sex'] == 'Male') ? 'Female' : 'Male';
+
 // Get all states for dropdown
 $states_query = mysqli_query($conn, "SELECT id, state_name, state_code FROM states WHERE status = 1 ORDER BY state_name");
 $states = [];
