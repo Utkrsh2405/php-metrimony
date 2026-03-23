@@ -258,6 +258,7 @@ function loadMessages(type, silent = false) {
       .fail(function(jqXHR, textStatus, errorThrown) {
           $('#messages-list').html('<p style="text-align: center; padding: 20px; color: red;">Network Error: ' + errorThrown + '</p>');
           console.error(jqXHR.responseText);
+      });
 }
 
 function renderMessagesList(messages, type) {
@@ -325,6 +326,15 @@ function loadConversation(userId, silent = false) {
       })
       .fail(function(jqXHR, textStatus, errorThrown) {
           $('#conversation-area').html('<p style="text-align: center; padding: 20px; color: red;">Network Error: ' + errorThrown + '</p>');
+      });
+}
+
+function renderConversation(messages, userInfo) {
+    const initials = userInfo.name ? userInfo.name.charAt(0).toUpperCase() : '?';
+    const verified = userInfo.verified == 1 
+        ? '<i class="fa fa-check-circle" style="color: #4caf50;"></i> ' : '';
+    
+    const conversationHtml = `
         <div class="conversation-header">
             <div style="display: flex; align-items: center; justify-content: space-between;">
                 <div style="display: flex; align-items: center;">
