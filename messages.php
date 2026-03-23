@@ -409,6 +409,10 @@ function sendMessage(event, toUserId) {
             } else {
                 alert('Error: ' + response.error);
             }
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            console.error('AJAX Error:', jqXHR.responseText);
+            alert('Server Error: ' + jqXHR.responseText.substring(0, 150));
         }
     });
 }

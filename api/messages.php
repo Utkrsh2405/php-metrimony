@@ -157,104 +157,117 @@ if ($method === 'GET') {
 
 // POST - Send a new message
 if ($method === 'POST') {
-    $input = json_decode(file_get_contents('php://input'), true);
-    $to_user_id = isset($input['to_user_id']) ? intval($input['to_user_id']) : 0;
-    $subject = isset($input['subject']) ? mysqli_real_escape_string($conn, trim($input['subject'])) : '';
-    $message = isset($input['message']) ? mysqli_real_escape_string($conn, trim($input['message'])) : '';
-    
-    if ($to_user_id <= 0 || $to_user_id == $user_id) {
-        echo json_encode(['success' => false, 'error' => 'Invalid recipient']);
-        exit();
-    }
-    
-    if (empty($message)) {
-        echo json_encode(['success' => false, 'error' => 'Message cannot be empty']);
-        exit();
-    }
-    
-    // Check if recipient exists
-    $user_check = mysqli_query($conn, "SELECT id FROM users WHERE id = $to_user_id LIMIT 1");
-    if (mysqli_num_rows($user_check) === 0) {
-        echo json_encode(['success' => false, 'error' => 'Recipient not found']);
-        exit();
-    }
-    
-    // Enforce message quota from active plan
-    $plan_query = mysqli_query($conn, "SELECT us.*, p.max_messages_send FROM user_subscriptions us 
-        LEFT JOIN plans p ON us.plan_id = p.id 
-        WHERE us.user_id = $user_id AND us.status = 'active' ORDER BY us.end_date DESC LIMIT 1");
-    
-    $message_limit = 0; // 0 = unlimited
-    if (mysqli_num_rows($plan_query) > 0) {
-        $plan = mysqli_fetch_assoc($plan_query);
-        $message_limit = intval($plan['max_messages_send']);
-        $sub_start = $plan['start_date'];
-        $sub_end = $plan['end_date'];
+    try {
+        $input = json_decode(file_get_contents('php://input'), true);
+        $to_user_id = isset($input['to_user_id']) ? intval($input['to_user_id']) : 0;
+        $subject = isset($input['subject']) ? mysqli_real_escape_string($conn, trim($input['subject'])) : '';
+        $message = isset($input['message']) ? mysqli_real_escape_string($conn, trim($input['message'])) : '';
         
-        if ($message_limit > 0) {
-            // Count messages sent within subscription period
-            $count_query = "SELECT COUNT(*) as cnt FROM messages 
-                WHERE from_user_id = $user_id 
-                AND created_at >= '$sub_start' 
-                AND created_at <= '$sub_end'";
-            $count_result = mysqli_query($conn, $count_query);
-            $count_row = mysqli_fetch_assoc($count_result);
-            $current_count = intval($count_row['cnt']);
+        if ($to_user_id <= 0 || $to_user_id == $user_id) {
+            echo json_encode(['success' => false, 'error' => 'Invalid recipient']);
+            exit();
+        }
+        
+        if (empty($message)) {
+            echo json_encode(['success' => false, 'error' => 'Message cannot be empty']);
+            exit();
+        }
+        
+        // Check if recipient exists
+        $user_check = mysqli_query($conn, "SELECT id FROM users WHERE id = $to_user_id LIMIT 1");
+        if (mysqli_num_rows($user_check) === 0) {
+            echo json_encode(['success' => false, 'error' => 'Recipient not found']);
+            exit();
+        }
+        
+        // Enforce message quota from active plan
+        $plan_query = @mysqli_query($conn, "SELECT us.*, p.max_messages_send FROM user_subscriptions us 
+            LEFT JOIN plans p ON us.plan_id = p.id 
+            WHERE us.user_id = $user_id AND us.status = 'active' ORDER BY us.end_date DESC LIMIT 1");
+        
+        $message_limit = 0; // 0 = unlimited
+        if ($plan_query && mysqli_num_rows($plan_query) > 0) {
+            $plan = mysqli_fetch_assoc($plan_query);
+            $message_limit = isset($plan['max_messages_send']) ? intval($plan['max_messages_send']) : 0;
+            $sub_start = $plan['start_date'];
+            $sub_end = $plan['end_date'];
             
-            if ($current_count >= $message_limit) {
-                echo json_encode([
-                    'success' => false, 
-                    'error' => 'Message quota exceeded for your current plan',
-                    'quota_info' => [
-                        'limit' => $message_limit,
-                        'used' => $current_count,
-                        'remaining' => 0
-                    ]
-                ]);
-                exit();
+            if ($message_limit > 0) {
+                // Count messages sent within subscription period
+                $count_query = "SELECT COUNT(*) as cnt FROM messages 
+                    WHERE from_user_id = $user_id 
+                    AND created_at >= '$sub_start' 
+                    AND created_at <= '$sub_end'";
+                $count_result = @mysqli_query($conn, $count_query);
+                if ($count_result) {
+                    $count_row = mysqli_fetch_assoc($count_result);
+                    $current_count = intval($count_row['cnt']);
+                    
+                    if ($current_count >= $message_limit) {
+                        echo json_encode([
+                            'success' => false, 
+                            'error' => 'Message quota exceeded for your current plan',
+                            'quota_info' => [
+                                'limit' => $message_limit,
+                                'used' => $current_count,
+                                'remaining' => 0
+                            ]
+                        ]);
+                        exit();
+                    }
+                }
             }
         }
-    }
-    
-    // Insert message
-    $query = "INSERT INTO messages (from_user_id, to_user_id, subject, message, created_at) 
-        VALUES ($user_id, $to_user_id, '$subject', '$message', NOW())";
-    
-    if (mysqli_query($conn, $query)) {
-        $message_id = mysqli_insert_id($conn);
         
-        // Get sender info for SMS
-        $sender_query = mysqli_query($conn, "SELECT firstname as name FROM customer WHERE cust_id = $user_id LIMIT 1");
-        $sender = mysqli_fetch_assoc($sender_query);
+        // Insert message
+        $query = "INSERT INTO messages (from_user_id, to_user_id, subject, message, created_at) 
+            VALUES ($user_id, $to_user_id, '$subject', '$message', NOW())";
         
-        // Get recipient info for SMS
-        $recipient_query = mysqli_query($conn, "SELECT c.firstname as name, c.mobile FROM users u
-            LEFT JOIN customer c ON u.id = c.cust_id
-            WHERE u.id = $to_user_id LIMIT 1");
-        $recipient = mysqli_fetch_assoc($recipient_query);
-
-        // Send SMS notification
-        if ($recipient && !empty($recipient['mobile'])) {
-            $sms_vars = [
-                'name' => $recipient['name'],
-                'sender_name' => $sender['name'],
-                'inbox_url' => 'https://' . $_SERVER['HTTP_HOST'] . '/messages.php'
-            ];
+        if (mysqli_query($conn, $query)) {
+            $message_id = mysqli_insert_id($conn);
             
-            $tmpl_q = mysqli_query($conn, "SELECT id FROM sms_templates WHERE event_trigger = 'message_received' AND is_active = 1 LIMIT 1");
-            if ($tmpl_q && mysqli_num_rows($tmpl_q) > 0) {
-                $tmpl = mysqli_fetch_assoc($tmpl_q);
-                sendSMSFromTemplate($tmpl['id'], $to_user_id, $sms_vars);
-            }
-        }
+            // Get sender info for SMS
+            $sender_query = @mysqli_query($conn, "SELECT firstname as name FROM customer WHERE cust_id = $user_id LIMIT 1");
+            $sender = $sender_query ? mysqli_fetch_assoc($sender_query) : ['name' => 'Member'];
+            
+            // Get recipient info for SMS
+            $recipient_query = @mysqli_query($conn, "SELECT c.firstname as name, c.mobile FROM users u
+                LEFT JOIN customer c ON u.id = c.cust_id
+                WHERE u.id = $to_user_id LIMIT 1");
+            $recipient = $recipient_query ? mysqli_fetch_assoc($recipient_query) : null;
 
-        echo json_encode([
-            'success' => true, 
-            'message_id' => $message_id,
-            'message' => 'Message sent successfully'
-        ]);
-    } else {
-        echo json_encode(['success' => false, 'error' => 'Failed to send message: ' . mysqli_error($conn)]);
+            // Send SMS notification
+            if ($recipient && !empty($recipient['mobile'])) {
+                try {
+                    $sms_vars = [
+                        'name' => $recipient['name'],
+                        'sender_name' => $sender['name'] ? $sender['name'] : 'A Member',
+                        'inbox_url' => 'https://' . $_SERVER['HTTP_HOST'] . '/messages.php'
+                    ];
+                    
+                    $tmpl_q = @mysqli_query($conn, "SELECT id FROM sms_templates WHERE event_trigger = 'message_received' AND is_active = 1 LIMIT 1");
+                    if ($tmpl_q && mysqli_num_rows($tmpl_q) > 0) {
+                        $tmpl = mysqli_fetch_assoc($tmpl_q);
+                        // Make sure we pass correct params: id, user_id, vars
+                        if(function_exists('sendSMSFromTemplate')) {
+                            sendSMSFromTemplate($tmpl['id'], $to_user_id, $sms_vars);
+                        }
+                    }
+                } catch (Exception $e) {
+                    // ignore SMS errors so message still sends
+                }
+            }
+
+            echo json_encode([
+                'success' => true, 
+                'message_id' => $message_id,
+                'message' => 'Message sent successfully'
+            ]);
+        } else {
+            echo json_encode(['success' => false, 'error' => 'Failed to send message: ' . mysqli_error($conn)]);
+        }
+    } catch (Exception $e) {
+        echo json_encode(['success' => false, 'error' => 'Server Error: ' . $e->getMessage()]);
     }
     exit();
 }
