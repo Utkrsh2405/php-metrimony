@@ -7,12 +7,13 @@ if (!isset($_SESSION['id'])) {
 }
 
 require_once("includes/dbconn.php");
+require_once("functions.php");
 
 $user_id = $_SESSION['id'];
 
 // Get user's gender to search opposite gender by default
-$user_query = mysqli_query($conn, "SELECT c.sex FROM customer c WHERE c.id = $user_id");
-$user_data = mysqli_fetch_assoc($user_query);
+$user_gender = get_user_gender($user_id);
+$user_data = ['sex' => $user_gender];
 $default_gender = ($user_data['sex'] == 'Male') ? 'Female' : 'Male';
 
 // Get saved searches
@@ -181,11 +182,19 @@ include("includes/header.php");
                             <div class="col-md-4">
                                 <div class="form-group">
                                     <label>Gender</label>
-                                    <select name="gender" class="form-control">
-                                        <option value="">Any</option>
-                                        <option value="Male" <?= $default_gender == 'Male' ? 'selected' : '' ?>>Male</option>
-                                        <option value="Female" <?= $default_gender == 'Female' ? 'selected' : '' ?>>Female</option>
-                                    </select>
+                                      <?php if (isset($_SESSION['id'])) { ?>
+                                          <input type="hidden" name="gender" value="<?= $default_gender ?>">
+                                          <select class="form-control" disabled>
+                                              <option value="Male" <?= $default_gender == 'Male' ? 'selected' : '' ?>>Male</option>
+                                              <option value="Female" <?= $default_gender == 'Female' ? 'selected' : '' ?>>Female</option>
+                                          </select>
+                                      <?php } else { ?>
+                                          <select name="gender" class="form-control">
+                                              <option value="">Any</option>
+                                              <option value="Male" <?= $default_gender == 'Male' ? 'selected' : '' ?>>Male</option>
+                                              <option value="Female" <?= $default_gender == 'Female' ? 'selected' : '' ?>>Female</option>
+                                          </select>
+                                      <?php } ?>
                                 </div>
                             </div>
                             <div class="col-md-4">

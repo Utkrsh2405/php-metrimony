@@ -16,18 +16,23 @@ $where_conditions = ["(u.account_status = 'active' OR u.account_status IS NULL O
 $where_conditions[] = "c.cust_id > 0"; // Ensure valid profile
 $where_conditions[] = "(c.firstname IS NOT NULL AND c.firstname != '')"; // Must have a name
 
-// Gender filter - handle Groom/Bride mapping
-if (!empty($_GET['gender'])) {
-    $gender_input = trim($_GET['gender']);
-    // Map Groom to Male and Bride to Female
-    if (strtolower($gender_input) == 'groom') {
-        $gender = 'Male';
-    } elseif (strtolower($gender_input) == 'bride') {
-        $gender = 'Female';
-    } else {
-        $gender = mysqli_real_escape_string($conn, $gender_input);
-    }
-    $where_conditions[] = "LOWER(TRIM(c.sex)) = LOWER('$gender')";
+// Gender filter - Enforce opposite gender for logged-in users
+  if (isset($_SESSION['id'])) {
+      $logged_user_id = intval($_SESSION['id']);
+      $user_gender = get_user_gender($logged_user_id);
+      $opposite_gender = ($user_gender == 'Male') ? 'Female' : 'Male';
+      $where_conditions[] = "c.sex = '$opposite_gender'";
+  } elseif (!empty($_GET['gender'])) {
+      $gender_input = trim($_GET['gender']);
+      // Map Groom to Male and Bride to Female
+      if (strtolower($gender_input) == 'groom') {
+          $gender = 'Male';
+      } elseif (strtolower($gender_input) == 'bride') {
+          $gender = 'Female';
+      } else {
+          $gender = mysqli_real_escape_string($conn, $gender_input);
+      }
+      $where_conditions[] = "LOWER(TRIM(c.sex)) = LOWER('$gender')";
 }
 
 // Age filter - precise range with validation
@@ -933,7 +938,7 @@ function sendMessage(profileId) {
     return;
     <?php endif; ?>
     
-    window.location.href = 'messages.php?to=' + profileId;
+    window.location.href = 'messages.php?user=' + profileId;
 }
 
 // Change sort order

@@ -8,7 +8,18 @@ if(isloggedin()){
    header("location:login.php");
 }
  
-$id=$_GET['id'];
+// Sanitize and validate ID parameter
+$id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+if ($id <= 0) {
+    die("Invalid user ID");
+}
+
+// Verify user can only edit their own partner preferences
+if ($id != $_SESSION['id']) {
+    header("location:partner_preference.php?id=" . $_SESSION['id']);
+    exit();
+}
+
 writepartnerprefs($id);
 
 ///reading partnerprefs from db

@@ -8,6 +8,7 @@ if (!isset($_SESSION['id'])) {
 }
 
 require_once("../includes/dbconn.php");
+require_once("../functions.php");
 
 $user_id = $_SESSION['id'];
 $method = $_SERVER['REQUEST_METHOD'];
@@ -16,21 +17,23 @@ if ($method === 'POST') {
     // Perform search
     $input = json_decode(file_get_contents('php://input'), true);
     
-    // Build search query
-    $query = "SELECT c.id, c.firstname, c.lastname, c.sex as gender, c.age, c.height, 
+    // Build search query - exclude deleted and suspended users
+    $query = "SELECT c.cust_id as id, c.firstname, c.lastname, c.sex as gender, c.age, c.height, 
               c.religion, c.maritalstatus as marital_status, c.education, c.occupation, 
               CONCAT(c.district, ', ', c.state) as location,
-              c.is_verified as verified, u.plan_id
+              c.mothertounge, c.caste, c.subcaste, c.country,
+              u.username, u.profilestat
               FROM customer c
-              LEFT JOIN users u ON c.id = u.id
-              WHERE c.id != $user_id AND u.userlevel = 0";
+              LEFT JOIN users u ON c.cust_id = u.id
+              WHERE c.cust_id != $user_id 
+              AND (u.userlevel = 0 OR u.userlevel IS NULL)
+              AND (u.account_status = 'active' OR u.account_status IS NULL)";
     
     $params = [];
     
     // Get logged-in user's gender to auto-filter for opposite gender
-    $user_gender_query = mysqli_query($conn, "SELECT c.sex FROM customer c WHERE c.id = $user_id");
-    $user_gender_data = mysqli_fetch_assoc($user_gender_query);
-    $user_gender = $user_gender_data['sex'] ?? null;
+    $user_gender_str = get_user_gender($user_id);
+    $user_gender = $user_gender_str ?? null;
     
     // Apply gender filter - if user specifies a gender, use that; otherwise show opposite gender
     if (!empty($input['gender'])) {

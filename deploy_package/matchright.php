@@ -30,7 +30,21 @@
    <div class="view_profile view_profile2">
         	<h3>View Recent Profiles</h3>
     <?php
-     $sql="SELECT * FROM customer ORDER BY profilecreationdate DESC";
+     // Exclude deleted and suspended users from recent profiles
+     $gender_filter = "";
+     if(isset($_SESSION['id'])) {
+         $logged_user_id = intval($_SESSION['id']);
+         $my_user_gender = get_user_gender($logged_user_id);
+         if($my_user_gender) {
+             $my_opposite_gender = (strtolower($my_user_gender) == 'male') ? 'Female' : 'Male';
+             $gender_filter = " AND LOWER(TRIM(c.sex)) = LOWER('$my_opposite_gender')";
+         }
+     }
+
+     $sql="SELECT c.* FROM customer c
+           INNER JOIN users u ON c.cust_id = u.id
+           WHERE u.account_status = 'active' AND u.userlevel = 0 $gender_filter
+           ORDER BY c.profilecreationdate DESC";
       $result=mysqlexec($sql);
       $count=1;
       while($row=mysqli_fetch_assoc($result)){

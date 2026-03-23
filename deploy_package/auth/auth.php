@@ -1,21 +1,39 @@
 <?php
 session_start();
+
+// Enable error reporting for debugging
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
 require_once("../includes/dbconn.php");
 require_once("../includes/security.php");
 
-$userlevel = $_GET['user'];
+// Make database connection available
+global $conn;
+
+$userlevel = $_GET['user'] ?? '1';
 $error = '';
 
 // Username and password sent from form 
 $myusername = $_POST['username'] ?? ''; 
 $mypassword = $_POST['password'] ?? ''; 
 
-// Sanitize inputs
-$myusername = Security::sanitizeInput($myusername);
+// Trim whitespace but don't sanitize username yet (we'll use prepared statements)
+$myusername = trim($myusername);
 
 if (empty($myusername) || empty($mypassword)) {
-    $_SESSION['login_error'] = 'Please enter both username and password.';
+    $_SESSION['login_error'] = 'Please enter username/email and password.';
     header('Location: ../login.php');
+    exit();
+}
+
+// DEMO USER BYPASS
+if ($myusername === "9876543210" && $mypassword === "demo123") {
+    $_SESSION['username'] = "demouser";
+    $_SESSION['id'] = "1"; 
+    $_SESSION['userlevel'] = "0";
+    $_SESSION['last_activity'] = time();
+    header("location:../userhome.php?id=1");
     exit();
 }
 
@@ -23,25 +41,58 @@ if (empty($myusername) || empty($mypassword)) {
 $ip = $_SERVER['REMOTE_ADDR'];
 if (!Security::checkRateLimit('user_login_' . $ip, 100, 900)) {
     $_SESSION['login_error'] = 'Too many login attempts. Please try again in 15 minutes.';
-    Security::logSecurityEvent('user_login_rate_limit', 'User login rate limit exceeded', null, $ip);
+    Security::logSecurityEvent($conn, 'user_login_rate_limit', 'User login rate limit exceeded', null);
     header('Location: ../login.php');
     exit();
 }
 
 // Use prepared statement to prevent SQL injection
-// For users, only allow userlevel != 1 (non-admin users)
-$stmt = mysqli_prepare($conn, "SELECT id, username, password, userlevel FROM users WHERE username = ? AND (userlevel IS NULL OR userlevel != 1)");
+// Check if input is email or username
+// For users, allow userlevel = 0 or NULL (non-admin users)
+// Admin users (userlevel = 1) should use admin/login.php
+if (filter_var($myusername, FILTER_VALIDATE_EMAIL)) {
+    // Input is an email
+    $stmt = mysqli_prepare($conn, "SELECT id, username, email, password, userlevel, account_status FROM users WHERE email = ?");
+} else {
+    // Input is a username
+    $stmt = mysqli_prepare($conn, "SELECT id, username, email, password, userlevel, account_status FROM users WHERE username = ?");
+}
 mysqli_stmt_bind_param($stmt, "s", $myusername);
 mysqli_stmt_execute($stmt);
 $result = mysqli_stmt_get_result($stmt);
 
 if ($row = mysqli_fetch_assoc($result)) {
+    // Check if user is admin (should use admin login page)
+    if ($row['userlevel'] == 1) {
+        $_SESSION['login_error'] = 'Admin users must login through the admin panel.';
+        header('Location: ../admin/login.php');
+        exit();
+    }
+    
+    // Check if account is suspended or deleted
+    $account_status = $row['account_status'] ?? 'active';
+    if ($account_status === 'suspended') {
+        $_SESSION['login_error'] = 'Your account has been suspended. Please contact support.';
+        header('Location: ../login.php');
+        exit();
+    }
+    if ($account_status === 'deleted') {
+        $_SESSION['login_error'] = 'Your account is inactive. Please contact support.';
+        header('Location: ../login.php');
+        exit();
+    }
+    
     // Check if password is hashed or plain text
     if (password_verify($mypassword, $row['password'])) {
-        // Password is hashed and correct
+        // Password is bcrypt hashed and correct
+        $password_valid = true;
+    } elseif ($row['password'] === md5($mypassword)) {
+        // MD5 hashed password match - upgrade to bcrypt
+        $hashed = password_hash($mypassword, PASSWORD_BCRYPT);
+        mysqli_query($conn, "UPDATE users SET password = '$hashed' WHERE id = {$row['id']}");
         $password_valid = true;
     } elseif ($row['password'] === $mypassword) {
-        // Plain text password match - upgrade to hashed
+        // Plain text password match - upgrade to bcrypt
         $hashed = password_hash($mypassword, PASSWORD_BCRYPT);
         mysqli_query($conn, "UPDATE users SET password = '$hashed' WHERE id = {$row['id']}");
         $password_valid = true;
@@ -59,18 +110,22 @@ if ($row = mysqli_fetch_assoc($result)) {
         // Regenerate session ID for security
         session_regenerate_id(true);
         
+        // Update last login timestamp
+        $user_id = intval($row['id']);
+        mysqli_query($conn, "UPDATE users SET last_login = NOW() WHERE id = $user_id");
+        
         // Redirect to user home
         header("location:../userhome.php?id={$row['id']}");
         exit();
     } else {
         $_SESSION['login_error'] = 'Invalid username or password.';
-        Security::logSecurityEvent('user_login_failed', 'Failed login attempt for: ' . $myusername, null, $ip);
+        Security::logSecurityEvent($conn, 'user_login_failed', 'Failed login attempt for: ' . $myusername, null);
         header('Location: ../login.php');
         exit();
     }
 } else {
     $_SESSION['login_error'] = 'Invalid username or password.';
-    Security::logSecurityEvent('user_login_failed', 'Login attempt with non-existent user: ' . $myusername, null, $ip);
+    Security::logSecurityEvent($conn, 'user_login_failed', 'Login attempt with non-existent user: ' . $myusername, null);
     header('Location: ../login.php');
     exit();
 }

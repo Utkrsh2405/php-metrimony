@@ -2,31 +2,21 @@
 <?php include_once("functions.php"); ?>
 <?php
 
+$id=$_GET['id'];
 if(isloggedin()){
  //do nothing stay here
 } else{
    header("location:login.php");
 }
 
-// Sanitize and validate ID parameter
-$id = isset($_GET['id']) ? intval($_GET['id']) : 0;
-if ($id <= 0) {
-    die("Invalid user ID");
-}
-
-// Verify user can only access their own home page
-if ($id != $_SESSION['id']) {
-    header("location:userhome.php?id=" . $_SESSION['id']);
-    exit();
-}
-
-
+//calling photo uploader function
+if ($_SERVER['REQUEST_METHOD'] == 'POST'){ uploadphoto($id); }
 ?>
 <!DOCTYPE HTML>
 <html>
 <head>
-<title>Find Your Perfect Partner - Matrimony
- | User Home :: Matrimony
+<title>Find Your Perfect Partner - Makemylove
+ | Login :: Make My Love
 </title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
@@ -60,7 +50,7 @@ $(document).ready(function(){
 </head>
 <body>
 <!-- ============================  Navigation Start =========================== -->
- <?php include_once("includes/navigation.php");?>
+<?php include_once("includes/navigation.php");?>
 <!-- ============================  Navigation End ============================ -->
 <div class="grid_3">
   <div class="container">
@@ -68,39 +58,40 @@ $(document).ready(function(){
      <ul>
         <a href="index.php"><i class="fa fa-home home_1"></i></a>
         <span class="divider">&nbsp;|&nbsp;</span>
-        <li class="current-page">User Home</li>
+        <li class="current-page">Login</li>
      </ul>
    </div>
-   <div class="navigation" style="background-color: #ccc;"><!-- Innernavigation starts -->
-   	
-   	  	<div class="collapse navbar-collapse" id="bs-megadropdown-tabs">
-		        <ul class="nav navbar-nav nav_1">
-		            <li><a href="view_profile.php?id=<?php echo $id;?>">View Profile</a></li>
-		            <li><a href="partner_preference.php?id=<?php echo $id;?>">Partner Preference</a></li>
-		    		<li class="dropdown">
-		              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Profile<span class="caret"></span></a>
-		              <ul class="dropdown-menu" role="menu">
-		               <li><a href="photouploader.php?id=<?php echo $id;?>">Upload Photos</a></li>
-		               <li><a href="view_profile.php?id=<?php echo $id;?>">View Profile</a></li>
-		               <li><a href="edit-profile.php?id=<?php echo $id;?>">Edit Profile</a></li>  
-		              </ul>
-		            </li>
-					<li class="dropdown">
-		              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Search<span class="caret"></span></a>
-		              <ul class="dropdown-menu" role="menu">
-		                <li><a href="search.php">Regular Search</a></li>
-		                <li><a href="faq.php">Faq</a></li>
-		              </ul>
-		            </li>
-		        </ul>
-		</div>
-   </div><!-- End of inner navigation -->
-   <div
+   <div class="services">
+   	  <div class="col-sm-6 login_left">
+	   <form action="" method="post" enctype="multipart/form-data">
+  	    <div class="form-item form-type-textfield form-item-name">
+	      <label for="edit-name">Upload Your Photo(Upto 4 images, Use 300 x 250 dimensions) <span class="form-required" title="This field is required.">*</span></label>
+	      <input type="file" id="edit-name" name="pic1" class="form-file required">
+        <input type="file" id="edit-name" name="pic2" class="form-file required">
+        <input type="file" id="edit-name" name="pic3" class="form-file required">
+        <input type="file" id="edit-name" name="pic4" class="form-file required">
+	    </div>
+	    <div class="form-actions">
+	    	<input type="submit" id="edit-submit" name="op" value="Upload" class="btn_1 submit">
+	    </div>
+	   </form>
+	  </div>
+	  <div class="col-sm-6">
+	    <ul class="sharing">
+			<li><a href="#" class="facebook" title="Facebook"><i class="fa fa-boxed fa-fw fa-facebook"></i> Share on Facebook</a></li>
+		  	<li><a href="#" class="twitter" title="Twitter"><i class="fa fa-boxed fa-fw fa-twitter"></i> Tweet</a></li>
+		  	<li><a href="#" class="google" title="Google"><i class="fa fa-boxed fa-fw fa-google-plus"></i> Share on Google+</a></li>
+		  	<li><a href="#" class="linkedin" title="Linkedin"><i class="fa fa-boxed fa-fw fa-linkedin"></i> Share on LinkedIn</a></li>
+		  	<li><a href="#" class="mail" title="Email"><i class="fa fa-boxed fa-fw fa-envelope-o"></i> E-mail</a></li>
+		</ul>
+	  </div>
+	  <div class="clearfix"> </div>
+   </div>
   </div>
 </div>
 
 
-<?php include_once("footer.php")?>
+<?php include_once("footer.php");?>
 <!-- FlexSlider -->
 <script defer src="js/jquery.flexslider.js"></script>
 <link rel="stylesheet" href="css/flexslider.css" type="text/css" media="screen" />
@@ -113,5 +104,3 @@ $(window).load(function() {
   });
 });
 </script>   
-</body>
-</html>	

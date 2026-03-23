@@ -26,24 +26,10 @@ $result = mysqlexec($sql);
 if($result){
 $row=mysqli_fetch_assoc($result);
 
-  $fname=$row['firstname'];
-  $lname=$row['lastname'];
-  $sex=$row['sex'];
-
-  // Ensure user cannot view same gender unless it's their own profile
-  if(isset($_SESSION['id']) && !$is_own_profile) {
-      $viewer_id = $_SESSION['id'];
-        $viewer_gender = get_user_gender($viewer_id);
-        if($viewer_gender) {
-            $viewer_gender = strtolower(trim($viewer_gender));
-          if($viewer_gender == $profile_gender) {
-              echo "<script>alert('You can only view profiles of the opposite gender.'); window.location.href='userhome.php';</script>";
-              exit;
-          }
-      }
-  }
-
-  $email=$row['email'];
+	$fname=$row['firstname'];
+	$lname=$row['lastname'];
+	$sex=$row['sex'];
+	$email=$row['email'];
 	$dob=$row['dateofbirth'];
 	$religion=$row['religion'];
 	$caste = $row['caste'];
@@ -74,10 +60,6 @@ $row=mysqli_fetch_assoc($result);
 	$bros=$row['no_bro'];
 	$sis=$row['no_sis'];
 	$aboutme=$row['aboutme'];
-	
-	// Mobile number (contact info)
-	$mobile=$row['mobile'] ?? '';
-	$phone_code=$row['phone_code'] ?? '91';
 
 	$pic1="";
 	$pic2="";
@@ -258,20 +240,6 @@ $p_descr=$partner_row['descr'] ?? '';
 .btn-interest:hover {
     background: #059669;
     transform: translateY(-2px);
-}
-
-.btn-mobile {
-    background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
-    color: white;
-}
-
-.btn-mobile:hover {
-    background: linear-gradient(135deg, #2563eb 0%, #1e40af 100%);
-    transform: translateY(-2px);
-}
-
-.btn-mobile.revealed {
-    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
 }
 
 .profile-container {
@@ -582,46 +550,6 @@ $p_descr=$partner_row['descr'] ?? '';
     background: #dc2626;
     transform: scale(1.1);
 }
-
-/* Contact Information Styles */
-.view-mobile-btn, .view-email-btn {
-    margin-left: 10px;
-    padding: 5px 12px;
-    font-size: 12px;
-    border-radius: 20px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border: none;
-    color: white;
-    cursor: pointer;
-    transition: all 0.3s;
-}
-
-.view-mobile-btn:hover, .view-email-btn:hover {
-    transform: scale(1.05);
-    box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
-}
-
-.masked-number, .masked-email {
-    font-family: monospace;
-    color: var(--text-light);
-    font-size: 14px;
-}
-
-.mobile-link, .email-link {
-    color: var(--primary-color);
-    font-weight: 600;
-    text-decoration: none;
-    transition: all 0.3s;
-}
-
-.mobile-link:hover, .email-link:hover {
-    color: #c2185b;
-    text-decoration: underline;
-}
-
-.mobile-link i, .email-link i {
-    margin-right: 5px;
-}
 </style>
 
 <script>
@@ -668,12 +596,7 @@ $(document).ready(function(){
                 <button class="btn-modern btn-interest" onclick="sendInterest(<?php echo $profileid; ?>)">
                     <i class="fa fa-heart"></i> Express Interest
                 </button>
-                <?php if (!empty($mobile)): ?>
-                <a href="tel:+<?php echo $phone_code . $mobile; ?>" class="btn-modern btn-mobile" style="text-decoration: none;">
-                    <i class="fa fa-phone"></i> <?php echo "+" . $phone_code . " " . $mobile; ?>
-                </a>
-                <?php endif; ?>
-                <button class="btn-modern btn-photos" onclick="window.location.href='messages.php?user=<?php echo $profileid; ?>'">
+                <button class="btn-modern btn-photos">
                     <i class="fa fa-comments"></i> Send Message
                 </button>
             <?php endif; ?>
@@ -682,18 +605,6 @@ $(document).ready(function(){
 </div>
 
 <div class="container profile-container">
-    <?php if (isset($_SESSION['upload_success'])): ?>
-        <div class="alert alert-success" style="border-radius: 12px; margin-bottom: 20px;">
-            <i class="fa fa-check-circle"></i> <?php echo $_SESSION['upload_success']; unset($_SESSION['upload_success']); ?>
-        </div>
-    <?php endif; ?>
-    
-    <?php if (isset($_SESSION['upload_error'])): ?>
-        <div class="alert alert-danger" style="border-radius: 12px; margin-bottom: 20px;">
-            <i class="fa fa-exclamation-circle"></i> <?php echo $_SESSION['upload_error']; unset($_SESSION['upload_error']); ?>
-        </div>
-    <?php endif; ?>
-    
     <div class="row">
         <div class="col-md-8">
             <!-- Photo Gallery -->
@@ -775,37 +686,6 @@ $(document).ready(function(){
                     </div>
                 </div>
             </div>
-
-            <!-- Contact Information - Only visible to logged-in users viewing other profiles -->
-            <?php if (!$is_own_profile && isloggedin()): ?>
-            <div class="profile-card">
-                <div class="section-title">
-                    <i class="fa fa-phone"></i> Contact Information
-                </div>
-                <div class="info-grid">
-                    <div class="info-item">
-                        <div class="info-label"><i class="fa fa-mobile"></i> Mobile Number</div>
-                        <div class="info-value">
-                            <?php if (!empty($mobile)): ?>
-                                <a href="tel:+<?php echo $phone_code . $mobile; ?>" class="mobile-link" style="text-decoration: none; color: #333; font-weight: 500;">
-                                    <i class="fa fa-phone"></i> +<?php echo $phone_code; ?> <?php echo $mobile; ?>
-                                </a>
-                            <?php else: ?>
-                                <span class="text-muted">Not provided</span>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-                    <div class="info-item">
-                        <div class="info-label"><i class="fa fa-envelope"></i> Email</div>
-                        <div class="info-value">
-                            <a href="mailto:<?php echo $email; ?>" class="email-link" style="text-decoration: none; color: #333; font-weight: 500;">
-                                <i class="fa fa-envelope"></i> <?php echo $email; ?>
-                            </a>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            <?php endif; ?>
 
             <!-- Religious Background -->
             <div class="profile-card">
@@ -931,21 +811,9 @@ $(document).ready(function(){
                     <i class="fa fa-clock-o"></i> Recent Profiles
                 </div>
                 <?php
-                $recent_gender_filter = "";
-                if(isset($_SESSION['id'])) {
-                    $logged_user_id = intval($_SESSION['id']);
-                    $user_gender = get_user_gender($logged_user_id);
-                      if($user_gender) {
-                          $user_gender = strtolower(trim($user_gender));
-                          $opposite_gender = ($user_gender == 'male') ? 'Female' : 'Male';
-                          $recent_gender_filter = "AND c.sex = '$opposite_gender'";
-                    }
-                }
-                
-                $sql="SELECT c.*, u.account_status FROM customer c
-                      LEFT JOIN users u ON c.cust_id = u.id
+                $sql="SELECT c.*, u.account_status FROM customer c 
+                      LEFT JOIN users u ON c.cust_id = u.id 
                       WHERE (u.account_status = 'active' OR u.account_status IS NULL)
-                      $recent_gender_filter
                       ORDER BY c.profilecreationdate DESC LIMIT 10";
                 $result=mysqlexec($sql);
                 while($row=mysqli_fetch_assoc($result)){
@@ -1027,98 +895,31 @@ $(document).ready(function(){
 function previewPhoto(input, index) {
     if (input.files && input.files[0]) {
         var reader = new FileReader();
-        var fileInput = input; // Store reference before innerHTML destroys it
         reader.onload = function(e) {
-            var uploadBox = fileInput.parentElement;
+            var uploadBox = input.parentElement;
             uploadBox.classList.add('has-image');
-            // Create preview without destroying the input
-            // First, remove all content except file input
-            while (uploadBox.firstChild) {
-                if (uploadBox.firstChild !== fileInput) {
-                    uploadBox.removeChild(uploadBox.firstChild);
-                } else {
-                    break;
-                }
-            }
-            // Remove remaining children after input
-            while (fileInput.nextSibling) {
-                uploadBox.removeChild(fileInput.nextSibling);
-            }
-            // Add preview image before input
-            var img = document.createElement('img');
-            img.src = e.target.result;
-            img.alt = 'Preview';
-            uploadBox.insertBefore(img, fileInput);
-            // Add remove button
-            var removeBtn = document.createElement('div');
-            removeBtn.className = 'remove-photo';
-            removeBtn.innerHTML = '<i class="fa fa-times"></i>';
-            removeBtn.onclick = function(event) { removePhoto(event, this, index); };
-            uploadBox.appendChild(removeBtn);
+            uploadBox.innerHTML = '<img src="' + e.target.result + '" alt="Preview">';
+            uploadBox.innerHTML += '<div class="remove-photo" onclick="removePhoto(this, ' + index + ')"><i class="fa fa-times"></i></div>';
             uploadBox.onclick = null;
         }
         reader.readAsDataURL(input.files[0]);
     }
 }
 
-function removePhoto(event, btn, index) {
+function removePhoto(btn, index) {
     event.stopPropagation();
     var uploadBox = btn.parentElement;
     var photoInput = document.getElementById('photo' + (index + 1));
     photoInput.value = '';
     
     uploadBox.classList.remove('has-image');
-    // Clear everything except the input
-    while (uploadBox.firstChild) {
-        if (uploadBox.firstChild !== photoInput) {
-            uploadBox.removeChild(uploadBox.firstChild);
-        } else {
-            break;
-        }
-    }
-    while (photoInput.nextSibling) {
-        uploadBox.removeChild(photoInput.nextSibling);
-    }
-    // Add back default content
-    var icon = document.createElement('i');
-    icon.className = 'fa fa-camera';
-    uploadBox.insertBefore(icon, photoInput);
-    var p = document.createElement('p');
-    p.innerHTML = 'Upload Photo ' + (index + 1) + (index === 0 ? '<br><small>Main Photo</small>' : '');
-    uploadBox.insertBefore(p, photoInput);
+    uploadBox.innerHTML = '<i class="fa fa-camera"></i><p>Upload Photo ' + (index + 1) + (index === 0 ? '<br><small>Main Photo</small>' : '') + '</p>';
     uploadBox.onclick = function() { photoInput.click(); };
 }
 
 function sendInterest(profileId) {
     // Add AJAX call to send interest
     alert('Interest sent to profile #' + profileId);
-}
-
-// Show Mobile Number in header button
-function showMobileNumber() {
-    var btn = document.querySelector('.btn-mobile');
-    var btnText = document.getElementById('mobile-btn-text');
-    var mobileNumber = '<?php echo !empty($mobile) ? "+$phone_code $mobile" : "Not Available"; ?>';
-    
-    if (btnText.innerText === 'View Mobile') {
-        btnText.innerHTML = mobileNumber;
-        btn.classList.add('revealed');
-        btn.onclick = function() {
-            window.location.href = 'tel:<?php echo !empty($mobile) ? "+$phone_code$mobile" : ""; ?>';
-        };
-    }
-}
-
-// View Mobile Number function (for contact section)
-function viewMobileNumber() {
-    document.getElementById('mobile-hidden').style.display = 'none';
-    document.getElementById('mobile-visible').style.display = 'inline';
-}
-
-// View Email function
-function viewEmail() {
-    document.getElementById('email-hidden').style.display = 'none';
-    document.getElementById('email-visible').style.display = 'inline';
 }
 </script>
 
