@@ -668,6 +668,7 @@ include("../includes/admin-header.php");
                     <th style="width: 60px;">ID</th>
                     <th>Name</th>
                     <th>Email</th>
+                    <th>Mobile</th>
                     <th style="width: 120px;">Age/Gender</th>
                     <th>Location</th>
                     <th style="width: 100px;">Plan</th>
@@ -862,7 +863,7 @@ function renderMembers(members) {
     tbody.empty();
     
     if (!members || members.length === 0) {
-        tbody.append('<tr><td colspan="10" class="text-center" style="padding: 30px;">No members found</td></tr>');
+        tbody.append('<tr><td colspan="11" class="text-center" style="padding: 30px;">No members found</td></tr>');
         return;
     }
     
@@ -899,6 +900,7 @@ function renderMembers(members) {
                     <small style="color: #94a3b8; font-size: 12px; display: block; margin-top: 2px;">@${member.username || 'N/A'}</small>
                 </td>
                 <td>${member.email}</td>
+                <td>${member.mobile || '-'}</td>
                 <td><strong>${age}</strong> / ${gender}</td>
                 <td>${member.state || '-'}</td>
                 <td><span class="badge badge-info">${plan}</span></td>

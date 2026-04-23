@@ -65,7 +65,7 @@ if ($method == 'GET') {
     // Get members
     $query = "SELECT u.id, u.username, u.email, u.dateofbirth, u.account_status, 
                      u.profile_completeness, u.last_login,
-                     c.firstname, c.lastname, c.sex, c.age, c.state, c.is_verified,
+                     c.firstname, c.lastname, c.sex, c.age, c.state, c.is_verified, c.mobile,
                      p.name as plan_name, us.end_date as subscription_end
               FROM users u
               LEFT JOIN customer c ON u.id = c.cust_id
