@@ -773,6 +773,18 @@ $(document).ready(function(){
                         <div class="info-label"><i class="fa fa-cutlery"></i> Diet</div>
                         <div class="info-value"><?php echo $diet; ?></div>
                     </div>
+                    <div class="info-item">
+                        <div class="info-label"><i class="fa fa-mobile"></i> Mobile Number</div>
+                        <div class="info-value">
+                            <?php if (!empty($mobile)): ?>
+                                <a href="tel:+<?php echo $phone_code . $mobile; ?>" class="mobile-link" style="text-decoration: none; color: #333; font-weight: 500;">
+                                    <i class="fa fa-phone"></i> +<?php echo $phone_code; ?> <?php echo $mobile; ?>
+                                </a>
+                            <?php else: ?>
+                                <span class="text-muted">Not provided</span>
+                            <?php endif; ?>
+                        </div>
+                    </div>
                 </div>
             </div>
 
