@@ -876,6 +876,7 @@ $(document).ready(function(){
                         </div>
                     </div>
                     <input type="hidden" name="profile_id" value="<?php echo $profileid; ?>">
+                    <input type="hidden" name="return_to" value="view_profile_new.php">
                 </form>
                 <p style="margin-top: 20px; color: #64748b; font-size: 13px;">
                     <i class="fa fa-info-circle"></i> Allowed formats: JPG, PNG, GIF. Maximum size: 5MB per photo.
@@ -895,25 +896,58 @@ $(document).ready(function(){
 function previewPhoto(input, index) {
     if (input.files && input.files[0]) {
         var reader = new FileReader();
+        var fileInput = input;
         reader.onload = function(e) {
-            var uploadBox = input.parentElement;
+            var uploadBox = fileInput.parentElement;
             uploadBox.classList.add('has-image');
-            uploadBox.innerHTML = '<img src="' + e.target.result + '" alt="Preview">';
-            uploadBox.innerHTML += '<div class="remove-photo" onclick="removePhoto(this, ' + index + ')"><i class="fa fa-times"></i></div>';
+            while (uploadBox.firstChild) {
+                if (uploadBox.firstChild !== fileInput) {
+                    uploadBox.removeChild(uploadBox.firstChild);
+                } else {
+                    break;
+                }
+            }
+            while (fileInput.nextSibling) {
+                uploadBox.removeChild(fileInput.nextSibling);
+            }
+            var img = document.createElement('img');
+            img.src = e.target.result;
+            img.alt = 'Preview';
+            uploadBox.insertBefore(img, fileInput);
+            var removeBtn = document.createElement('div');
+            removeBtn.className = 'remove-photo';
+            removeBtn.innerHTML = '<i class="fa fa-times"></i>';
+            removeBtn.onclick = function(event) { removePhoto(event, this, index); };
+            uploadBox.appendChild(removeBtn);
             uploadBox.onclick = null;
         }
         reader.readAsDataURL(input.files[0]);
     }
 }
 
-function removePhoto(btn, index) {
+function removePhoto(event, btn, index) {
     event.stopPropagation();
     var uploadBox = btn.parentElement;
     var photoInput = document.getElementById('photo' + (index + 1));
     photoInput.value = '';
     
     uploadBox.classList.remove('has-image');
-    uploadBox.innerHTML = '<i class="fa fa-camera"></i><p>Upload Photo ' + (index + 1) + (index === 0 ? '<br><small>Main Photo</small>' : '') + '</p>';
+    while (uploadBox.firstChild) {
+        if (uploadBox.firstChild !== photoInput) {
+            uploadBox.removeChild(uploadBox.firstChild);
+        } else {
+            break;
+        }
+    }
+    while (photoInput.nextSibling) {
+        uploadBox.removeChild(photoInput.nextSibling);
+    }
+    var icon = document.createElement('i');
+    icon.className = 'fa fa-camera';
+    uploadBox.insertBefore(icon, photoInput);
+    var p = document.createElement('p');
+    p.innerHTML = 'Upload Photo ' + (index + 1) + (index === 0 ? '<br><small>Main Photo</small>' : '');
+    uploadBox.insertBefore(p, photoInput);
     uploadBox.onclick = function() { photoInput.click(); };
 }
 

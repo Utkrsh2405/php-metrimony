@@ -14,6 +14,11 @@ if(!isloggedin()){
 }
 
 $user_id = intval($_SESSION['id']);
+$allowed_return_pages = ['view_profile.php', 'view_profile_new.php'];
+$return_to = isset($_POST['return_to']) ? basename($_POST['return_to']) : 'view_profile.php';
+if (!in_array($return_to, $allowed_return_pages, true)) {
+    $return_to = 'view_profile.php';
+}
 
 // Handle photo upload
 if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -22,7 +27,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Security check - users can only upload photos to their own profile
     if ($profile_id != $user_id) {
         $_SESSION['upload_error'] = 'Unauthorized access';
-        header("location:view_profile.php?id=$user_id");
+        header("location:$return_to?id=$user_id");
         exit();
     }
     
@@ -31,7 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     if (!file_exists($upload_dir)) {
         if (!mkdir($upload_dir, 0755, true)) {
             $_SESSION['upload_error'] = 'Failed to create upload directory. Please contact support.';
-            header("location:view_profile.php?id=$user_id");
+            header("location:$return_to?id=$user_id");
             exit();
         }
     }
@@ -39,7 +44,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     // Check if directory is writable
     if (!is_writable($upload_dir)) {
         $_SESSION['upload_error'] = 'Upload directory is not writable. Please contact support.';
-        header("location:view_profile.php?id=$user_id");
+        header("location:$return_to?id=$user_id");
         exit();
     }
     
@@ -163,7 +168,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
     }
     
-    header("location:view_profile.php?id=$user_id");
+    header("location:$return_to?id=$user_id");
     exit();
 }
 
