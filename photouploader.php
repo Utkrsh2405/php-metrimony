@@ -63,10 +63,14 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             $allowed_extensions = ['jpg', 'jpeg', 'png', 'gif', 'webp'];
             $max_size = 5 * 1024 * 1024; // 5MB
             
-            // Check MIME type
-            $finfo = finfo_open(FILEINFO_MIME_TYPE);
-            $mime_type = finfo_file($finfo, $file['tmp_name']);
-            finfo_close($finfo);
+            // Fallback for getting MIME type if finfo is not available
+            if (function_exists('finfo_open')) {
+                $finfo = finfo_open(FILEINFO_MIME_TYPE);
+                $mime_type = finfo_file($finfo, $file['tmp_name']);
+                finfo_close($finfo);
+            } else {
+                $mime_type = $file['type'];
+            }
             
             if (!in_array(strtolower($mime_type), $allowed_types)) {
                 $errors[] = "Photo $i: Invalid file type ($mime_type). Only JPG, PNG, GIF, and WebP allowed.";
