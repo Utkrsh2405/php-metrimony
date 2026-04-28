@@ -574,7 +574,7 @@ function uploadphoto($id){
 
 }//end uploadphoto function
 
-?>
+
 
 
 
