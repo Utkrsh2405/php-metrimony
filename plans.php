@@ -1,4 +1,5 @@
 <?php include_once("includes/basic_includes.php");?>
+<?php include_once("includes/dbconn.php");?>
 <?php include_once("functions.php"); ?>
 <?php
 // Fetch all active plans
