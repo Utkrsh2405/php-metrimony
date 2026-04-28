@@ -115,4 +115,8 @@ if (!$conn) {
 // Set character set to UTF-8
 mysqli_set_charset($conn, "utf8mb4");
 
+// Temporary fix: ensuring columns exist
+@mysqli_query($conn, "ALTER TABLE customer ADD COLUMN is_exclusive TINYINT(1) DEFAULT 0");
+@mysqli_query($conn, "ALTER TABLE users ADD COLUMN is_subscribed TINYINT(1) DEFAULT 0");
+
 ?>
