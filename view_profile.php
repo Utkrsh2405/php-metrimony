@@ -17,6 +17,13 @@ if ($id <= 0) {
 // Check if this is the logged-in user's own profile
 $is_own_profile = (isset($_SESSION['id']) && $_SESSION['id'] == $id);
 
+$is_exclusive_profile_var = false;
+$user_is_subscribed = false;
+
+if (isset($_SESSION['id'])) {
+    $user_is_subscribed = isSubscribedUser($_SESSION['id']);
+}
+
 //safty purpose copy the get id
 $profileid=$id;
 
@@ -43,6 +50,7 @@ $row=mysqli_fetch_assoc($result);
       }
   }
 
+  $is_exclusive_profile_var = (isset($row['is_exclusive']) && $row['is_exclusive'] == 1);
   $email=$row['email'];
 	$dob=$row['dateofbirth'];
 	$religion=$row['religion'];
@@ -646,7 +654,7 @@ $(document).ready(function(){
 <div class="profile-header">
     <div class="container profile-header-content">
         <div class="profile-id-badge">
-            <i class="fa fa-id-card"></i> Profile ID: <?php echo $profileid; ?>
+            <i class="fa fa-id-card"></i> Profile ID: MV <?php echo $profileid; ?>
         </div>
         <h1 class="profile-name"><?php echo $fname . " " . $lname; ?></h1>
         <div class="profile-meta">

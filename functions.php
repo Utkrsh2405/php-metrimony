@@ -579,3 +579,17 @@ function uploadphoto($id){
 
 
 
+// Check if user is subscribed (paid plan active)
+function isSubscribedUser($user_id) {
+    global $conn;
+    if (!$user_id) return false;
+    $stmt = mysqli_prepare($conn, "SELECT is_subscribed FROM users WHERE id = ?");
+    if (!$stmt) return false;
+    mysqli_stmt_bind_param($stmt, "i", $user_id);
+    mysqli_stmt_execute($stmt);
+    $result = mysqli_stmt_get_result($stmt);
+    if ($row = mysqli_fetch_assoc($result)) {
+        return $row['is_subscribed'] == 1;
+    }
+    return false;
+}

@@ -62,18 +62,13 @@ $(document).ready(function(){
 	   endif; 
 	   ?>
 	   <form action="auth/auth.php?user=1" method="post">
-            <div style="background-color: #f8d7da; padding: 10px; margin-bottom: 15px; border-radius: 5px;">
-                <strong>Demo Login Info:</strong><br>
-                Mobile / ID: <code>9876543210</code><br>
-                Password: <code>demo123</code>
-            </div>
   	    <div class="form-item form-type-textfield form-item-name">
-	      <label for="edit-name">Username or Email <span class="form-required" title="This field is required.">*</span></label>
-	      <input type="text" id="edit-name" name="username" value="9876543210" size="60" maxlength="60" class="form-text required" placeholder="Enter your username or email" required>
+	      <label for="edit-name">Username, Email, or Profile ID <span class="form-required" title="This field is required.">*</span></label>
+	      <input type="text" id="edit-name" name="username" value="" size="60" maxlength="60" class="form-text required" placeholder="Enter username, email, or Profile ID (e.g., MV1)" required>
 	    </div>
 	    <div class="form-item form-type-password form-item-pass">
 	      <label for="edit-pass">Password <span class="form-required" title="This field is required.">*</span></label>
-	      <input type="password" id="edit-pass" name="password" value="demo123" size="60" maxlength="128" class="form-text required" required>
+	      <input type="password" id="edit-pass" name="password" value="" size="60" maxlength="128" class="form-text required" required>
 	    </div>
 	    <div class="form-actions">
 	    	<input type="submit" id="edit-submit" name="op" value="Log in" class="btn_1 submit">

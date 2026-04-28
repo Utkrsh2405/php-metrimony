@@ -574,7 +574,7 @@ $(document).ready(function(){
 <div class="profile-header">
     <div class="container profile-header-content">
         <div class="profile-id-badge">
-            <i class="fa fa-id-card"></i> Profile ID: <?php echo $profileid; ?>
+            <i class="fa fa-id-card"></i> Profile ID: MV <?php echo $profileid; ?>
         </div>
         <h1 class="profile-name"><?php echo $fname . " " . $lname; ?></h1>
         <div class="profile-meta">

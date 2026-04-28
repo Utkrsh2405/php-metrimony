@@ -174,8 +174,8 @@ if (!empty($_GET['with_photo']) && $_GET['with_photo'] == '1') {
 // Profile ID search (exact match)
 if (!empty($_GET['profile_id'])) {
     $profile_id = mysqli_real_escape_string($conn, trim($_GET['profile_id']));
-    // Remove SP prefix if present
-    $profile_id = preg_replace('/^SP/i', '', $profile_id);
+    // Remove MV prefix if present
+    $profile_id = preg_replace('/^MV\s*/i', '', $profile_id);
     $profile_id = intval($profile_id);
     if ($profile_id > 0) {
         $where_conditions[] = "c.cust_id = $profile_id";
@@ -784,7 +784,7 @@ $query_string = http_build_query($query_params);
             $profile_pic = $photo['pic1'] ?? '';
             
             // Format profile ID
-            $formatted_id = 'SP' . str_pad($profile_id, 6, '0', STR_PAD_LEFT);
+            $formatted_id = 'MV ' . $profile_id;
         ?>
         <div class="profile-card">
             <div class="profile-card-header">

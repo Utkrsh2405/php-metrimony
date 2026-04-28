@@ -53,6 +53,10 @@ if (!Security::checkRateLimit('user_login_' . $ip, 100, 900)) {
 if (filter_var($myusername, FILTER_VALIDATE_EMAIL)) {
     // Input is an email
     $stmt = mysqli_prepare($conn, "SELECT id, username, email, password, userlevel, account_status FROM users WHERE email = ?");
+} elseif (preg_match('/^MV\s*(\d+)$/i', $myusername, $matches)) {
+    // Input is a Profile ID (e.g. MV1, MV 1)
+    $stmt = mysqli_prepare($conn, "SELECT id, username, email, password, userlevel, account_status FROM users WHERE id = ?");
+    $myusername = $matches[1];
 } else {
     // Input is a username
     $stmt = mysqli_prepare($conn, "SELECT id, username, email, password, userlevel, account_status FROM users WHERE username = ?");

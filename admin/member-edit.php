@@ -68,6 +68,8 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     $about = mysqli_real_escape_string($conn, $_POST['about']);
     $account_status = mysqli_real_escape_string($conn, $_POST['account_status']);
     $is_verified = isset($_POST['is_verified']) ? 1 : 0;
+    $is_exclusive = isset($_POST['is_exclusive']) ? 1 : 0;
+    $is_subscribed = isset($_POST['is_subscribed']) ? 1 : 0;
     $profile_completeness = intval($_POST['profile_completeness']);
     
     // Update users table
@@ -75,11 +77,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                     username = '$username',
                     email = '$email',
                     account_status = '$account_status',
+                    is_subscribed = $is_subscribed,
                     profile_completeness = $profile_completeness
                     WHERE id = $member_id";
     
     // Update customer table
     $update_customer = "UPDATE customer SET
+                        is_exclusive = $is_exclusive,
                         firstname = '$firstname',
                         lastname = '$lastname',
                         sex = '$sex',
@@ -312,6 +316,22 @@ include("../includes/admin-header.php");
                             </select>
                         </div>
                         
+                        <div class="form-group" style="padding: 15px; background: #fff3cd; border-radius: 5px; border: 1px solid #ffeeba; margin-top: 15px;">
+                            <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 0; cursor: pointer;">
+                                <input type="checkbox" name="is_exclusive" value="1" <?php echo (isset($member['is_exclusive']) && $member['is_exclusive'] == 1) ? 'checked' : ''; ?> style="width: auto; height: auto;">
+                                <strong>Mark as Exclusive Profile</strong>
+                            </label>
+                            <small class="text-muted" style="display: block; margin-top: 5px;">Only members with a paid subscription can view details and contact information of exclusive profiles.</small>
+                        </div>
+                        
+                        <div class="form-group" style="padding: 15px; background: #d4edda; border-radius: 5px; border: 1px solid #c3e6cb; margin-top: 15px;">
+                            <label style="display: flex; align-items: center; gap: 10px; margin-bottom: 0; cursor: pointer;">
+                                <input type="checkbox" name="is_subscribed" value="1" <?php echo (isset($member['is_subscribed']) && $member['is_subscribed'] == 1) ? 'checked' : ''; ?> style="width: auto; height: auto;">
+                                <strong>Mark as Subscribed User</strong>
+                            </label>
+                            <small class="text-muted" style="display: block; margin-top: 5px;">This user has made a manual payment and will be able to see exclusive profiles.</small>
+                        </div>
+
                         <div class="form-group">
                             <label>Profile Completeness (%)</label>
                             <input type="number" name="profile_completeness" class="form-control" min="0" max="100" value="<?php echo $member['profile_completeness'] ?: 0; ?>">
