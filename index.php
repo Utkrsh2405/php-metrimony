@@ -430,7 +430,7 @@ $search_by = $sections['search_by'] ?? null;
             // Get featured profiles - exclude deleted and suspended users
             $sql = "SELECT c.* FROM customer c
                     INNER JOIN users u ON c.cust_id = u.id
-                    WHERE u.account_status = 'active' AND u.userlevel = 0
+                    WHERE (u.account_status = 'active' OR u.account_status IS NULL) AND u.userlevel = 0
                     $gender_filter_clause
                     ORDER BY c.cust_id DESC LIMIT 12";
             $result = mysqlexec($sql);
@@ -481,7 +481,7 @@ $search_by = $sections['search_by'] ?? null;
             <div class="profile-slider">
                 <?php
                 // Get user's gender to show opposite gender profiles
-                $bg_gender_filter = "WHERE u.account_status = 'active' AND u.userlevel = 0";
+                $bg_gender_filter = "WHERE (u.account_status = 'active' OR u.account_status IS NULL) AND u.userlevel = 0";
                 if(isset($_SESSION['id'])) {
                     $logged_user_id = intval($_SESSION['id']);
                       $bg_user_gender = get_user_gender($logged_user_id);
