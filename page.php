@@ -33,6 +33,11 @@ $meta_keywords = $page['meta_keywords'];
 <!DOCTYPE HTML>
 <html>
 <head>
+<!-- SEO Meta Tags -->
+<meta name="robots" content="index, follow">
+<meta name="description" content="Mangal Vivah is your trusted Shaadi Partner. Find your perfect match with our premium matrimonial services.">
+<meta name="keywords" content="Mangal Vivah, Shaadi Partner, Matrimony, Marriage, Matchmaking, Find Match, Indian Matrimony, Wedding">
+<meta name="author" content="Mangal Vivah">
 <title><?php echo htmlspecialchars($meta_title); ?> - MakeMyLove</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />

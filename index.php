@@ -6,6 +6,7 @@ include_once("functions.php");
 <!DOCTYPE HTML>
 <html lang="en">
 <head>
+<meta name="robots" content="index, follow">
 <title>Mangal Vivah - Find Your Perfect Match | Best Shaadi Partner</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
