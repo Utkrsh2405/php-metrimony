@@ -43,7 +43,7 @@ if (!$conn) {
                         .note { background: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0; }
                         .success { background: #d4edda; border-left: 4px solid #28a745; padding: 15px; margin: 20px 0; }
                     </style>
-                <link rel="icon" type="image/png" href="images/favicon.png">
+                <link rel=\"icon\" type=\"image/png\" href=\"images/favicon.png\">
 </head>
                 <body>
                     <div class='container'>

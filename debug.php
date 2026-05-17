@@ -25,7 +25,7 @@ echo "<!DOCTYPE html>
         .alert-success { background: #d4edda; color: #155724; border: 1px solid #c3e6cb; }
         .alert-warning { background: #fff3cd; color: #856404; border: 1px solid #ffeaa7; }
     </style>
-<link rel="icon" type="image/png" href="images/favicon.png">
+<link rel=\"icon\" type=\"image/png\" href=\"images/favicon.png\">
 </head>
 <body>";
 
