@@ -27,7 +27,7 @@
 			   </ul>
              </nav>
            </div>
-           <a class="brand" href="index.php"><img src="images/logo.png" alt="logo"></a>
+           <a class="brand" href="index.php"><img src="<?php echo defined('SITE_URL') ? SITE_URL : ''; ?>/images/logo.png" alt="logo" style="max-height: 60px; width: auto; object-fit: contain; background: white; padding: 5px; border-radius: 5px;"></a>
            <div class="pull-right">
           	<nav class="navbar nav_bottom" role="navigation">
  
