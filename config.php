@@ -7,7 +7,7 @@
 // Environment
 define('ENVIRONMENT', 'production');
 define('DEBUG_MODE', false);
-define('SITE_URL', 'https://yourdomain.com');
+define('SITE_URL', 'https://mangalvivah.online');
 define('SITE_NAME', 'MakeMyLove');
 
 // Database - Hostinger Credentials

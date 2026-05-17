@@ -22,7 +22,7 @@ define('ENVIRONMENT', 'production');
 define('DEBUG_MODE', false);
 
 // Your website URL (without trailing slash)
-define('SITE_URL', 'https://yourdomain.com');
+define('SITE_URL', 'https://mangalvivah.online');
 
 // Site name for emails and titles
 define('SITE_NAME', 'MakeMyLove');

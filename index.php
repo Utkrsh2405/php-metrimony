@@ -17,8 +17,8 @@ include_once("functions.php");
 <meta property="og:type" content="website" />
 <meta property="og:title" content="Mangal Vivah - Find Your Perfect Match" />
 <meta property="og:description" content="Mangal Vivah is your trusted Shaadi Partner. Find your perfect match with our premium matrimonial services. Join today for a blessed and happy marriage." />
-<meta property="og:image" content="<?php echo defined('SITE_URL') ? SITE_URL : 'https://yourdomain.com'; ?>/images/logo.png" />
-<meta property="og:url" content="<?php echo defined('SITE_URL') ? SITE_URL : 'https://yourdomain.com'; ?>/" />
+<meta property="og:image" content="<?php echo defined('SITE_URL') ? SITE_URL : 'https://mangalvivah.online'; ?>/images/logo.png" />
+<meta property="og:url" content="<?php echo defined('SITE_URL') ? SITE_URL : 'https://mangalvivah.online'; ?>/" />
 <meta property="og:site_name" content="Mangal Vivah" />
 
 <!-- Schema.org Markup -->
@@ -27,10 +27,10 @@ include_once("functions.php");
   "@context": "https://schema.org",
   "@type": "WebSite",
   "name": "Mangal Vivah",
-  "url": "<?php echo defined('SITE_URL') ? SITE_URL : 'https://yourdomain.com'; ?>/",
+  "url": "<?php echo defined('SITE_URL') ? SITE_URL : 'https://mangalvivah.online'; ?>/",
   "potentialAction": {
     "@type": "SearchAction",
-    "target": "<?php echo defined('SITE_URL') ? SITE_URL : 'https://yourdomain.com'; ?>/search.php?q={search_term_string}",
+    "target": "<?php echo defined('SITE_URL') ? SITE_URL : 'https://mangalvivah.online'; ?>/search.php?q={search_term_string}",
     "query-input": "required name=search_term_string"
   }
 }
