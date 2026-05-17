@@ -14,6 +14,7 @@ include_once("functions.php");
 <meta name="author" content="Mangal Vivah" />
 
 <!-- Open Graph / Facebook -->
+<link rel="canonical" href="<?php echo defined('SITE_URL') ? rtrim(SITE_URL, '/') : 'https://mangalvivah.online'; ?>/" />
 <meta property="og:type" content="website" />
 <meta property="og:title" content="Mangal Vivah - Find Your Perfect Match" />
 <meta property="og:description" content="Mangal Vivah is your trusted Shaadi Partner. Find your perfect match with our premium matrimonial services. Join today for a blessed and happy marriage." />

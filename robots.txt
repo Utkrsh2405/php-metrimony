@@ -1,0 +1,5 @@
+User-agent: *
+Disallow: /admin/
+Disallow: /config.php
+Disallow: /classes/
+Disallow: /includes/
