@@ -110,6 +110,7 @@ $default_gender = ($user_data['sex'] == 'male') ? 'Female' : 'Male';
     font-weight: 600;
 }
 </style>
+<link rel="icon" type="image/png" href="images/favicon.png">
 </head>
 <body>
 <?php include_once("includes/navigation.php");?>

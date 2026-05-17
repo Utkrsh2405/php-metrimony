@@ -46,6 +46,7 @@ $(document).ready(function(){
     );
 });
 </script>
+<link rel="icon" type="image/png" href="images/favicon.png">
 </head>
 <body>
 <!-- ============================  Navigation Start =========================== -->

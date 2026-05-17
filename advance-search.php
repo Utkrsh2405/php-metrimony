@@ -174,6 +174,7 @@ while ($occ = mysqli_fetch_assoc($occupations_query)) {
     border-radius: 3px;
 }
 </style>
+<link rel="icon" type="image/png" href="images/favicon.png">
 </head>
 <body>
 <?php include_once("includes/navigation.php");?>

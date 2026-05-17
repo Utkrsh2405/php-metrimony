@@ -1,3 +1,5 @@
+<?php
+$html = <<<'HTML'
 <?php 
 require_once("includes/basic_includes.php");
 require_once("includes/dbconn.php");
@@ -45,7 +47,7 @@ if(!$row) {
 }
 
 $is_subscribed_val = (isset($row['is_subscribed']) && $row['is_subscribed'] == 1);
-$account_type = $is_subscribed_val ? "UNIQUE" : "FREE";
+$account_type = $is_subscribed_val ? "PREMIUM" : "FREE";
 
 // Messages Stats
 $unread_msg = mysqli_fetch_assoc(mysqli_query($conn, "SELECT count(*) as c FROM messages WHERE to_user_id=$id AND is_read=0"))['c'] ?? 0;
@@ -233,28 +235,26 @@ body {
     <div class="container text-center banner-content">
         <h2 style="font-size:26px; margin-bottom:15px; font-weight:normal;">Hello! <?php echo htmlspecialchars($fname); ?> <span style="font-size:26px;">(MV <?php echo $id; ?>)</span> <span style="font-size:14px; margin-left:10px;">Profile <?php echo $completeness; ?>% complete</span></h2>
         <div class="avatar-container">
-            <a href="photouploader.php">
-                <img src="<?php echo $profileImage; ?>" onerror="this.src='images/avatar.jpg'" alt="">
-                <span class="avatar-request">Upload Photo</span>
-            </a>
+            <img src="<?php echo $profileImage; ?>" onerror="this.src='images/avatar.jpg'" alt="">
+            <span class="avatar-request">Photo</span>
         </div>
     </div>
 </div>
 
 <div class="badges-bar">
-    <a href="#" onclick="verifyProfile(); return false;" class="badge-red" style="text-decoration:none;"><i class="fa fa-user"></i> Verified Profile</a>
-    <a href="#" onclick="verifyEmail(); return false;" class="badge-red" style="text-decoration:none;"><i class="fa fa-envelope"></i> Verify my email</a>
-    <a href="#" onclick="verifyMobile(); return false;" class="badge-red" style="text-decoration:none;"><i class="fa fa-mobile"></i> Verify mobile no.</a>
-    <span class="badge-red" style="background:#a30000; cursor:default;">Created on : <?php echo $created_on; ?></span>
-    <span class="badge-red" style="background:#a30000; cursor:default;">Last Login : <?php echo $last_login; ?></span>
+    <span class="badge-red"><i class="fa fa-user"></i> Verified Profile</span>
+    <span class="badge-red"><i class="fa fa-envelope"></i> Verify my email</span>
+    <span class="badge-red"><i class="fa fa-mobile"></i> Verify mobile no.</span>
+    <span class="badge-red" style="background:#a30000;">Created on : <?php echo $created_on; ?></span>
+    <span class="badge-red" style="background:#a30000;">Last Login : <?php echo $last_login; ?></span>
 </div>
 
 <!-- Alert Box -->
 <div class="container" style="margin-top: 30px;">
     <div class="alert" style="background-color: #e8f5e9; border: 1px solid #c8e6c9; color: #333; padding: 10px 15px;">
         Your favourite list is empty. &nbsp;&nbsp;&nbsp; Members I Ignored: <b style="color:#cc0000;">0</b> 
-        <a href="#" onclick="alert('You have not ignored any profiles yet.'); return false;" style="color:#cc0000; text-decoration:none;">(View ignored profile(s))</a> 
-        <span class="pull-right" style="font-size:12px; margin-top:2px;">For better responses, <a href="edit-profile.php" style="color:#cc0000; font-weight:bold;">complete your profile</a>.</span>
+        <a href="#" style="color:#cc0000; text-decoration:none;">(View ignored profile(s))</a> 
+        <span class="pull-right" style="font-size:12px; margin-top:2px;">For better responses, complete your profile.</span>
     </div>
 </div>
 
@@ -314,75 +314,38 @@ body {
                 <li class="active"><a href="#tab_messages" data-toggle="tab">Messages</a></li>
                 <li><a href="#tab_request" data-toggle="tab">Request</a></li>
             </ul>
-            <div class="tab-content" style="border: 1px solid #ddd; border-top:none; padding: 20px; min-height: 250px;">
+            <div style="border: 1px solid #ddd; border-top:none; padding: 20px; min-height: 250px;">
                 
-                <!-- Messages Tab -->
-                <div class="tab-pane active" id="tab_messages">
-                    <table class="stats-table">
-                        <tr>
-                            <th style="width:50%;">Recieved</th>
-                            <th style="width:50%;">Send</th>
-                        </tr>
-                        <tr>
-                            <td>Recieved : <span><?php echo $total_msg; ?></span></td>
-                            <td>Sent : <span><?php echo $sent_msg; ?></span></td>
-                        </tr>
-                        <tr>
-                            <td>Read : <span><?php echo ($total_msg - $unread_msg); ?></span></td>
-                            <td>Read : <span>None</span></td>
-                        </tr>
-                        <tr>
-                            <td>Unread : <span><?php echo $unread_msg; ?></span></td>
-                            <td>Unread : <span>None</span></td>
-                        </tr>
-                    </table>
-                    <div style="margin-top:20px;text-align:center;">
-                        <a href="messages.php" class="btn badge-red" style="color:#fff; text-decoration:none; padding:6px 15px;">View Messages</a>
-                    </div>
-                </div>
-
-                <!-- Interest Tab -->
-                <div class="tab-pane" id="tab_interest">
-                    <table class="stats-table">
-                        <tr>
-                            <th style="width:50%;">Recieved</th>
-                            <th style="width:50%;">Send</th>
-                        </tr>
-                        <tr>
-                            <td>Pending : <span><?php echo $received_pending; ?></span></td>
-                            <td>Pending : <span><?php echo $sent_pending; ?></span></td>
-                        </tr>
-                        <tr>
-                            <td>Accepted : <span><?php echo $received_accepted; ?></span></td>
-                            <td>Accepted : <span><?php echo $sent_accepted; ?></span></td>
-                        </tr>
-                        <tr>
-                            <td>Decline : <span><?php echo $received_declined; ?></span></td>
-                            <td>Decline : <span><?php echo $sent_declined; ?></span></td>
-                        </tr>
-                    </table>
-                    <div style="margin-top:20px;text-align:center;">
-                        <a href="messages.php?tab=interest" class="btn badge-red" style="color:#fff; text-decoration:none; padding:6px 15px;">View Interests</a>
-                    </div>
-                </div>
-
-                <!-- Request Tab -->
-                <div class="tab-pane" id="tab_request">
-                    <table class="stats-table">
-                        <tr>
-                            <th style="width:50%;">Recieved</th>
-                            <th style="width:50%;">Send</th>
-                        </tr>
-                        <tr>
-                            <td>Photo Request : <span>0</span></td>
-                            <td>Photo Request : <span>0</span></td>
-                        </tr>
-                        <tr>
-                            <td>Contact Request : <span>0</span></td>
-                            <td>Contact Request : <span>0</span></td>
-                        </tr>
-                    </table>
-                </div>
+                <table class="stats-table">
+                    <tr>
+                        <th style="width:50%;">Recieved</th>
+                        <th style="width:50%;">Send</th>
+                    </tr>
+                    <tr>
+                        <td>Recieved : <span><?php echo $total_msg; ?></span></td>
+                        <td>Sent : <span><?php echo $sent_msg; ?></span></td>
+                    </tr>
+                    <tr>
+                        <td>Read : <span><?php echo ($total_msg - $unread_msg); ?></span></td>
+                        <td>Read : <span>None</span></td>
+                    </tr>
+                    <tr>
+                        <td>Unread : <span><?php echo $unread_msg; ?></span></td>
+                        <td>Unread : <span>None</span></td>
+                    </tr>
+                    <tr>
+                        <td>Pending : <span><?php echo $received_pending; ?></span></td>
+                        <td>Pending : <span><?php echo $sent_pending; ?></span></td>
+                    </tr>
+                    <tr>
+                        <td>Accepted : <span><?php echo $received_accepted; ?></span></td>
+                        <td>Accepted : <span><?php echo $sent_accepted; ?></span></td>
+                    </tr>
+                    <tr>
+                        <td>Decline : <span><?php echo $received_declined; ?></span></td>
+                        <td>Decline : <span><?php echo $sent_declined; ?></span></td>
+                    </tr>
+                </table>
 
             </div>
         </div>
@@ -396,7 +359,7 @@ body {
 
             <div style="border: 1px solid #ddd; padding: 20px;">
                 <div style="color:#cc0000; font-weight:bold; font-size:13px; margin-bottom:15px;">Enter your contact number to call you back</div>
-                <form onsubmit="handleCallback(event);">
+                <form onsubmit="event.preventDefault(); alert('Callback request submitted successfully.');">
                     <div style="margin-bottom:10px; font-size:12px;">
                         <span style="display:inline-block; width:120px;">Preferred language:</span>
                         <input type="radio" name="lang" value="Hindi" id="l_hin"> <label for="l_hin" style="font-weight:normal; margin-right:10px;">Hindi</label>
@@ -404,7 +367,7 @@ body {
                     </div>
                     <div style="margin-bottom:10px; font-size:12px; display:flex; align-items:center;">
                         <span style="display:inline-block; width:120px;">Contact Details:</span>
-                        <input type="text" id="callback_number" class="form-control" style="width:200px; height:26px; font-size:12px; display:inline-block; padding:2px 5px;" placeholder="Phone Number" required>
+                        <input type="text" class="form-control" style="width:200px; height:26px; font-size:12px; display:inline-block; padding:2px 5px;" placeholder="Phone Number" required>
                         <button type="submit" class="btn badge-red" style="padding: 4px 15px; margin-left: 10px; border:none;">submit</button>
                     </div>
                     <div style="font-size:12px; color:#555;">Mention STD code for landline number.</div>
@@ -417,40 +380,17 @@ body {
 <?php include_once("includes/footer.php");?>
 
 <script>
-// Tab integration
+// Simple tab integration (visual only per html given)
 $('.nav-tabs-custom a').click(function (e) {
-  e.preventDefault();
+  e.preventDefault()
   $(this).parent().siblings().removeClass('active');
   $(this).parent().addClass('active');
-
-  // Toggle tab contents
-  $('.tab-pane').removeClass('active').hide();
-  var target = $(this).attr('href');
-  $(target).addClass('active').show();
-});
-
-// Initially hide inactive tabs
-$('.tab-pane:not(.active)').hide();
-
-// Verification Actions
-function verifyEmail() {
-    alert("Verification link has been sent to your registered email address.");
-}
-function verifyMobile() {
-    var otp = prompt("Please enter the OTP sent to your mobile number:");
-    if(otp) {
-        alert("Mobile number verified successfully!");
-    }
-}
-function verifyProfile() {
-    alert("To get a verified badge, please upload your ID proof from the Edit Profile section.");
-}
-function handleCallback(e) {
-    e.preventDefault();
-    var lang = $("input[name='lang']:checked").val();
-    var phone = $("#callback_number").val();
-    alert("Callback request submitted successfully! We will call you on " + phone + " in " + lang + ".");
-}
+})
 </script>
 </body>
 </html>
+HTML;
+
+file_put_contents("userhome.php", $html);
+echo "New UI applied to userhome.php\n";
+?>

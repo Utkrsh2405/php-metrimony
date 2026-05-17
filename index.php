@@ -4,11 +4,37 @@ include_once("includes/dbconn.php");
 include_once("functions.php"); 
 ?>
 <!DOCTYPE HTML>
-<html>
+<html lang="en">
 <head>
-<title>Shaadi Partner - Find Your Perfect Match | Home</title>
+<title>Mangal Vivah - Find Your Perfect Match | Best Shaadi Partner</title>
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+<meta name="description" content="Mangal Vivah is your trusted Shaadi Partner. Find your perfect match with our premium matrimonial services. Join today for a blessed and happy marriage." />
+<meta name="keywords" content="Mangal Vivah, Shaadi Partner, Matrimony, Marriage, Matchmaking, Find Match, Indian Matrimony, Wedding" />
+<meta name="author" content="Mangal Vivah" />
+
+<!-- Open Graph / Facebook -->
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Mangal Vivah - Find Your Perfect Match" />
+<meta property="og:description" content="Mangal Vivah is your trusted Shaadi Partner. Find your perfect match with our premium matrimonial services. Join today for a blessed and happy marriage." />
+<meta property="og:image" content="<?php echo defined('SITE_URL') ? SITE_URL : 'https://yourdomain.com'; ?>/images/logo.png" />
+<meta property="og:url" content="<?php echo defined('SITE_URL') ? SITE_URL : 'https://yourdomain.com'; ?>/" />
+<meta property="og:site_name" content="Mangal Vivah" />
+
+<!-- Schema.org Markup -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "Mangal Vivah",
+  "url": "<?php echo defined('SITE_URL') ? SITE_URL : 'https://yourdomain.com'; ?>/",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": "<?php echo defined('SITE_URL') ? SITE_URL : 'https://yourdomain.com'; ?>/search.php?q={search_term_string}",
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
 
 <script type="application/x-javascript"> addEventListener("load", function() { setTimeout(hideURLbar, 0); }, false); function hideURLbar(){ window.scrollTo(0,1); } </script>
 <link href="css/bootstrap-3.1.1.min.css" rel='stylesheet' type='text/css' />
@@ -349,6 +375,7 @@ body {
     animation: fadeInUp 0.8s ease;
 }
 </style>
+<link rel="icon" type="image/png" href="images/favicon.png">
 </head>
 <body>
 <!-- Navigation -->
@@ -389,6 +416,38 @@ $search_by = $sections['search_by'] ?? null;
         <a href="register.php" class="hero-cta">Create Profile</a>
     </div>
 </section>
+
+<!-- SEO Mangal Vivah Content Section -->
+<section class="mangal-vivah-seo-section" style="padding: 60px 0; background: #fafafa;">
+    <div class="container">
+        <div style="text-align: center; margin-bottom: 40px;">
+            <h2 style="color: #c32143; font-size: 32px; font-weight: bold; margin-bottom: 15px; font-family: 'Ubuntu', sans-serif;">Welcome to Mangal Vivah</h2>
+            <p style="color: #555; font-size: 16px; line-height: 1.8; max-width: 850px; margin: 0 auto;">
+                <strong>Mangal Vivah</strong> is India's most trusted and successful matchmaking service. As your dedicated <strong>Shaadi Partner</strong>, we take pride in helping you find your perfect life partner. Understanding that marriage is not just the union of two individuals, but of two families, Mangal Vivah bridges tradition with modern matchmaking techniques. With thousands of verified profiles, your journey to a blissful married life begins right here at Mangal Vivah.
+            </p>
+        </div>
+        
+        <div class="row" style="display: flex; flex-wrap: wrap;">
+            <div class="col-md-6" style="margin-bottom: 30px;">
+                <div style="background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); height: 100%;">
+                    <h3 style="color: #333; font-size: 22px; margin-bottom: 15px; font-family: 'Ubuntu', sans-serif;">Why Choose Mangal Vivah?</h3>
+                    <p style="color: #666; line-height: 1.7; font-size: 15px;">
+                        At <strong>Mangal Vivah</strong>, we go beyond typical matrimonial services. Our expert matchmakers use advanced search algorithms and personalized assistance to ensure your matrimony profile reaches the most compatible matches. Finding genuine, verified brides and grooms has never been easier than with your trusted Shaadi Partner. Experience a safe, secure, and intuitive platform designed exclusively for your matrimonial success.
+                    </p>
+                </div>
+            </div>
+            <div class="col-md-6" style="margin-bottom: 30px;">
+                <div style="background: #fff; padding: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); height: 100%;">
+                    <h3 style="color: #333; font-size: 22px; margin-bottom: 15px; font-family: 'Ubuntu', sans-serif;">Your Ideal Shaadi Partner</h3>
+                    <p style="color: #666; line-height: 1.7; font-size: 15px;">
+                        The sacred bond of marriage requires trust, transparency, and a platform that understands your cultural values. <strong>Mangal Vivah</strong> celebrates diversity and offers community-specific searches so you can find a soulmate who matches your lifestyle, religion, and cultural background perfectly. Embrace your beautiful future with the finest matchmaking service today!
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- // SEO Mangal Vivah Content Section -->
 
 <!-- About Section -->
 <?php if($about && $about['is_active'] == 1): ?>

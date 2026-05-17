@@ -82,6 +82,7 @@ button:hover {
     font-weight: bold;
 }
 </style>
+<link rel="icon" type="image/png" href="images/favicon.png">
 </head>
 <body>
 <div class="container">

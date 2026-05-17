@@ -99,6 +99,7 @@ $meta_keywords = $page['meta_keywords'];
     padding: 15px 0;
 }
 </style>
+<link rel="icon" type="image/png" href="images/favicon.png">
 </head>
 <body>
 

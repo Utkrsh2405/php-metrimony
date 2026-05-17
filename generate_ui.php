@@ -1,131 +1,14 @@
-<?php include_once("includes/basic_includes.php");?>
-<?php include_once("functions.php"); ?>
-<?php require_once("includes/dbconn.php");?>
 <?php
-if(isloggedin()){
- //do nothing stay here
-} else{
-   header("location:login.php");
-}
- 
-// Sanitize and validate ID parameter
-$id = isset($_GET['id']) ? intval($_GET['id']) : 0;
-if ($id <= 0) {
-    die("Invalid profile ID");
+$content = file_get_contents("view_profile.php");
+// find the <!DOCTYPE HTML> tag
+$pos = strpos($content, '<!DOCTYPE HTML>');
+if($pos !== false) {
+    $php_headers = substr($content, 0, $pos);
+} else {
+    die("Could not find DOCTYPE");
 }
 
-// Check if this is the logged-in user's own profile
-$is_own_profile = (isset($_SESSION['id']) && $_SESSION['id'] == $id);
-
-$is_exclusive_profile_var = false;
-$user_is_subscribed = false;
-
-if (isset($_SESSION['id'])) {
-    $user_is_subscribed = isSubscribedUser($_SESSION['id']);
-}
-
-//safty purpose copy the get id
-$profileid=$id;
-
-//getting profile details from db
-$sql="SELECT * FROM customer WHERE cust_id = $id";
-$result = mysqlexec($sql);
-if($result){
-$row=mysqli_fetch_assoc($result);
-
-  $fname=$row['firstname'];
-  $lname=$row['lastname'];
-  $sex=$row['sex'];
-
-  // Ensure user cannot view same gender unless it's their own profile
-  if(isset($_SESSION['id']) && !$is_own_profile) {
-      $viewer_id = $_SESSION['id'];
-        $viewer_gender = get_user_gender($viewer_id);
-        if($viewer_gender) {
-            $viewer_gender = strtolower(trim($viewer_gender));
-          if($viewer_gender == $profile_gender) {
-              echo "<script>alert('You can only view profiles of the opposite gender.'); window.location.href='userhome.php';</script>";
-              exit;
-          }
-      }
-  }
-
-  $is_exclusive_profile_var = (isset($row['is_exclusive']) && $row['is_exclusive'] == 1);
-  $email=$row['email'];
-	$dob=$row['dateofbirth'];
-	$religion=$row['religion'];
-	$caste = $row['caste'];
-	$subcaste=$row['subcaste'];
-	$country = $row['country'];
-	$state=$row['state'];
-	$district=$row['district'];
-	$age=$row['age'];
-	$maritalstatus=$row['maritalstatus'];
-	$profileby=$row['profilecreatedby'];
-	$education=$row['education'];
-	$edudescr=$row['education_sub'];
-	$bodytype=$row['body_type'];
-	$physicalstatus=$row['physical_status'];
-	$drink=$row['drink'];
-	$smoke=$row['smoke'];
-	$mothertounge=$row['mothertounge'];
-	$bloodgroup=$row['blood_group'];
-	$weight=$row['weight'];
-	$height=$row['height'];
-	$colour=$row['colour'];
-	$diet=$row['diet'];
-	$occupation=$row['occupation'];
-	$occupationdescr=$row['occupation_descr'];
-	$fatheroccupation=$row['fathers_occupation'];
-	$motheroccupation=$row['mothers_occupation'];
-	$income=$row['annual_income'];
-	$bros=$row['no_bro'];
-	$sis=$row['no_sis'];
-	$aboutme=$row['aboutme'];
-	
-	// Mobile number (contact info)
-	$mobile=$row['mobile'] ?? '';
-	$phone_code=$row['phone_code'] ?? '91';
-
-	$pic1="";
-	$pic2="";
-	$pic3="";
-	$pic4="";
-//getting image filenames from db
-$sql2="SELECT * FROM photos WHERE cust_id = $profileid";
-$result2 = mysqlexec($sql2);
-if($result2){
-	$row2=mysqli_fetch_array($result2);
-	$pic1=$row2['pic1'] ?? 'default-avatar.jpg';
-	$pic2=$row2['pic2'] ?? '';
-	$pic3=$row2['pic3'] ?? '';
-	$pic4=$row2['pic4'] ?? '';
-}
-}else{
-	echo "<script>alert(\"Invalid Profile ID\")</script>";
-}
-
-//getting partner preference
-$sql = "SELECT * FROM partnerprefs WHERE custId = $id";
-$result = mysqlexec($sql);
-$partner_row = mysqli_fetch_assoc($result);
-
-$agemin=$partner_row['agemin'] ?? '';
-$agemax=$partner_row['agemax'] ?? '';
-$p_maritalstatus=$partner_row['maritalstatus'] ?? '';
-$p_complexion=$partner_row['complexion'] ?? '';
-$p_height=$partner_row['height'] ?? '';
-$p_diet=$partner_row['diet'] ?? '';
-$p_religion=$partner_row['religion'] ?? '';
-$p_caste=$partner_row['caste'] ?? '';
-$p_mothertounge=$partner_row['mothertounge'] ?? '';
-$p_education=$partner_row['education'] ?? '';
-$p_occupation=$partner_row['occupation'] ?? '';
-$p_country=$partner_row['country'] ?? '';
-$p_descr=$partner_row['descr'] ?? '';
-
-?>
-
+$html = <<<'HTML'
 <!DOCTYPE HTML>
 <html>
 <head>
@@ -519,3 +402,8 @@ document.getElementById('toggleContactBtn').addEventListener('click', function()
 
 </body>
 </html>
+HTML;
+
+file_put_contents("view_profile.php", $php_headers . $html);
+echo "New design generated.";
+?>

@@ -278,6 +278,7 @@ body {
     border: 1px solid #e2e8f0;
 }
 </style>
+<link rel="icon" type="image/png" href="../images/favicon.png">
 </head>
 <body>
 <div class="login-container">

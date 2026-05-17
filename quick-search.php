@@ -114,6 +114,7 @@ while ($lang = mysqli_fetch_assoc($languages_query)) {
     flex: 1;
 }
 </style>
+<link rel="icon" type="image/png" href="images/favicon.png">
 </head>
 <body>
 <?php include_once("includes/navigation.php");?>

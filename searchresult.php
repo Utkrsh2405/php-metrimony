@@ -648,6 +648,7 @@ $query_string = http_build_query($query_params);
     }
 }
 </style>
+<link rel="icon" type="image/png" href="images/favicon.png">
 </head>
 <body>
 <?php include_once("includes/navigation.php");?>

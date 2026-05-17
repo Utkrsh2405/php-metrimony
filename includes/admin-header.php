@@ -69,6 +69,7 @@ $current_page = basename($_SERVER['PHP_SELF']);
 <link href="../css/admin-custom.css" rel='stylesheet' type='text/css' />
 <script src="../js/jquery.min.js"></script>
 <script src="../js/bootstrap.min.js"></script>
+<link rel="icon" type="image/png" href="images/favicon.png">
 </head>
 <body>
 <div class="admin-wrapper">

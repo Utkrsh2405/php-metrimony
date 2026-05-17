@@ -87,9 +87,9 @@ elseif ($method == 'POST') {
                   duration_days = $duration_days,
                   features = '$features',
                   is_active = $is_active,
-                  max_contacts = $max_contacts,
-                  max_messages = $max_messages,
-                  max_interests = $max_interests,
+                  max_contacts_view = $max_contacts,
+                  max_messages_send = $max_messages,
+                  max_interests_express = $max_interests,
                   max_shortlist = $max_shortlist,
                   display_order = $display_order,
                   description = '$description',
@@ -104,8 +104,8 @@ elseif ($method == 'POST') {
     } else {
         // Create new plan
         $query = "INSERT INTO plans 
-                  (name, price, duration_days, features, is_active, max_contacts, max_messages, 
-                   max_interests, max_shortlist, display_order, description, created_at, updated_at)
+                  (name, price, duration_days, features, is_active, max_contacts_view, max_messages_send, 
+                   max_interests_express, max_shortlist, display_order, description, created_at, updated_at)
                   VALUES 
                   ('$name', $price, $duration_days, '$features', $is_active, $max_contacts, 
                    $max_messages, $max_interests, $max_shortlist, $display_order, '$description', 

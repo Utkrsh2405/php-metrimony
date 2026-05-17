@@ -123,6 +123,7 @@ $(document).ready(function(){
     box-shadow: 0 5px 15px rgba(0,0,0,0.05);
 }
 </style>
+<link rel="icon" type="image/png" href="images/favicon.png">
 </head>
 <body>
 <?php include_once("includes/navigation.php");?>

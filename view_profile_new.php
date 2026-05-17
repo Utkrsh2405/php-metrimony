@@ -566,6 +566,7 @@ $(document).ready(function(){
     );
 });
 </script>
+<link rel="icon" type="image/png" href="images/favicon.png">
 </head>
 <body>
 <?php include_once("includes/navigation.php");?>

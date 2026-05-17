@@ -314,6 +314,7 @@ function checkRequirements() {
             color: #28a745;
         }
     </style>
+<link rel="icon" type="image/png" href="images/favicon.png">
 </head>
 <body>
     <div class="install-container">
